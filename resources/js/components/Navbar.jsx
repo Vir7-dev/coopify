@@ -3,7 +3,7 @@ import { FaCheckCircle, FaUserCircle, FaBell, FaShoppingCart } from "react-icons
 
 function Navbar({ role }) {
   return (
-    <nav className="flex justify-between items-center px-10 py-2.5 bg-gradient-to-r from-[#4ade80] to-[#3b82f6] text-white font-sans shadow-md">
+    <nav className="flex justify-between items-center px-10 py-2.5 bg-[#2D5A74] text-white font-sans shadow-md">
 
       <div className="flex items-center gap-2.5">
         <img
@@ -14,7 +14,7 @@ function Navbar({ role }) {
         <span className="text-2xl font-bold">Coopify</span>
       </div>
 
-      <ul className="flex list-none gap-[30px] m-0 p-0 font-medium">
+      <ul className="flex list-none gap-[30px] m-0 p-0">
         <li className="cursor-pointer text-base hover:text-green-100 transition">Home</li>
         <li className="cursor-pointer text-base hover:text-green-100 transition">Kategori Produk</li>
         <li className="cursor-pointer text-base hover:text-green-100 transition">Hubungi</li>

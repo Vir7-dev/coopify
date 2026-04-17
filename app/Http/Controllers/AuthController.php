@@ -41,4 +41,5 @@ class AuthController extends Controller
             'message' => 'Logout berhasil'
         ]);
     }
+
 }
