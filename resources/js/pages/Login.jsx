@@ -1,8 +1,6 @@
 import React, { useState } from 'react'
-import ReactDOM from 'react-dom/client'
-import '../css/app.css'
 
-function App() {
+function Login() {
   const [nim, setNim] = useState('')
   const [password, setPassword] = useState('')
   const [message, setMessage] = useState('')
@@ -40,7 +38,7 @@ function App() {
 
     } catch (err) {
       console.error("ERROR:", err)
-      setMessage("❌ Terjadi error, cek console")
+      setMessage("❌ Masukan Nama Pengguna dan Kata sandi")
     }
   }
 
@@ -48,9 +46,21 @@ function App() {
     <div className="min-h-screen flex font-sans">
 
       {/* LEFT SIDE LOGIN */}
-      <div className="w-1/2 bg-slate-700 flex flex-col justify-center px-20 text-white">
+      <div className="w-1/2 bg-[#2D5A74] flex flex-col justify-center px-20 text-white">
 
-        <h2 className="text-3xl font-bold mb-2">Coopify</h2>
+        <div className="flex items-center gap-3 mb-2">
+
+          <img
+            src="/img/logo.png"
+            alt="Coopify Logo"
+            className="w-16 h-16"
+          />
+
+          <h2 className="text-3xl font-bold">
+            Coopify
+          </h2>
+
+        </div>
 
         <h1 className="text-4xl font-bold mt-10 mb-2">
           Selamat datang!
@@ -100,7 +110,7 @@ function App() {
           <p className="mt-4 text-sm">{message}</p>
         )}
 
-        <p className="mt-20 text-sm text-gray-300">
+        <p className="mt-20 text-sm text-gray-300 text-center">
           Coopify 2026
         </p>
 
@@ -118,8 +128,7 @@ function App() {
         </h2>
 
         <p className="text-white/90 max-w-md mb-10">
-          Belanja kebutuhan kampus, bayar tagihan, dan kelola simpanan
-          dalam satu platform
+          Semua kebutuhan koperasi kampus dalam satu tempat belanja produk dan kelola simpanan dengan mudah
         </p>
 
         <div className="bg-white/20 px-6 py-4 rounded-xl">
@@ -133,4 +142,4 @@ function App() {
   )
 }
 
-ReactDOM.createRoot(document.getElementById('app')).render(<App />)
+export default Login
