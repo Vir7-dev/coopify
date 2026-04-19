@@ -48,10 +48,10 @@ const fileInputRef = useRef(null);
       <div className="bg-[#2D5A74] text-white p-6  mt-6 rounded-t-lg">
         <h2 className="text-lg font-semibold">Halo, Winda! 👋</h2>
         <p className="text-sm">
-          Kelola akun dan pantau riwayat belanja kamu di sini
+           Atur informasi akun Anda di sini.
         </p>
       </div>
-        <div className="max-w-xl mx-auto bg-white p-6 rounded-t-lg shadow">
+        <div className="mx-auto bg-white p-6 rounded-b-lg shadow">
           <h2 className="text-lg font-semibold mb-4">
             Edit Profil
           </h2>
@@ -138,14 +138,14 @@ const fileInputRef = useRef(null);
               <button
                 type="button"
                 onClick={() => navigate("/profil-pengguna")}
-                className="px-4 py-2 bg-gray-300 rounded"
+                className="px-3 py-2 bg-gray-300 rounded text-sm"
               >
                 Batal
               </button>
 
               <button
                 type="submit"
-                className="px-4 py-2 bg-green-500 text-white rounded hover:bg-green-600"
+                className="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
               >
                 Simpan
               </button>

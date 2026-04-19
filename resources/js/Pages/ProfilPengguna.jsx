@@ -48,12 +48,7 @@ const currentData = data.slice(startIndex, startIndex + itemsPerPage);
   </div>
 
 
- <button
-    onClick={() => setShowModal(true)}
-    className="absolute bottom-0 right-0 bg-white border rounded-full p-1 shadow hover:bg-gray-100"
-  >
-    <FaCamera size={12} className="text-gray-700" />
-  </button>
+
 </div>
 </div>
           
@@ -61,22 +56,33 @@ const currentData = data.slice(startIndex, startIndex + itemsPerPage);
         <div>
       <h3 className="font-bold text-lg">Winda</h3>
 
-<div className="text-sm text-gray-500 ">
-  <p className="flex items-center gap-2">
-    <FaIdCard /> NIM: 434234235
-  </p>
-  <p className="flex items-center gap-2">
-    <FaPhone /> 08123456789
-  </p>
-  <p className="flex items-center gap-2">
-    <FaEnvelope /> winda@mail.com
-  </p>
+<div className="mt-2 space-y-2">
+
+  {/* Baris ID & No HP */}
+  <div className="flex gap-2 flex-wrap">
+    <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
+      <FaIdCard className="text-gray-600" />
+      43425105
+    </span>
+
+    <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
+      <FaPhone className="text-gray-600" />
+      08577800000
+    </span>
+  </div>
+
+  {/* Email */}
+  <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full w-fit">
+    <FaEnvelope className="text-gray-600" />
+    winda@email.ac.id
+  </span>
+
 </div>
 </div>
 </div>
 </div>
 <button
-  className="bg-green-500 text-white px-3 py-2 rounded text-sm cursor-pointer hover:scale-110 transition"
+  className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-1"
   onClick={() => navigate("/edit-profil")}
 >
   Edit Profil
@@ -102,37 +108,33 @@ const currentData = data.slice(startIndex, startIndex + itemsPerPage);
         </div>
       </div>
 
-      {/* Riwayat Pembelian */}
-     <div className="bg-white mx-6 mb-6 rounded-lg shadow overflow-hidden mt-6">
   
-  {/* Header Biru */}
-  <div className="bg-[#2D8CA8] text-white px-4 py-3 flex justify-between items-center">
-    <h3 className="font-semibold flex items-center gap-2">
-      📄 Riwayat Pembelian
-    </h3>
-</div>
+  {/* Header*/}
+   <div className="mx-6 mt-6 bg-white rounded-xl shadow overflow-hidden">
+
+  {/* Header Table */}
+  <div className="p-4 border-b">
+    <h2 className="text-lg font-semibold">Riwayat Pesanan</h2>
+  </div>
+
   {/* Table */}
-  <div className="p-4">
-    <table className="w-full text-sm">
-      
-      {/* Head */}
-      <thead className="text-gray-600 border-b">
+  <div className="overflow-x-auto">
+    <table className="w-full text-sm text-left">
+      <thead className="bg-gray-100 text-gray-600">
         <tr>
-          <th className="py-2 text-left">No</th>
-          <th className="text-left">Produk</th>
-          <th className="text-left">Kategori</th>
-          <th className="text-left">Harga</th>
-          <th className="text-left">Qty</th>
-          <th className="text-left">Tgl Pesan</th>
-          <th className="text-left">Status</th>
+          <th className="px-4 py-2">No</th>
+          <th className="px-4 py-2">Produk</th>
+          <th className="px-4 py-2">Kategori</th>
+          <th className="px-4 py-2">Harga</th>
+          <th className="px-4 py-2">Qty</th>
+          <th className="px-4 py-2">Tgl Pesan</th>
+          <th className="px-4 py-2">Status</th>
         </tr>
       </thead>
 
-      {/* Body */}
       <tbody className="text-gray-700">
-        
         <tr className="border-b hover:bg-gray-50">
-          <td className="py-2">1.</td>
+          <td className="px-4 py-2">1</td>
           <td>Roti Tawar</td>
           <td>Makanan</td>
           <td>Rp 5.000</td>
@@ -146,7 +148,7 @@ const currentData = data.slice(startIndex, startIndex + itemsPerPage);
         </tr>
 
         <tr className="border-b hover:bg-gray-50">
-          <td className="py-2">2.</td>
+          <td className="px-4 py-2">2</td>
           <td>Teh Botol</td>
           <td>Minuman</td>
           <td>Rp 4.000</td>
@@ -160,129 +162,48 @@ const currentData = data.slice(startIndex, startIndex + itemsPerPage);
         </tr>
 
         <tr className="border-b hover:bg-gray-50">
-          <td className="py-2">3.</td>
-          <td>Pulpen Hitam</td>
-          <td>Alat Tulis</td>
-          <td>Rp 3.500</td>
-          <td>5</td>
-          <td>19-03-26</td>
+          <td className="px-4 py-2">1</td>
+          <td>Roti Tawar</td>
+          <td>Makanan</td>
+          <td>Rp 5.000</td>
+          <td>2</td>
+          <td>22-03-26</td>
           <td>
             <span className="bg-red-100 text-red-600 px-3 py-1 rounded-full text-xs">
-              Belum Diambil
+              Belum Bayar
             </span>
           </td>
         </tr>
-
-        <tr className="hover:bg-gray-50">
-          <td className="py-2">4.</td>
-          <td>Pensil</td>
-          <td>Alat Tulis</td>
-          <td>Rp 3.000</td>
-          <td>3</td>
-          <td>18-03-26</td>
-          <td>
-            <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
-              Selesai
-            </span>
-          </td>
-        </tr>
-
-
-
       </tbody>
     </table>
   </div>
-  <div className="flex items-center justify-between border-t border-gray-200 bg-white px-4 py-3 sm:px-6">
-  
-  {/* Mobile */}
-  <div className="flex flex-1 justify-between sm:hidden">
-    <button className="relative inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+
+  {/* Pagination */}
+  <div className="flex items-center justify-between px-4 py-3 border-t bg-white">
+    <button className="px-3 py-2 text-sm rounded hover:bg-gray-500 bg-gray-200 ">
       Previous
     </button>
-    <button className="relative ml-3 inline-flex items-center rounded-md border border-gray-300 bg-white px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50">
+
+    <div className="flex gap-2">
+      <button className="px-3 py-1 text-sm bg-indigo-600 text-white rounded">
+        1
+      </button>
+      <button className="px-3 py-1 text-sm border rounded hover:bg-gray-50">
+        2
+      </button>
+      <button className="px-3 py-1 text-sm border rounded hover:bg-gray-50">
+        3
+      </button>
+    </div>
+
+    <button className="px-3 py-2 text-sm rounded hover:bg-gray-500 bg-gray-200">
       Next
     </button>
   </div>
 
-  {/* Desktop */}
-  <div className="hidden sm:flex sm:flex-1 sm:items-center sm:justify-between">
-    
-
-
-    {/* Pagination */}
-    <div>
-      <nav
-        aria-label="Pagination"
-        className="isolate inline-flex -space-x-px rounded-md shadow-xs"
-      >
-        
-        {/* Prev */}
-        <button className="relative inline-flex items-center rounded-l-md px-2 py-2 text-gray-400 inset-ring inset-ring-gray-300 hover:bg-gray-50">
-          <span className="sr-only">Previous</span>
-          <svg
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="size-5"
-          >
-            <path
-              d="M11.78 5.22a.75.75 0 0 1 0 1.06L8.06 10l3.72 3.72a.75.75 0 1 1-1.06 1.06l-4.25-4.25a.75.75 0 0 1 0-1.06l4.25-4.25a.75.75 0 0 1 1.06 0Z"
-              fillRule="evenodd"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-
-        {/* Pages */}
-        <button className="relative z-10 inline-flex items-center bg-indigo-600 px-4 py-2 text-sm font-semibold text-white">
-          1
-        </button>
-
-        <button className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50">
-          2
-        </button>
-
-        <button className="relative hidden md:inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50">
-          3
-        </button>
-
-        <span className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-700">
-          ...
-        </span>
-
-        <button className="relative hidden md:inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50">
-          8
-        </button>
-
-        <button className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50">
-          9
-        </button>
-
-        <button className="relative inline-flex items-center px-4 py-2 text-sm font-semibold text-gray-900 inset-ring inset-ring-gray-300 hover:bg-gray-50">
-          10
-        </button>
-
-        {/* Next */}
-        <button className="relative inline-flex items-center rounded-r-md px-2 py-2 text-gray-400 inset-ring inset-ring-gray-300 hover:bg-gray-50">
-          <span className="sr-only">Next</span>
-          <svg
-            viewBox="0 0 20 20"
-            fill="currentColor"
-            className="size-5"
-          >
-            <path
-              d="M8.22 5.22a.75.75 0 0 1 1.06 0l4.25 4.25a.75.75 0 0 1 0 1.06l-4.25 4.25a.75.75 0 0 1-1.06-1.06L11.94 10 8.22 6.28a.75.75 0 0 1 0-1.06Z"
-              fillRule="evenodd"
-              clipRule="evenodd"
-            />
-          </svg>
-        </button>
-
-      </nav>
-    </div>
-  </div>
 </div>
 </div>
-</div>
+
 
     
    
