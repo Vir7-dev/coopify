@@ -56,7 +56,7 @@ function Navbar({ role }) {
         
         <FaUserCircle 
           className="text-2xl cursor-pointer hover:scale-110 transition"
-          onClick={() => navigate("/edit-profil")}
+          onClick={() => navigate("")}
         />
       </div>
 
