@@ -6,7 +6,7 @@ function Navbar({ role }) {
   const navigate = useNavigate(); // 
 
   return (
-    <nav className="flex justify-between items-center px-10 py-2.5 bg-[#2D5A74] text-white font-sans shadow-md">
+    <nav className="flex justify-between items-center px-10 py-2.5 bg-[#3F7EA2] text-white font-sans shadow-md">
 
       {/* LOGO */}
       <div className="flex items-center gap-2.5">
