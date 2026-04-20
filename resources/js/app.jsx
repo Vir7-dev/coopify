@@ -7,7 +7,6 @@ function App() {
     return (
         <Router>
             <Routes>
-                <Route path="/" element={<KelolaKategori />} />
                 <Route path="/kelola-produk" element={<KelolaProduk />} />
                 <Route path="/kelola-kategori" element={<KelolaKategori />} />
                 <Route path="/profil-pengguna" element={<ProfilPengguna />} />

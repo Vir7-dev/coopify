@@ -1,3 +1,4 @@
+import Swal from "sweetalert2";
 import React, { useState } from "react";
 import AppLayout from "../Layouts/AppLayout";
 import { FaSearch, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
@@ -22,30 +23,86 @@ export default function KelolaKategori() {
     item.nama.toLowerCase().includes(search.toLowerCase())
   );
 
+  // ✅ TAMBAH + ALERT
   const handleTambah = () => {
-    setKategori([...kategori, {
-      id: Date.now(),
-      nama: formNama,
-      ikon: "/img/ikon.jpg",
-      jumlah: 0,
-      tgl: "01-01-2026",
-    }]);
+    if (!formNama.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Oops...",
+        text: "Nama kategori tidak boleh kosong!",
+      });
+      return;
+    }
+
+    setKategori([
+      ...kategori,
+      {
+        id: Date.now(),
+        nama: formNama,
+        ikon: "/img/ikon.jpg",
+        jumlah: 0,
+        tgl: "01-01-2026",
+      },
+    ]);
+
     setShowTambah(false);
     setFormNama("");
+
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil!",
+      text: "Kategori berhasil ditambahkan",
+      timer: 1500,
+      showConfirmButton: false,
+    });
   };
 
+  // ✅ EDIT + ALERT
   const handleEdit = () => {
-    setKategori(kategori.map((item) =>
-      item.id === selected.id ? { ...item, nama: formNama } : item
-    ));
+    setKategori(
+      kategori.map((item) =>
+        item.id === selected.id ? { ...item, nama: formNama } : item
+      )
+    );
+
     setShowEdit(false);
+
+    Swal.fire({
+      icon: "success",
+      title: "Berhasil!",
+      text: "Kategori berhasil diupdate",
+      timer: 1500,
+      showConfirmButton: false,
+    });
   };
 
+  // ✅ DELETE + KONFIRMASI + ALERT
   const handleDelete = () => {
-    setKategori(kategori.filter((item) => item.id !== selected.id));
-    setShowDelete(false);
-  };
+    Swal.fire({
+      title: "Yakin hapus?",
+      text: "Data tidak bisa dikembalikan!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, hapus!",
+      cancelButtonText: "Batal",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        setKategori(kategori.filter((item) => item.id !== selected.id));
+        setShowDelete(false);
 
+        Swal.fire({
+          icon: "success",
+          title: "Terhapus!",
+          text: "Kategori berhasil dihapus",
+          timer: 1500,
+          showConfirmButton: false,
+        });
+      }
+    });
+  };
+  
   return (
     <AppLayout role="admin">
       <div className="w-full">
@@ -152,13 +209,17 @@ export default function KelolaKategori() {
         {/* MODAL TAMBAH */}
         {showTambah && (
           <Modal title="Tambah Kategori" onClose={() => setShowTambah(false)}>
-            <input
-              type="text"
-              placeholder="Nama kategori"
-              value={formNama}
-              onChange={(e) => setFormNama(e.target.value)}
-              className="w-full border px-3 py-2 mb-4 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-green-300"
-            />
+           <input
+  type="text"
+  required
+  placeholder="Nama kategori"
+  value={formNama}
+  onChange={(e) => {
+    const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
+    setFormNama(value);
+  }}
+  className="w-full border px-3 py-2 mb-4 rounded-lg text-sm"
+/>
             <div className="flex justify-end gap-2">
               <BtnBatal onClick={() => setShowTambah(false)} />
               <button onClick={handleTambah} className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded-lg transition">
