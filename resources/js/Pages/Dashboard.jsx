@@ -1,13 +1,7 @@
 import React from "react";
+import AppLayout from "../Layouts/AppLayout";
 
 function Dashboard() {
-    const categories = [
-        "Makanan",
-        "Minuman",
-        "Alat Tulis",
-        "Almamater",
-        "Obat",
-    ];
 
     const products = [
         { name: "Roti", price: "5000" },
@@ -36,7 +30,24 @@ function Dashboard() {
         { name: "Kertas HVS", price: "2000" },
     ];
 
+    const drug = [
+        { name: "Panadol", price: "5000" },
+        { name: "Amoxicillin", price: "3000" },
+        { name: "Bromhexine", price: "8000" },
+        { name: "Captopril", price: "7000" },
+        { name: "Promag", price: "9000" },
+        { name: "Inheler", price: "2000" },
+    ];
+
+        const categories = [
+        { title: "Makanan", data: products },
+        { title: "Minuman", data: drinks },
+        { title: "Alat Tulis", data: stationery },
+        { title: "Obat", data: drug },
+    ];
+
     return (
+        <AppLayout>
         <div className="bg-gray-100 min-h-screen">
 
             {/* BREADCRUMB */}
@@ -49,7 +60,7 @@ function Dashboard() {
                 <input
                     type="text"
                     placeholder="Cari produk..."
-                    className="border rounded-lg px-4 py-2 w-[450]"
+                    className="border rounded-lg px-4 py-2 w-[450px]"
                 />
             </div>
 
@@ -84,7 +95,7 @@ function Dashboard() {
                             🛒
                         </div>
 
-                        <p className="mt-2 text-sm">{cat}</p>
+                        <p className="mt-2 text-sm">{cat.title}</p>
                     </div>
                 ))}
             </div>
@@ -154,7 +165,7 @@ function Dashboard() {
                 </h2>
 
                 <div className="grid grid-cols-6 gap-4">
-                    {drinks.map((stationery, index) => (
+                    {stationery.map((stationery, index) => (
                         <div
                             key={index}
                             className="bg-white p-4 rounded shadow"
@@ -174,6 +185,35 @@ function Dashboard() {
 
              </div>
 
+            {/* ===== Obat ===== */}
+            <div className="px-10 mt-10">
+
+                <h2 className="text-lg font-semibold mb-4">
+                    Obat
+                </h2>
+
+                <div className="grid grid-cols-6 gap-4">
+                    {drug.map((drug, index) => (
+                        <div
+                            key={index}
+                            className="bg-white p-4 rounded shadow"
+                        >
+                            <div className="bg-gray-200 h-20 mb-2"></div>
+
+                            <h3 className="text-sm font-semibold">
+                                {drug.name}
+                            </h3>
+
+                            <p className="text-green-600 text-sm">
+                                Rp {drug.price}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+
+             </div>
+            
+
       {/* FOOTER */}
 <div className="bg-gray-800 text-white mt-16 p-6 text-center">
   <p>Coopify Koperasi Kampus Digital</p>
@@ -183,6 +223,7 @@ function Dashboard() {
 </div>
 
 </div>
+</AppLayout>
 );
 }
 
