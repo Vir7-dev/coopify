@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 import KelolaProduk from "./Pages/KelolaProduk";
 import KelolaKategori from "./Pages/KelolaKategori";
 import ProfilPengguna from "./Pages/ProfilPengguna";
+import ProfilAdmin from "./Pages/ProfilAdmin";
 import EditProfil from "./Pages/EditProfil";
 
 function App() {
@@ -10,8 +11,9 @@ function App() {
         <Router>
             <Routes>
                 <Route path="/kelola-produk" element={<KelolaProduk />} />
-                <Route path="/kelola-kategori" element={<KelolaKategori/>} />
+                <Route path="/kelola-kategori" element={<KelolaKategori />} />
                 <Route path="/profil-pengguna" element={<ProfilPengguna />} />
+                <Route path="/profil-admin" element={<ProfilAdmin />} />
                 <Route path="/edit-profil" element={<EditProfil />} />
             </Routes>
         </Router>
