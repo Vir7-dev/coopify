@@ -52,84 +52,77 @@ const DashboardAdmin = () => {
   return (
     <AppLayout>
 
-    <div className="bg-gray-200 min-h-screen">
+      <div className="bg-gray-100 min-h-screen pb-24">
 
-      <div className="p-6">
-
-        {/* BREADCRUMB + SEARCH */}
-        <div className="flex justify-between items-center mb-4">
-          <p className="text-sm text-gray-600">
-            Beranda &gt; Kategori &gt; <span className="font-semibold">Makanan</span>
-          </p>
-
-          <div className="relative">
-            <input
-              type="text"
-              placeholder="Cari..."
-              className="bg-gray-100 px-4 py-2 rounded-full outline-none w-64"
-            />
-            <span className="absolute right-3 top-2">🔍</span>
-          </div>
-        </div>
-
-        {/* BANNER */}
-        <div className="bg-gray-100 border rounded-lg p-4">
-          <img
-            src="https://illustrations.popsy.co/gray/shopping.svg"
-            alt="banner"
-            className="w-full h-40 object-contain"
+        {/* SEARCH */}
+        <div className="px-10 mt-4 flex justify-end">
+          <input
+            type="text"
+            placeholder="Cari produk..."
+            className="border rounded-lg px-4 py-2 w-[450px]"
           />
         </div>
 
-        {/* STATISTIK */}
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+        {/* BANNER */}
+        <div className="px-10 mt-14">
+                    <div className="rounded-2xl overflow-hidden shadow-md">
 
-          <div className="bg-gray-300 rounded-lg p-4 flex items-center gap-3">
+                        <img
+                            src="/img/banner.admin.png"
+                            alt="banner"
+                            className="w-full h-[350px] object-cover object-center"
+                        />
+
+                    </div>
+                </div>
+
+        {/* STATISTIK */}
+        <div className="px-10 grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
+
+          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
             <div className="text-2xl">👜</div>
             <div>
-              <p className="text-sm text-gray-700">Total Produk</p>
-              <p className="font-bold text-sm">200 Produk</p>
+              <p className="text-sm text-gray-500">Total Produk</p>
+              <p className="font-bold text-lg">200</p>
             </div>
           </div>
 
-          <div className="bg-gray-300 rounded-lg p-4 flex items-center gap-3">
+          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
             <div className="text-2xl">👥</div>
             <div>
-              <p className="text-sm text-gray-700">Total Pengguna</p>
-              <p className="font-bold text-sm">200 Pengguna</p>
+              <p className="text-sm text-gray-500">Total Pengguna</p>
+              <p className="font-bold text-lg">200</p>
             </div>
           </div>
 
-          <div className="bg-gray-300 rounded-lg p-4 flex items-center gap-3">
+          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
             <div className="text-2xl">💰</div>
             <div>
-              <p className="text-sm text-gray-700">Pemasukan hari ini</p>
-              <p className="font-bold text-sm">Rp.1.500.000</p>
+              <p className="text-sm text-gray-500">Pemasukan Hari Ini</p>
+              <p className="font-bold text-lg">Rp 1.500.000</p>
             </div>
           </div>
 
-          <div className="bg-gray-300 rounded-lg p-4 flex items-center gap-3">
+          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
             <div className="text-2xl">📄</div>
             <div>
-              <p className="text-sm text-gray-700">Transaksi Hari ini</p>
-              <p className="font-bold text-sm">40 Transaksi</p>
+              <p className="text-sm text-gray-500">Transaksi Hari Ini</p>
+              <p className="font-bold text-lg">40</p>
             </div>
           </div>
 
         </div>
 
-        {/* FITUR EXPORT + FILTER */}
-        <div className="flex justify-between items-center mt-6">
+        {/* EXPORT + FILTER */}
+        <div className="px-10 flex justify-between items-center mt-6">
 
-          {/* Export PDF */}
           <button
             onClick={exportPDF}
-            className="bg-red-500 text-white px-4 py-2 rounded"
+            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
           >
             Export PDF
           </button>
 
-          {/* Filter Bulan & Tahun */}
           <div className="flex gap-2">
 
             <select
@@ -166,27 +159,29 @@ const DashboardAdmin = () => {
         </div>
 
         {/* CHART */}
-        <div ref={chartRef} className="bg-white mt-6 p-4 rounded-lg shadow">
+        <div className="px-10">
+          <div ref={chartRef} className="bg-white mt-6 p-4 rounded-lg shadow">
 
-          {/* Scroll Grafik */}
-          <div className="overflow-x-auto">
-            <div className="min-w-[800px] h-48">
-              <Bar data={data} options={options} />
+            <div className="overflow-x-auto">
+              <div className="min-w-[800px] h-48">
+                <Bar data={data} options={options} />
+              </div>
             </div>
-          </div>
 
+          </div>
+        </div>
+
+        {/* FOOTER */}
+        <div className="bg-green-600 text-white mt-24 p-6 text-center">
+          <p className="font-semibold">
+            Coopify Koperasi Kampus Digital
+          </p>
+          <p className="text-sm text-green-200">
+            © 2026 Coopify
+          </p>
         </div>
 
       </div>
-
-      {/* FOOTER */}
-      <div className="bg-green-600 text-white px-6 py-6 mt-10">
-        <p className="text-center text-sm">
-          © 2026 Coopify, Koperasi Kampus Digital.
-        </p>
-      </div>
-
-    </div>
 
     </AppLayout>
   );

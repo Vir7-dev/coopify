@@ -39,103 +39,105 @@ function Dashboard() {
         { name: "Inhaler", price: "2000" },
     ];
 
+    const almamater = [
+        { name: "Politeknik", price: "200.000"},
+    ];
+
     const categories = [
         { title: "Makanan", data: products },
         { title: "Minuman", data: drinks },
         { title: "Alat Tulis", data: stationery },
         { title: "Obat", data: drug },
+        { title: "Almamater", data: almamater},
     ];
 
     return (
         <AppLayout>
 
-        <div className="bg-gray-100 min-h-screen pb-24">
+            <div className="bg-gray-100 min-h-screen pb-24">
 
-            <div className="px-10 pt-6 text-sm text-gray-500">
-                Beranda • Kategori • Produk
-            </div>
-
-            <div className="px-10 mt-4 flex justify-end">
-                <input
-                    type="text"
-                    placeholder="Cari produk..."
-                    className="border rounded-lg px-4 py-2 w-[450px]"
-                />
-            </div>
-
-            <div className="px-10 mt-14">
-                <div className="border rounded-xl overflow-hidden bg-gray-200">
-                    <img
-                        src="/img/Banner.jpg"
-                        alt="banner"
-                        className="w-full h-[240px] object-cover"
+                <div className="px-10 mt-4 flex justify-end">
+                    <input
+                        type="text"
+                        placeholder="Cari produk..."
+                        className="border rounded-lg px-4 py-2 w-[450px]"
                     />
                 </div>
-            </div>
 
-            <div className="px-10 mt-20 flex justify-center gap-12">
+                <div className="px-10 mt-14">
+                    <div className="rounded-2xl overflow-hidden shadow-md">
+
+                        <img
+                            src="/img/banner.pengguna.png"
+                            alt="banner"
+                            className="w-full h-[350px] object-cover object-center"
+                        />
+
+                    </div>
+                </div>
+                <div className="px-10 mt-20 flex justify-center gap-12">
+                    {categories.map((cat, index) => (
+                        <div key={index} className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-xl">
+                                🛒
+                            </div>
+
+                            <p className="mt-3 text-sm font-medium">
+                                {cat.title}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+
                 {categories.map((cat, index) => (
-                    <div key={index} className="flex flex-col items-center">
-                        <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-xl">
-                            🛒
+                    <div className="px-10 mt-20" key={index}>
+
+                        <div className="bg-gray-200 rounded-xl p-6">
+
+                            <div className="bg-gradient-to-r from--400 to-blue-500 text-black font-semibold px-4 py-2 rounded-lg mb-6">
+                                {cat.title}
+                            </div>
+
+                            <div className="grid grid-cols-6 gap-6">
+
+                                {cat.data.map((item, i) => (
+                                    <div
+                                        key={i}
+                                        className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition"
+                                    >
+
+                                        <div className="bg-gray-200 h-24 mb-3 rounded"></div>
+
+                                        <h3 className="text-sm font-semibold">
+                                            {item.name}
+                                        </h3>
+
+                                        <p className="text-green-600 text-sm">
+                                            Rp {item.price}
+                                        </p>
+
+                                        <button className="bg-green-500 text-white text-xs px-3 py-1 rounded mt-3 w-full hover:bg-green-600">
+                                            🛒 Tambah
+                                        </button>
+
+                                    </div>
+                                ))}
+
+                            </div>
+
                         </div>
 
-                        <p className="mt-3 text-sm font-medium">
-                            {cat.title}
-                        </p>
                     </div>
                 ))}
-            </div>
 
-            {categories.map((cat, index) => (
-                <div className="px-10 mt-20" key={index}>
-
-                    <div className="bg-gray-200 rounded-xl p-6">
-
-                        <div className="bg-gradient-to-r from--400 to-blue-500 text-black font-semibold px-4 py-2 rounded-lg mb-6">
-                            {cat.title}
-                        </div>
-
-                        <div className="grid grid-cols-6 gap-6">
-
-                            {cat.data.map((item, i) => (
-                                <div
-                                    key={i}
-                                    className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition"
-                                >
-
-                                    <div className="bg-gray-200 h-24 mb-3 rounded"></div>
-
-                                    <h3 className="text-sm font-semibold">
-                                        {item.name}
-                                    </h3>
-
-                                    <p className="text-green-600 text-sm">
-                                        Rp {item.price}
-                                    </p>
-
-                                    <button className="bg-green-500 text-white text-xs px-3 py-1 rounded mt-3 w-full hover:bg-green-600">
-                                        🛒 Tambah
-                                    </button>
-
-                                </div>
-                            ))}
-
-                        </div>
-
-                    </div>
-
+                <div className="bg-gray-800 text-white mt-24 p-6 text-center">
+                    <p className="font-semibold">Coopify Koperasi Kampus Digital</p>
+                    <p className="text-sm text-gray-400">
+                        © 2026 Coopify
+                    </p>
                 </div>
-            ))}
 
-            <div className="bg-gray-800 text-white mt-24 p-6 text-center">
-                <p className="font-semibold">Coopify Koperasi Kampus Digital</p>
-                <p className="text-sm text-gray-400">
-                    © 2026 Coopify
-                </p>
             </div>
-
-        </div>
 
         </AppLayout>
     );
