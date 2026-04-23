@@ -216,10 +216,10 @@ export default function KelolaProduk() {
                 <div className="flex justify-between items-center mb-6">
                     <div>
                         <h1 className="text-xl font-semibold">
-                            Kelola Kategori Produk
+                            Kelola Produk
                         </h1>
                         <p className="text-sm text-gray-500">
-                            Manajemen kategori produk koperasi
+                            Manajemen produk koperasi
                         </p>
                     </div>
 
@@ -233,20 +233,9 @@ export default function KelolaProduk() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-4 gap-4 mb-6">
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
-                        <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
-                            <FaLayerGroup />
-                        </div>
-                        <div>
-                            <p className="text-sm text-gray-500">
-                                Total Kategori
-                            </p>
-                            <h2 className="text-lg font-semibold">5</h2>
-                        </div>
-                    </div>
+                <div className="grid grid-cols-3 gap-4 mb-6">
 
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
                         <div className="bg-green-100 text-green-600 p-3 rounded-lg">
                             <FaBox />
                         </div>
@@ -258,7 +247,7 @@ export default function KelolaProduk() {
                         </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
                         <div className="bg-orange-100 text-orange-600 p-3 rounded-lg">
                             <FaCalendarAlt />
                         </div>
@@ -273,7 +262,7 @@ export default function KelolaProduk() {
                         </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
                         <div className="bg-purple-100 text-purple-600 p-3 rounded-lg">
                             <FaTags />
                         </div>
@@ -291,6 +280,9 @@ export default function KelolaProduk() {
                     <div className="p-4 flex justify-between items-center">
                         <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
                             <option>Semua Kategori</option>
+                            <option>Makanan</option>
+                            <option>Minuman</option>
+                            <option>Obat & Kesehatan</option>
                         </select>
 
                         <div className="relative w-64">
