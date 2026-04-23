@@ -6,7 +6,7 @@ function Navbar({ role }) {
   const navigate = useNavigate(); // 
 
   return (
-    <nav className="flex justify-between items-center px-10 py-2.5 bg-[#2D5A74] text-white font-sans shadow-md">
+    <nav className="flex justify-between items-center px-10 py-2.5 bg-[#3F7EA2] text-white font-sans shadow-md">
 
       {/* LOGO */}
       <div className="flex items-center gap-2.5">
@@ -28,7 +28,7 @@ function Navbar({ role }) {
         </li>
 
         <li 
-          onClick={() => navigate("/kategori")}
+          onClick={() => navigate("/kelola-kategori")}
           className="cursor-pointer text-base hover:text-green-100 transition"
         >
           Kategori Produk
@@ -56,7 +56,7 @@ function Navbar({ role }) {
         
         <FaUserCircle 
           className="text-2xl cursor-pointer hover:scale-110 transition"
-          onClick={() => navigate("/edit-profil")}
+          onClick={() => navigate("")}
         />
       </div>
 
