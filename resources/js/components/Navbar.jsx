@@ -28,7 +28,7 @@ function Navbar({ role }) {
         </li>
 
         <li 
-          onClick={() => navigate("/kategori")}
+          onClick={() => navigate("/kelola-kategori")}
           className="cursor-pointer text-base hover:text-green-100 transition"
         >
           Kategori Produk

@@ -18,7 +18,7 @@ function Dashboard() {
         { name: "Jus Jeruk", price: "8000" },
         { name: "Kopi", price: "7000" },
         { name: "Susu Coklat", price: "9000" },
-        { name: "Nutirboost", price: "6000" },
+        { name: "NutriBoost", price: "6000" },
     ];
 
     const stationery = [
@@ -36,195 +36,111 @@ function Dashboard() {
         { name: "Bromhexine", price: "8000" },
         { name: "Captopril", price: "7000" },
         { name: "Promag", price: "9000" },
-        { name: "Inheler", price: "2000" },
+        { name: "Inhaler", price: "2000" },
     ];
 
-        const categories = [
+    const almamater = [
+        { name: "Politeknik", price: "200.000"},
+    ];
+
+    const categories = [
         { title: "Makanan", data: products },
         { title: "Minuman", data: drinks },
         { title: "Alat Tulis", data: stationery },
         { title: "Obat", data: drug },
+        { title: "Almamater", data: almamater},
     ];
 
     return (
         <AppLayout>
-        <div className="bg-gray-100 min-h-screen">
 
-            {/* BREADCRUMB */}
-            <div className="px-10 pt-6 text-sm text-gray-500">
-                Beranda • Kategori • Makanan
-            </div>
+            <div className="bg-gray-100 min-h-screen pb-24">
 
-            {/* SEARCH */}
-            <div className="px-10 mt-2 flex justify-end">
-                <input
-                    type="text"
-                    placeholder="Cari produk..."
-                    className="border rounded-lg px-4 py-2 w-[450px]"
-                />
-            </div>
-
-            {/* BANNER */}
-            <div className="px-10 mt-6">
-                <div className="bg-white rounded-lg p-6 shadow flex justify-between items-center">
-                    <div>
-                        <h2 className="text-2xl font-bold">
-                            Belanja mudah di Coopify
-                        </h2>
-                        <p className="text-gray-500">
-                            Semua kebutuhan koperasi tersedia
-                        </p>
-                    </div>
-
-                    <img
-                        src="/img/Banner.jpg"
-                        alt="Banner"
-                        className="w-48"
+                <div className="px-10 mt-4 flex justify-end">
+                    <input
+                        type="text"
+                        placeholder="Cari produk..."
+                        className="border rounded-lg px-4 py-2 w-[450px]"
                     />
                 </div>
-            </div>
 
-            {/* KATEGORI */}
-            <div className="px-10 mt-8 flex justify-center gap-6">
+                <div className="px-10 mt-14">
+                    <div className="rounded-2xl overflow-hidden shadow-md">
+
+                        <img
+                            src="/img/banner.pengguna.png"
+                            alt="banner"
+                            className="w-full h-[350px] object-cover object-center"
+                        />
+
+                    </div>
+                </div>
+                <div className="px-10 mt-20 flex justify-center gap-12">
+                    {categories.map((cat, index) => (
+                        <div key={index} className="flex flex-col items-center">
+                            <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-xl">
+                                🛒
+                            </div>
+
+                            <p className="mt-3 text-sm font-medium">
+                                {cat.title}
+                            </p>
+                        </div>
+                    ))}
+                </div>
+
                 {categories.map((cat, index) => (
-                    <div
-                        key={index}
-                        className="flex flex-col items-center"
-                    >
-                        <div className="w-16 h-16 bg-green-200 rounded-full flex items-center justify-center">
-                            🛒
+                    <div className="px-10 mt-20" key={index}>
+
+                        <div className="bg-gray-200 rounded-xl p-6">
+
+                            <div className="bg-gradient-to-r from--400 to-blue-500 text-black font-semibold px-4 py-2 rounded-lg mb-6">
+                                {cat.title}
+                            </div>
+
+                            <div className="grid grid-cols-6 gap-6">
+
+                                {cat.data.map((item, i) => (
+                                    <div
+                                        key={i}
+                                        className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition"
+                                    >
+
+                                        <div className="bg-gray-200 h-24 mb-3 rounded"></div>
+
+                                        <h3 className="text-sm font-semibold">
+                                            {item.name}
+                                        </h3>
+
+                                        <p className="text-green-600 text-sm">
+                                            Rp {item.price}
+                                        </p>
+
+                                        <button className="bg-green-500 text-white text-xs px-3 py-1 rounded mt-3 w-full hover:bg-green-600">
+                                            🛒 Tambah
+                                        </button>
+
+                                    </div>
+                                ))}
+
+                            </div>
+
                         </div>
 
-                        <p className="mt-2 text-sm">{cat.title}</p>
                     </div>
                 ))}
-            </div>
 
-            {/* PRODUK */}
-            <div className="px-10 mt-10">
-
-                <h2 className="text-lg font-semibold mb-4">
-                    Makanan
-                </h2>
-
-                <div className="grid grid-cols-6 gap-4">
-                    {products.map((product, index) => (
-                        <div
-                            key={index}
-                            className="bg-white p-4 rounded shadow"
-                        >
-                            <div className="bg-gray-200 h-20 mb-2"></div>
-
-                            <h3 className="text-sm font-semibold">
-                                {product.name}
-                            </h3>
-
-                            <p className="text-green-600 text-sm">
-                                Rp {product.price}
-                            </p>
-                        </div>
-                    ))}
-
+                <div className="bg-gray-800 text-white mt-24 p-6 text-center">
+                    <p className="font-semibold">Coopify Koperasi Kampus Digital</p>
+                    <p className="text-sm text-gray-400">
+                        © 2026 Coopify
+                    </p>
                 </div>
 
             </div>
 
-            {/* ===== MINUMAN ===== */}
-            <div className="px-10 mt-10">
-
-                <h2 className="text-lg font-semibold mb-4">
-                    Minuman
-                </h2>
-
-                <div className="grid grid-cols-6 gap-4">
-                    {drinks.map((drink, index) => (
-                        <div
-                            key={index}
-                            className="bg-white p-4 rounded shadow"
-                        >
-                            <div className="bg-gray-200 h-20 mb-2"></div>
-
-                            <h3 className="text-sm font-semibold">
-                                {drink.name}
-                            </h3>
-
-                            <p className="text-green-600 text-sm">
-                                Rp {drink.price}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-
-             </div>
-
-             {/* ===== Alat tulis ===== */}
-            <div className="px-10 mt-10">
-
-                <h2 className="text-lg font-semibold mb-4">
-                    Alat tulis
-                </h2>
-
-                <div className="grid grid-cols-6 gap-4">
-                    {stationery.map((stationery, index) => (
-                        <div
-                            key={index}
-                            className="bg-white p-4 rounded shadow"
-                        >
-                            <div className="bg-gray-200 h-20 mb-2"></div>
-
-                            <h3 className="text-sm font-semibold">
-                                {stationery.name}
-                            </h3>
-
-                            <p className="text-green-600 text-sm">
-                                Rp {stationery.price}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-
-             </div>
-
-            {/* ===== Obat ===== */}
-            <div className="px-10 mt-10">
-
-                <h2 className="text-lg font-semibold mb-4">
-                    Obat
-                </h2>
-
-                <div className="grid grid-cols-6 gap-4">
-                    {drug.map((drug, index) => (
-                        <div
-                            key={index}
-                            className="bg-white p-4 rounded shadow"
-                        >
-                            <div className="bg-gray-200 h-20 mb-2"></div>
-
-                            <h3 className="text-sm font-semibold">
-                                {drug.name}
-                            </h3>
-
-                            <p className="text-green-600 text-sm">
-                                Rp {drug.price}
-                            </p>
-                        </div>
-                    ))}
-                </div>
-
-             </div>
-            
-
-      {/* FOOTER */}
-<div className="bg-gray-800 text-white mt-16 p-6 text-center">
-  <p>Coopify Koperasi Kampus Digital</p>
-  <p className="text-sm text-gray-400">
-    © 2026 Coopify
-  </p>
-</div>
-
-</div>
-</AppLayout>
-);
+        </AppLayout>
+    );
 }
 
 export default Dashboard;
