@@ -19,6 +19,8 @@ export default function KelolaProduk() {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showDeleteModal, setShowDeleteModal] = useState(false);
     const [selectedDelete, setSelectedDelete] = useState(null);
+    const [search, setSearch] = useState("");
+    const [filterKategori, setFilterKategori] = useState("Semua");
 
     const [form, setForm] = useState({
         nama: "",
@@ -40,6 +42,8 @@ export default function KelolaProduk() {
             console.log("File terpilih:", file);
         }
     };
+
+    
 
     // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
@@ -141,10 +145,25 @@ export default function KelolaProduk() {
         },
     ];
 
+    const filteredProducts = products.filter((item) => {
+        const matchSearch = item.nama
+            .toLowerCase()
+            .includes(search.toLowerCase());
+
+        const matchKategori =
+            filterKategori === "Semua" ||
+            item.kategori.trim().toLowerCase() === filterKategori.toLowerCase();
+
+        return matchSearch && matchKategori;
+    });
+
     const indexOfLastItem = currentPage * itemsPerPage;
     const indexOfFirstItem = indexOfLastItem - itemsPerPage;
-    const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
-    const totalPages = Math.ceil(products.length / itemsPerPage);
+    const currentItems = filteredProducts.slice(
+        indexOfFirstItem,
+        indexOfLastItem,
+    );
+    const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
     // TAMBAH
     const handleAdd = () => {
@@ -215,9 +234,7 @@ export default function KelolaProduk() {
             <div className="w-full">
                 <div className="flex justify-between items-center mb-6">
                     <div>
-                        <h1 className="text-xl font-semibold">
-                            Kelola Produk
-                        </h1>
+                        <h1 className="text-xl font-semibold">Kelola Produk</h1>
                         <p className="text-sm text-gray-500">
                             Manajemen produk koperasi
                         </p>
@@ -233,9 +250,8 @@ export default function KelolaProduk() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-3 gap-4 mb-6">
-
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 w-full">
                         <div className="bg-green-100 text-green-600 p-3 rounded-lg">
                             <FaBox />
                         </div>
@@ -247,7 +263,7 @@ export default function KelolaProduk() {
                         </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 w-full">
                         <div className="bg-orange-100 text-orange-600 p-3 rounded-lg">
                             <FaCalendarAlt />
                         </div>
@@ -262,7 +278,7 @@ export default function KelolaProduk() {
                         </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 w-full">
                         <div className="bg-purple-100 text-purple-600 p-3 rounded-lg">
                             <FaTags />
                         </div>
@@ -276,20 +292,38 @@ export default function KelolaProduk() {
                     </div>
                 </div>
 
-                <div className="bg-white rounded-xl shadow-sm overflow-hidden text-left">
+                <div className="bg-white rounded-xl shadow-sm overflow-x-auto text-left">
                     <div className="p-4 flex justify-between items-center">
-                        <select className="border border-gray-300 rounded-md px-3 py-1 text-sm">
-                            <option>Semua Kategori</option>
-                            <option>Makanan</option>
-                            <option>Minuman</option>
-                            <option>Obat & Kesehatan</option>
+                        <select
+                            value={filterKategori}
+                            onChange={(e) => {
+                                setFilterKategori(e.target.value);
+                                setCurrentPage(1);
+                            }}
+                            className="border border-gray-300 rounded-md px-3 py-1 text-sm"
+                        >
+                            <option value="Semua">Semua Kategori</option>
+                            <option value="Makanan">Makanan</option>
+                            <option value="Minuman">Minuman</option>
+                            <option value="Obat & Kesehatan">
+                                Obat & Kesehatan
+                            </option>
+                            <option value="Buku & Alat tulis">
+                                Buku & Alat tulis
+                            </option>
+                            <option value="Almamater">Almamater</option>
                         </select>
 
                         <div className="relative w-64">
                             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
                             <input
                                 type="text"
-                                placeholder="Cari kategori..."
+                                placeholder="Cari produk..."
+                                value={search}
+                                onChange={(e) => {
+                                    setSearch(e.target.value);
+                                    setCurrentPage(1);
+                                }}
                                 className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-300 text-sm focus:outline-none"
                             />
                         </div>
@@ -353,7 +387,7 @@ export default function KelolaProduk() {
                                                     : "bg-green-100 text-green-600"
                                             }`}
                                         >
-                                            {item.stok} produk
+                                            {item.stok}
                                         </span>
                                     </td>
 
@@ -400,8 +434,8 @@ export default function KelolaProduk() {
                     {/* PAGINATION */}
                     <div className="flex justify-between items-center p-4 text-sm text-gray-500">
                         <p>
-                            Menampilkan {currentItems.length} dari{" "}
-                            {products.length} kategori
+                            Menampilkan {filteredProducts.length} dari{" "}
+                            {products.length} produk
                         </p>
 
                         <div className="flex gap-2">
