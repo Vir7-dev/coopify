@@ -4,6 +4,9 @@ import KelolaProduk from "./Pages/KelolaProduk";
 import KelolaKategori from "./Pages/KelolaKategori";
 import ProfilPengguna from "./Pages/ProfilPengguna";
 import EditProfil from "./Pages/EditProfil";
+import Produk from "./Pages/Produk";
+import Login from "./Pages/Login";
+
 function App() {
     return (
         <Router>
@@ -12,6 +15,8 @@ function App() {
                 <Route path="/kelola-kategori" element={<KelolaKategori/>} />
                 <Route path="/profil-pengguna" element={<ProfilPengguna />} />
                 <Route path="/edit-profil" element={<EditProfil />} />
+                <Route path="/produk" element={<Produk />} />
+                <Route path="/login" element={<Login />} />
             </Routes>
         </Router>
     );

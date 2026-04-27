@@ -433,7 +433,7 @@ export default function KelolaProduk() {
                     </div>
                 </div>
 
-                {/* MODAL TAMBAH & EDIT (VERSI RAMPIUNG) */}
+                {/* MODAL TAMBAH & EDIT */}
                 {showModal && (
                     <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
                         <div className="bg-white w-full max-w-[400px] rounded-[10px] shadow-2xl overflow-hidden">
@@ -573,7 +573,7 @@ export default function KelolaProduk() {
                             </h2>
 
                             <p className="text-sm text-gray-500 mb-4">
-                                Yakin mau hapus kategori{" "}
+                                Yakin mau hapus produk{" "}
                                 <span className="font-semibold text-black">
                                     {selectedDelete?.nama}
                                 </span>
