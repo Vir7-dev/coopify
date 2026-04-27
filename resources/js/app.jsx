@@ -7,6 +7,8 @@ import Pembayaran from "./Pages/Pembayaran";
 import ProfilPengguna from "./Pages/ProfilPengguna";
 import ProfilAdmin from "./Pages/ProfilAdmin";
 import EditProfil from "./Pages/EditProfil";
+import Produk from "./Pages/Produk";
+import Login from "./Pages/Login";
 
 function App() {
     return (
@@ -19,6 +21,8 @@ function App() {
                 <Route path="/profil-pengguna" element={<ProfilPengguna />} />
                 <Route path="/profil-admin" element={<ProfilAdmin />} />
                 <Route path="/edit-profil" element={<EditProfil />} />
+                <Route path="/produk" element={<Produk />} />
+                <Route path="/login" element={<Login />} />
             </Routes>
         </Router>
     );

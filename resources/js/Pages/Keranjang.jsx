@@ -1,36 +1,29 @@
 import React, { useState } from "react";
 import AppLayout from "../Layouts/AppLayout";
+import { Hamburger, Pill, Shirt, CalendarClock, NotebookPen } from "lucide-react";
+
+const SIZE_PRICES = {
+    S:   150000,
+    M:   165000,
+    L:   180000,
+    XL:  220000,
+    XXL: 250000,
+};
 
 const initialItems = [
-    { id: 1, name: "Makanan", category: "Kantin", price: 29000, qty: 1, checked: true, icon: "food" },
-    { id: 2, name: "Obat", category: "Apotek", price: 25000, qty: 1, checked: true, icon: "pill" },
-    { id: 3, name: "Almamater", category: "Toko Kampus", price: 25000, qty: 1, checked: false, icon: "shirt" },
-    { id: 4, name: "Almamater", category: "Toko Kampus", price: 25000, qty: 1, checked: false, icon: "shirt" },
-    { id: 5, name: "Almamater", category: "Toko Kampus", price: 25000, qty: 1, checked: false, icon: "shirt" },
-    { id: 6, name: "Almamater", category: "Toko Kampus", price: 25000, qty: 1, checked: false, icon: "shirt" },
-    { id: 7, name: "Almamater", category: "Toko Kampus", price: 25000, qty: 1, checked: false, icon: "shirt" },
-    { id: 8, name: "Almamater", category: "Toko Kampus", price: 25000, qty: 1, checked: false, icon: "shirt" },
-
+    { id: 1, name: "Pringles", category: "Makanan", price: 10000, qty: 1, checked: true, icon: "food", size: null },
+    { id: 2, name: "Betadine", category: "Obat", price: 15000, qty: 1, checked: true, icon: "pill", size: null },
+    { id: 3, name: "Buku Sidu", category: "Alat Tulis Kantor", price: 5000, qty: 1, checked: true, icon: "note", size: null },
+    { id: 4, name: "Almamater", category: "Almamater", price: 150000, baseprice: 150000, size: null, qty: 1, checked: false, icon: "shirt", size: null },
 ];
 
+const SIZES = ["S", "M", "L", "XL", "XXL"];
+
 const icons = {
-    food: (
-        <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" viewBox="0 0 24 24">
-            <path d="M18 8h1a4 4 0 010 8h-1M2 8h16v9a4 4 0 01-4 4H6a4 4 0 01-4-4V8z" />
-            <line x1="6" y1="1" x2="6" y2="4" /><line x1="10" y1="1" x2="10" y2="4" /><line x1="14" y1="1" x2="14" y2="4" />
-        </svg>
-    ),
-    pill: (
-        <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" viewBox="0 0 24 24">
-            <path d="M10.5 20.5L3.5 13.5a5 5 0 017-7l7 7a5 5 0 01-7 7z" />
-            <line x1="8.5" y1="8.5" x2="15.5" y2="15.5" />
-        </svg>
-    ),
-    shirt: (
-        <svg className="w-7 h-7 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" viewBox="0 0 24 24">
-            <path d="M20 7l-2-4-4 2a4 4 0 01-4 0L6 3 4 7l3 2v10h10V9l3-2z" />
-        </svg>
-    ),
+        food: <Hamburger className="w-7 h-7 text-gray-400" />,
+        pill: <Pill className="w-7 h-7 text-gray-400" />,
+        shirt: <Shirt className="w-7 h-7 text-gray-400" />,
+        notepen: <NotebookPen className="w-7 h-7 text-gray-400" />
 };
 
 function fmt(n) {
@@ -49,10 +42,15 @@ export default function Keranjang() {
     const checkedItems = items.filter((i) => i.checked);
     const total = checkedItems.reduce((s, i) => s + i.price * i.qty, 0);
 
+    // item yang perlu size tapi belum pilih
+    const hasUnselectedSize = checkedItems.some((i) => i.category === "Almamater" && !i.size);
+
     const toggleAll = (val) => setItems(items.map((i) => ({ ...i, checked: val })));
     const toggleItem = (id) => setItems(items.map((i) => i.id === id ? { ...i, checked: !i.checked } : i));
     const changeQty = (id, delta) =>
         setItems(items.map((i) => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
+    const changeSize = (id, size) =>
+        setItems(items.map((i) => i.id === id ? { ...i, size, price: SIZE_PRICES[size] ?? i.price } : i));
 
     const confirmPickup = () => {
         if (tempDate && tempTime) {
@@ -69,20 +67,20 @@ export default function Keranjang() {
 
                 {/* PAGE HEADER */}
                 <div className="mb-6 flex items-center gap-3">
-                <button
-                    onClick={() => window.history.back()}
-                    className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition flex-shrink-0">
-                    <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 16 16">
-                        <path d="M10 4L6 8l4 4" />
-                    </svg>
-                </button>
-                <div className="border-l-4 border-emerald-500 pl-3">
-                <h1 className="text-xl font-semibold text-gray-800">Keranjang Belanja</h1>
-                <p className="text-sm text-gray-500">{items.length} item di keranjang kamu</p>
-            </div>
+                    <button
+                        onClick={() => window.history.back()}
+                        className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition flex-shrink-0">
+                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 16 16">
+                            <path d="M10 4L6 8l4 4" />
+                        </svg>
+                    </button>
+                    <div className="border-l-4 border-[#2D5A74] pl-3">
+                        <h1 className="text-xl font-semibold text-gray-800">Keranjang Belanja</h1>
+                        <p className="text-sm text-gray-500">{items.length} item di keranjang kamu</p>
+                    </div>
                 </div>
 
-                {/* MAIN LAYOUT: item list kiri, summary kanan */}
+                {/* MAIN LAYOUT */}
                 <div className="flex flex-col lg:flex-row gap-6 items-stretch">
 
                     {/* LEFT: ITEM LIST */}
@@ -104,33 +102,59 @@ export default function Keranjang() {
                             {/* ITEMS */}
                             <div className="divide-y divide-gray-100">
                                 {items.map((item) => (
-                                    <div key={item.id} className="flex items-center gap-4 px-4 py-4 hover:bg-gray-50 transition">
-                                        <input
-                                            type="checkbox"
-                                            checked={item.checked}
-                                            onChange={() => toggleItem(item.id)}
-                                            className="w-4 h-4 accent-emerald-500 cursor-pointer flex-shrink-0"
-                                        />
-                                        <div className="w-14 h-14 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-50">
-                                            {icons[item.icon]}
+                                    <div key={item.id} className="px-4 py-4 hover:bg-gray-50 transition">
+                                        <div className="flex items-center gap-4">
+                                            <input
+                                                type="checkbox"
+                                                checked={item.checked}
+                                                onChange={() => toggleItem(item.id)}
+                                                className="w-4 h-4 accent-emerald-500 cursor-pointer flex-shrink-0"
+                                            />
+                                            <div className="w-14 h-14 border border-gray-200 rounded-xl flex items-center justify-center flex-shrink-0 bg-gray-50">
+                                                {icons[item.icon]}
+                                            </div>
+                                            <div className="flex-1 min-w-0">
+                                                <p className="text-sm font-medium text-gray-900">{item.name}</p>
+                                                <p className="text-xs text-gray-400 mb-1">{item.category}</p>
+                                                <p className="text-sm font-semibold text-emerald-500">{fmt(item.price * item.qty)}</p>
+                                            </div>
+                                            {/* QTY CONTROL */}
+                                            <div className="flex items-center border border-gray-200 rounded-full overflow-hidden flex-shrink-0">
+                                                <button
+                                                    onClick={() => changeQty(item.id, -1)}
+                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition text-lg leading-none"
+                                                >−</button>
+                                                <span className="w-6 text-center text-sm font-medium text-gray-900">{item.qty}</span>
+                                                <button
+                                                    onClick={() => changeQty(item.id, 1)}
+                                                    className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition text-lg leading-none"
+                                                >+</button>
+                                            </div>
                                         </div>
-                                        <div className="flex-1 min-w-0">
-                                            <p className="text-sm font-medium text-gray-900">{item.name}</p>
-                                            <p className="text-xs text-gray-400 mb-1">{item.category}</p>
-                                            <p className="text-sm font-semibold text-emerald-500">{fmt(item.price * item.qty)}</p>
-                                        </div>
-                                        {/* QTY CONTROL */}
-                                        <div className="flex items-center border border-gray-200 rounded-full overflow-hidden flex-shrink-0">
-                                            <button
-                                                onClick={() => changeQty(item.id, -1)}
-                                                className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition text-lg leading-none"
-                                            >−</button>
-                                            <span className="w-6 text-center text-sm font-medium text-gray-900">{item.qty}</span>
-                                            <button
-                                                onClick={() => changeQty(item.id, 1)}
-                                                className="w-8 h-8 flex items-center justify-center text-gray-600 hover:bg-gray-100 transition text-lg leading-none"
-                                            >+</button>
-                                        </div>
+
+                                        {/* SIZE PICKER — hanya muncul kalau Almamater */}
+                                        {item.category === "Almamater" && (
+                                            <div className="mt-3 ml-[calc(1rem+2.25rem)] flex items-center gap-2 flex-wrap">
+                                                <span className="text-xs text-gray-400 mr-1">Ukuran:</span>
+                                                {SIZES.map((s) => (
+                                                    <button
+                                                        key={s}
+                                                        onClick={() => changeSize(item.id, s)}
+                                                        className={`w-9 h-9 rounded-lg text-xs font-medium border transition
+                                                            ${item.size === s
+                                                                ? "bg-emerald-500 border-emerald-500 text-white"
+                                                                : "bg-white border-gray-200 text-gray-600 hover:border-emerald-400 hover:text-emerald-500"
+                                                            }`}
+                                                    >
+                                                        {s}
+                                                    </button>
+                                                ))}
+                                                {/* warning kalau item diceklis tapi belum pilih size */}
+                                                {item.checked && !item.size && (
+                                                    <span className="text-xs text-red-400 ml-1">Pilih ukuran</span>
+                                                )}
+                                            </div>
+                                        )}
                                     </div>
                                 ))}
                             </div>
@@ -139,20 +163,17 @@ export default function Keranjang() {
 
                     {/* RIGHT: SUMMARY PANEL */}
                     <div className="w-full lg:w-80 flex-shrink-0 sticky top-6 self-start h-[calc(100vh-3rem)]">
-                        <div className="bg-gray-800 text-white rounded-xl overflow-hidden flex flex-col h-full">
+                        <div className="bg-[#2D5A74] text-white rounded-xl overflow-hidden flex flex-col h-full">
 
                             {/* PICKUP */}
-                            <div className="px-4 pt-4 pb-3 border-b border-gray-700">
+                            <div className="px-4 pt-4 pb-3 border-b border-[#1E3F52]">
                                 <p className="text-xs text-gray-400 mb-2">Waktu Pengambilan</p>
                                 <button
                                     onClick={() => setShowPickupModal(true)}
-                                    className="w-full flex items-center gap-3 bg-gray-700 rounded-xl px-3 py-3 hover:bg-gray-600 transition"
+                                    className="w-full flex items-center gap-3 bg-[#1E3F52] rounded-xl px-3 py-3 hover:bg-[#3A6F8A] transition"
                                 >
-                                    <div className="w-8 h-8 rounded-lg bg-emerald-600/20 flex items-center justify-center flex-shrink-0">
-                                        <svg className="w-4 h-4 text-emerald-400" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" viewBox="0 0 16 16">
-                                            <rect x="2" y="3" width="12" height="11" rx="2" />
-                                            <path d="M5 2v2M11 2v2M2 7h12" />
-                                        </svg>
+                                    <div className="w-8 h-8 rounded-lg bg-[#3A6F8A]/20 flex items-center justify-center flex-shrink-0">
+                                        <CalendarClock className="w-4 h-4 text-[#7DB5CC]" strokeWidth={1.5} />
                                     </div>
                                     <div className="flex-1 text-left min-w-0">
                                         <p className="text-sm font-medium text-white truncate">
@@ -168,11 +189,11 @@ export default function Keranjang() {
 
                             {/* SUMMARY */}
                             <div className="px-4 py-4 space-y-2 flex-1">
-                                <div className="flex justify-between text-sm text-gray-400">
+                                <div className="flex justify-between text-sm text-[#7DB5CC]">
                                     <span>Subtotal ({checkedItems.length} item)</span>
                                     <span className="text-white">{fmt(total)}</span>
                                 </div>
-                                <div className="flex justify-between text-sm text-gray-400">
+                                <div className="flex justify-between text-sm text-[#7DB5CC]">
                                     <span>Diskon</span>
                                     <span className="text-emerald-400">-Rp 0</span>
                                 </div>
@@ -180,12 +201,25 @@ export default function Keranjang() {
                                     <span className="text-white">Total</span>
                                     <span className="text-white">{fmt(total)}</span>
                                 </div>
+
+                                {/* WARNING size belum dipilih */}
+                                {hasUnselectedSize && (
+                                    <div className="mt-3 flex items-start gap-2 bg-red-900/30 border border-red-700/40 rounded-xl px-3 py-2.5">
+                                        <svg className="w-4 h-4 text-red-400 flex-shrink-0 mt-0.5" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" viewBox="0 0 16 16">
+                                            <circle cx="8" cy="8" r="6" />
+                                            <path d="M8 5v3M8 11h.01" />
+                                        </svg>
+                                        <p className="text-xs text-red-400 leading-relaxed">
+                                            Ada almamater yang belum dipilih ukurannya. Pilih ukuran sebelum checkout.
+                                        </p>
+                                    </div>
+                                )}
                             </div>
 
                             {/* CHECKOUT */}
                             <div className="px-4 pb-4 mt-auto">
                                 <button
-                                    disabled={checkedItems.length === 0}
+                                    disabled={checkedItems.length === 0 || hasUnselectedSize}
                                     className="w-full py-3 bg-white text-gray-900 font-medium text-sm rounded-xl disabled:bg-gray-600 disabled:text-gray-400 hover:bg-gray-100 transition active:scale-95"
                                 >
                                     Checkout ({checkedItems.length} item)
