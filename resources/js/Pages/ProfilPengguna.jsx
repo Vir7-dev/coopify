@@ -146,63 +146,54 @@ export default function ProfilPengguna() {
           <h2 className="text-lg font-semibold">Riwayat Pesanan</h2>
         </div>
 
-        <table className="w-full table-fixed text-sm">
-          <thead className="bg-gray-50 text-gray-500 text-left">              <tr>
-            <th className="px-4 py-3">No</th>
-            <th className="px-4 py-3">Nama Produk</th>
-            <th className="px-4 py-3">Kategori</th>
-            <th className="px-4 py-3">Harga</th>
-            <th className="px-4 py-3">Jumlah</th>
-            <th className="px-4 py-3">Tanggal</th>
-            <th className="px-4 py-3">Status</th>
-          </tr>
-          </thead>
+<div className="space-y-4 p-4">
+  {currentItems.map((item) => (
+    <div key={item.id} className="border border-gray-300 rounded-xl p-4 shadow-sm">
 
-          <tbody>
-            {currentItems.map((item, i) => (
-              <tr key={item.id} className="hover:bg-gray-50">
-                <td className="border-b border-gray-200 px-4 py-3 text-gray-400">
-                  {indexOfFirstItem + i + 1}
-                </td>
+      {/* Header */}
+      <div className="flex justify-between items-center mb-2">
+        <h3 className="font-semibold text-sm">{item.kategori}</h3>
+        <span className={`text-xs px-2 py-1 rounded-full ${getStatusStyle(item.status)}`}>
+          {item.status}
+        </span>
+      </div>
 
-                <td className="border-b border-gray-200 px-4 py-3">
-                  {item.nama}
-                </td>
+      {/* Isi */}
+      <div className="flex gap-4">
+        {/* Gambar dummy */}
+        <div className="w-16 h-16 bg-gray-200 rounded"></div>
 
-                <td className="border-b border-gray-200 px-4 py-3">
-                  <div className="flex items-center gap-2">
-                    <FaBox className="text-blue-500" />
-                    {item.kategori}
-                  </div>
-                </td>
+        <div className="flex-1">
+          <h4 className="font-medium text-sm">{item.nama}</h4>
+          <p className="text-xs text-gray-500">
+            {new Date(item.tgl).toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+            })}
+          </p>
 
-                <td className="border-b border-gray-200 px-4 py-3">
-                  Rp {item.harga.toLocaleString("id-ID")}
-                </td>
+          <p className="text-sm font-semibold mt-1">
+            Rp {item.harga.toLocaleString("id-ID")}
+          </p>
 
-                <td className="border-b border-gray-200 px-4 py-3">
-                  {item.jumlah}
-                </td>
-                <td className="border-b border-gray-200 px-4 py-3 text-gray-500">
-                  {new Date(item.tgl).toLocaleDateString(
-                    "id-ID",
-                    {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    },
-                  )}
-                </td>
-                <td className="border-b border-gray-200 px-4 py-3">
-                  <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusStyle(item.status)}`}>
-                    {item.status}
-                  </span>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+          <p className="text-xs text-gray-500">
+            Jumlah: {item.jumlah}
+          </p>
+        </div>
+      </div>
 
+      {/* Footer */}
+      <div className="flex justify-between items-center mt-3">
+        <p className="text-sm font-bold">
+          Total: Rp {(item.harga * item.jumlah).toLocaleString("id-ID")}
+        </p>
+
+
+      </div>
+    </div>
+  ))}
+</div>
         {/* PAGINATION */}
         <div className="flex justify-end items-center gap-3 p-4">
           <button
