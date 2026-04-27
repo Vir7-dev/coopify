@@ -1,290 +1,481 @@
-import Swal from "sweetalert2";
 import React, { useState } from "react";
 import AppLayout from "../Layouts/AppLayout";
-import { FaSearch, FaEdit, FaTrash, FaPlus } from "react-icons/fa";
+import {
+  FaSearch,
+  FaEdit,
+  FaTrash,
+  FaPlus,
+  FaBox,
+  FaTags,
+  FaCalendarAlt,
+  FaLayerGroup,
+  FaTimes,
+  FaCheck,
+  FaChevronLeft,
+  FaChevronRight
+} from "react-icons/fa";
 
-export default function KelolaKategori() {
-  const [kategori, setKategori] = useState([
-    { id: 1, nama: "Makanan", ikon: "/img/makanan.jpg", jumlah: 8, tgl: "01-01-2026" },
-    { id: 2, nama: "Minuman", ikon: "/img/minuman.jpg", jumlah: 5, tgl: "01-01-2026" },
-    { id: 3, nama: "Obat", ikon: "/img/obat.jpg", jumlah: 3, tgl: "01-01-2026" },
-    { id: 4, nama: "Alat Tulis", ikon: "/img/alat_tulis.jpg", jumlah: 5, tgl: "01-01-2026" },
-    { id: 5, nama: "Almamater", ikon: "/img/almamater.jpg", jumlah: 10, tgl: "01-01-2026" },
-  ]);
+export default function KelolaProduk() {
+  const [showModal, setShowModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [selectedDelete, setSelectedDelete] = useState(null);
+  const [form, setForm] = useState({
+    nama: "",
+    stok: "",
+    tgl: "",
+  });
 
-  const [search, setSearch] = useState("");
-  const [showTambah, setShowTambah] = useState(false);
-  const [showEdit, setShowEdit] = useState(false);
-  const [showDelete, setShowDelete] = useState(false);
-  const [selected, setSelected] = useState(null);
-  const [formNama, setFormNama] = useState("");
 
-  const filtered = kategori.filter((item) =>
-    item.nama.toLowerCase().includes(search.toLowerCase())
-  );
+  const [currentPage, setCurrentPage] = useState(1);
+  const itemsPerPage = 10;
 
-  // ✅ TAMBAH + ALERT
-  const handleTambah = () => {
-    if (!formNama.trim()) {
-      Swal.fire({
-        icon: "warning",
-        title: "Oops...",
-        text: "Nama kategori tidak boleh kosong!",
-      });
+  const products = [
+    {
+      id: 1,
+      nama: "Makanan",
+      stok: 10,
+      tgl: "2026-04-20",
+    },
+    {
+      id: 2,
+      nama: "Minuman",
+      stok: 15,
+      tgl: "2026-04-20",
+    },
+    {
+      id: 3,
+      nama: "Obat & Kesehatan",
+      stok: 5,
+      tgl: "2026-04-20",
+    },
+    {
+      id: 3,
+      nama: "Alat tulis",
+      stok: 10,
+      tgl: "2026-04-20",
+    },
+    {
+      id: 3,
+      nama: "Almamater",
+      stok: 10,
+      tgl: "2026-04-20",
+    },
+  ];
+
+  const indexOfLastItem = currentPage * itemsPerPage;
+  const indexOfFirstItem = indexOfLastItem - itemsPerPage;
+  const currentItems = products.slice(indexOfFirstItem, indexOfLastItem);
+  const totalPages = Math.ceil(products.length / itemsPerPage);
+
+  // TAMBAH
+  const handleAdd = () => {
+    setIsEdit(false);
+    setSelectedProduct(null);
+    setForm({
+      nama: "",
+      tgl: "",
+    });
+
+    setShowModal(true);
+  };
+
+  // EDIT
+  const handleEdit = (item) => {
+    setIsEdit(true);
+    setSelectedProduct(item);
+    setForm({
+      nama: item.nama,
+      tgl: item.tgl,
+    });
+
+    setShowModal(true);
+  };
+
+  // HAPUS (klik tombol)
+  const handleDeleteClick = (item) => {
+    setSelectedDelete(item);
+    setShowDeleteModal(true);
+  };
+
+  const handleChange = (e) => {
+    setForm({
+      ...form,
+      [e.target.name]: e.target.value,
+    });
+  };
+
+  const handleSubmit = () => {
+    if (!form.nama || !form.tgl) {
+      alert("Isi semua data!");
       return;
     }
 
-    setKategori([
-      ...kategori,
-      {
-        id: Date.now(),
-        nama: formNama,
-        ikon: "/img/ikon.jpg",
-        jumlah: 0,
-        tgl: "01-01-2026",
-      },
-    ]);
+    if (isEdit) {
+      console.log("Update:", form);
+    } else {
+      console.log("Tambah:", form);
+    }
 
-    setShowTambah(false);
-    setFormNama("");
-
-    Swal.fire({
-      icon: "success",
-      title: "Berhasil!",
-      text: "Kategori berhasil ditambahkan",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    setShowModal(false);
   };
 
-  // ✅ EDIT + ALERT
-  const handleEdit = () => {
-    setKategori(
-      kategori.map((item) =>
-        item.id === selected.id ? { ...item, nama: formNama } : item
-      )
-    );
+  // KONFIRMASI HAPUS
+  const confirmDelete = () => {
+    console.log("Data dihapus:", selectedDelete);
 
-    setShowEdit(false);
-
-    Swal.fire({
-      icon: "success",
-      title: "Berhasil!",
-      text: "Kategori berhasil diupdate",
-      timer: 1500,
-      showConfirmButton: false,
-    });
+    setShowDeleteModal(false);
+    setSelectedDelete(null);
   };
 
-  // ✅ DELETE + KONFIRMASI + ALERT
-  const handleDelete = () => {
-    Swal.fire({
-      title: "Yakin hapus?",
-      text: "Data tidak bisa dikembalikan!",
-      icon: "warning",
-      showCancelButton: true,
-      confirmButtonColor: "#ef4444",
-      cancelButtonColor: "#6b7280",
-      confirmButtonText: "Ya, hapus!",
-      cancelButtonText: "Batal",
-    }).then((result) => {
-      if (result.isConfirmed) {
-        setKategori(kategori.filter((item) => item.id !== selected.id));
-        setShowDelete(false);
-
-        Swal.fire({
-          icon: "success",
-          title: "Terhapus!",
-          text: "Kategori berhasil dihapus",
-          timer: 1500,
-          showConfirmButton: false,
-        });
-      }
-    });
-  };
-  
   return (
     <AppLayout role="admin">
       <div className="w-full">
 
         {/* HEADER */}
-        <div className="flex justify-between items-start mb-6">
+        <div className="flex justify-between items-center mb-6">
           <div>
-            <h1 className="text-xl font-semibold">Kelola Kategori</h1>
-            <p className="text-sm text-gray-500 mt-1">Manajemen kategori produk koperasi</p>
+            <h1 className="text-xl font-semibold">
+              Kelola Kategori Produk
+            </h1>
+            <p className="text-sm text-gray-500">
+              Manajemen kategori produk koperasi
+            </p>
+          </div>
 
-            {/* SEARCH */}
-            <div className="relative mt-3 w-64">
+          <div className="flex items-center gap-3">
+            <button
+              onClick={handleAdd}
+              className="flex items-center gap-2  bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-sm px-4 py-2 rounded-lg"
+            >
+              <FaPlus /> Tambahkan Kategori
+            </button>
+          </div>
+        </div>
+
+        {/* CARD SUMMARY */}
+        <div className="grid grid-cols-4 gap-4 mb-6">
+          <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+            <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
+              <FaLayerGroup />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">
+                Total Kategori
+              </p>
+              <h2 className="text-lg font-semibold">5</h2>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+            <div className="bg-green-100 text-green-600 p-3 rounded-lg">
+              <FaBox />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">
+                Total Produk
+              </p>
+              <h2 className="text-lg font-semibold">55</h2>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+            <div className="bg-orange-100 text-orange-600 p-3 rounded-lg">
+              <FaCalendarAlt />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">
+                Terakhir Update
+              </p>
+              <h2 className="text-sm font-semibold">
+                20 April 2026
+              </h2>
+            </div>
+          </div>
+
+          <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
+            <div className="bg-purple-100 text-purple-600 p-3 rounded-lg">
+              <FaTags />
+            </div>
+            <div>
+              <p className="text-sm text-gray-500">
+                Kategori Terbanyak
+              </p>
+              <h2 className="text-sm font-semibold">Minuman</h2>
+            </div>
+          </div>
+        </div>
+
+        {/* TABLE MODERN */}
+        <div className="bg-white rounded-xl shadow-sm overflow-hidden text-left">
+          <div className="p-4 flex justify-between items-center">
+            <div className="relative w-64">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
               <input
                 type="text"
                 placeholder="Cari kategori..."
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                className="pl-9 pr-4 py-2 w-full rounded-full border text-sm focus:outline-none focus:ring-2"
+                className="pl-9 pr-4 py-2 w-full rounded-lg border border-gray-300 text-sm focus:outline-none"
               />
             </div>
           </div>
 
-          <button
-            onClick={() => { setFormNama(""); setShowTambah(true); }}
-            className="flex items-center gap-2 bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded-lg transition">
-            <FaPlus /> Tambah
-          </button>
-        </div>
 
-        {/* TABLE */}
-        <div className="bg-white rounded-xl shadow overflow-hidden">
           <table className="w-full text-sm">
-            <thead className="bg-gray-100 text-gray-600">
+            <thead className="bg-gray-50 text-gray-500">
               <tr>
-                <th className="px-4 py-3 text-center w-12">No</th>
-                <th className="px-4 py-3 text-left">Nama Kategori</th>
-                <th className="px-4 py-3 text-center">Jumlah Produk</th>
-                <th className="px-4 py-3 text-center">Tanggal Dibuat</th>
-                <th className="px-4 py-3 text-center">Aksi</th>
+                <th className="px-4 py-3">No</th>
+                <th className="px-4 py-3">Nama Kategori</th>
+                <th className="px-4 py-3">Jumlah Produk</th>
+                <th className="px-4 py-3">Tanggal Dibuat</th>
+                <th className="px-4 py-3">Aksi</th>
               </tr>
             </thead>
 
             <tbody>
-              {filtered.map((item, i) => (
-                <tr key={item.id} className="border-t hover:bg-gray-50 transition">
-
-                  <td className="px-4 py-3 text-center align-middle text-gray-500">
-                    {i + 1}
+              {currentItems.map((item, i) => (
+                <tr key={i} className="hover:bg-gray-50 ">
+                  <td className="px-4 py-3 text-gray-400">
+                    {indexOfFirstItem + i + 1}
                   </td>
 
-                  <td className="px-4 py-3 align-middle">
+                  {/* NAMA + SUBTEXT */}
+                  <td className="border-b border-gray-200 px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <img src={item.ikon} className="w-9 h-9 rounded-lg object-cover" />
-                      <span className="font-medium text-gray-700">{item.nama}</span>
+                      <div className="w-9 h-9 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full">
+                        <FaBox size={14} />
+                      </div>
+                      <div>
+                        <p className="font-medium">
+                          {item.nama}
+                        </p>
+                        <p className="text-xs text-gray-400">
+                          Kategori produk{" "}
+                          {item.nama.toLowerCase()}
+                        </p>
+                      </div>
                     </div>
                   </td>
 
-                  <td className="px-4 py-3 text-center align-middle">
-                    <span className="bg-green-100 text-green-600 px-2 py-1 rounded text-xs"> 
-                      {item.jumlah} Produk
+                  {/* BADGE */}
+                  <td className="border-b border-gray-200 px-4 py-3 ">
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs ${item.stok <= 5
+                        ? "bg-red-100 text-orange-600"
+                        : "bg-green-100 text-green-600"
+                        }`}
+                    >
+                      {item.stok} produk
                     </span>
                   </td>
 
-                  <td className="px-4 py-3 text-center align-middle text-gray-600">
-                    {item.tgl}
+                  {/* TANGGAL */}
+                  <td className="border-b border-gray-200 px-4 py-3 text-gray-500">
+                    {new Date(item.tgl).toLocaleDateString(
+                      "id-ID",
+                      {
+                        day: "numeric",
+                        month: "long",
+                        year: "numeric",
+                      },
+                    )}
+                    <p className="text-xs text-gray-400">
+                      10:30 WIB
+                    </p>
                   </td>
 
-                  <td className="px-4 py-3 align-middle">
-                    <div className="flex items-center justify-center gap-2">
+                  {/* AKSI */}
+                  <td className="border-b border-gray-200 px-4 py-3">
+                    <div className="flex gap-2">
                       <button
-                        onClick={() => { setSelected(item); setFormNama(item.nama); setShowEdit(true); }}
-                        className="flex items-center justify-center bg-yellow-400 hover:bg-yellow-500 text-white p-2 rounded-lg transition"
-                        title="Edit"
+                        onClick={() => handleEdit(item)}
+                        className="border border-blue-500 text-blue-500 px-3 py-1 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1"
                       >
-                        <FaEdit size={13} />
+                        <FaEdit size={10} />
                         Edit
                       </button>
+
                       <button
-                        onClick={() => { setSelected(item); setShowDelete(true); }}
-                        className="flex items-center justify-center bg-red-500 hover:bg-red-600 text-white p-2 rounded-lg transition"
-                        title="Hapus"
+                        onClick={() =>
+                          handleDeleteClick(item)
+                        }
+                        className="border border-red-400 text-red-500 px-3 py-1 rounded-md text-xs hover:bg-red-50 flex items-center gap-1"
                       >
-                        <FaTrash size={13} />
-                          Hapus
+                        <FaTrash size={10} />
+                        Hapus
                       </button>
                     </div>
                   </td>
-
                 </tr>
               ))}
-
-              {filtered.length === 0 && (
-                <tr>
-                  <td colSpan={5} className="px-4 py-6 text-center text-gray-400">
-                    Tidak ada data kategori.
-                  </td>
-                </tr>
-              )}
             </tbody>
           </table>
+
+          {/* PAGINATION */}
+          <div className="flex justify-between items-center p-4 text-sm text-gray-500">
+
+            {/* Info kiri */}
+            <p>
+              Menampilkan {currentItems.length} dari {products.length} kategori
+            </p>
+
+            {/* Pagination kanan */}
+            <div className="flex items-center gap-1">
+
+              {/* Previous */}
+              <button
+                onClick={() => setCurrentPage(currentPage - 1)}
+                disabled={currentPage === 1}
+                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition-colors
+        ${currentPage === 1
+                    ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50"
+                    : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
+                  }`}
+              >
+                <FaChevronLeft size={10} />
+                Previous
+              </button>
+
+              {/* Nomor Halaman */}
+              {[...Array(totalPages)].map((_, i) => (
+                <button
+                  key={i}
+                  onClick={() => setCurrentPage(i + 1)}
+                  className={`px-2 py-1 text-xs rounded-md border ${currentPage === i + 1
+                    ? "bg-blue-500 text-white border-blue-500"
+                    : "bg-gray-100 hover:bg-gray-200"
+                    }`}
+                >
+                  {i + 1}
+                </button>
+              ))}
+
+              {/* Next */}
+              <button
+                onClick={() => setCurrentPage(currentPage + 1)}
+                disabled={currentPage === totalPages}
+                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition-colors
+        ${currentPage === totalPages
+                    ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50"
+                    : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
+                  }`}
+              >
+                Next
+                <FaChevronRight size={10} />
+              </button>
+
+            </div>
+          </div>
+
+        {/* MODAL TAMBAH & EDIT */}
+{showModal && (
+  <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+    <div className="bg-white w-[420px] rounded-2xl shadow-lg overflow-hidden">
+
+      {/* HEADER */}
+      <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-5 py-3 flex justify-between items-center">
+        <div className="flex items-center gap-2">
+          <FaLayerGroup size={18} className="text-white mt-0.5" />
+          <h2 className="text-lg font-semibold">
+            {isEdit ? "Edit Kategori" : "Tambah Kategori"}
+          </h2>
         </div>
 
-        {/* MODAL TAMBAH */}
-        {showTambah && (
-          <Modal title="Tambah Kategori" onClose={() => setShowTambah(false)}>
-           <input
-  type="text"
-  required
-  placeholder="Nama kategori"
-  value={formNama}
-  onChange={(e) => {
-    const value = e.target.value.replace(/[^a-zA-Z\s]/g, "");
-    setFormNama(value);
-  }}
-  className="w-full border px-3 py-2 mb-4 rounded-lg text-sm"
-/>
-            <div className="flex justify-end gap-2">
-              <BtnBatal onClick={() => setShowTambah(false)} />
-              <button onClick={handleTambah} className="bg-green-500 hover:bg-green-600 text-white text-sm px-4 py-2 rounded-lg transition">
-                Simpan
-              </button>
-            </div>
-          </Modal>
-        )}
+        <button onClick={() => setShowModal(false)}>
+          <FaTimes />
+        </button>
+      </div>
 
-        {/* MODAL EDIT */}
-        {showEdit && (
-          <Modal title="Edit Kategori" onClose={() => setShowEdit(false)}>
-            <input
-              value={formNama}
-              onChange={(e) => setFormNama(e.target.value)}
-              className="w-full border px-3 py-2 mb-4 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-300"
-            />
-            <div className="flex justify-end gap-2">
-              <BtnBatal onClick={() => setShowEdit(false)} />
-              <button onClick={handleEdit} className="bg-blue-500 hover:bg-blue-600 text-white text-sm px-4 py-2 rounded-lg transition">
-                Update
-              </button>
-            </div>
-          </Modal>
-        )}
+      {/* BODY */}
+      <div className="p-5 space-y-4">
 
-        {/* MODAL DELETE */}
-        {showDelete && (
-          <Modal title="Hapus Kategori" onClose={() => setShowDelete(false)}>
-            <p className="text-sm text-gray-600 mb-4">
-              Yakin ingin menghapus kategori <span className="font-semibold text-gray-800">{selected?.nama}</span>?
-            </p>
-            <div className="flex justify-end gap-2">
-              <BtnBatal onClick={() => setShowDelete(false)} />
-              <button onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white text-sm px-4 py-2 rounded-lg transition">
-                Hapus
-              </button>
-            </div>
-          </Modal>
-        )}
+        {/* NAMA */}
+        <div>
+          <label className="text-xs text-gray-500">
+            Nama Kategori
+          </label>
+          <input
+            type="text"
+            name="nama"
+            placeholder="Contoh: Makanan"
+            value={form.nama}
+            onChange={handleChange}
+            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+        </div>
 
+        {/* TANGGAL */}
+        <div>
+          <label className="text-xs text-gray-500">
+            Tanggal Dibuat
+          </label>
+          <input
+            type="date"
+            name="tgl"
+            value={form.tgl}
+            onChange={handleChange}
+            className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+          />
+        </div>
+
+        {/* BUTTON */}
+        <div className="flex gap-3 pt-3">
+          <button
+            onClick={handleSubmit}
+            className="flex-1 bg-[#1D63D3] hover:bg-blue-700 transition text-white py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-bold active:scale-95"
+          >
+            {isEdit ? "Update" : "Simpan"}
+          </button>
+
+          <button
+            onClick={() => setShowModal(false)}
+            className="flex-1 bg-[#0099D5] hover:bg-[#0088C0] transition text-white py-2 rounded-lg flex items-center justify-center gap-2 text-sm font-bold active:scale-95"
+          >
+            Batal
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+)}
+              {/* MODAL HAPUS */}
+              {showDeleteModal && (
+                <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
+                  <div className="bg-white w-[350px] rounded-xl shadow-lg p-5">
+
+                    <h2 className="text-lg font-semibold mb-2">
+                      Konfirmasi Hapus
+                    </h2>
+
+                    <p className="text-sm text-gray-500 mb-4">
+                      Yakin mau hapus kategori{" "}
+                      <span className="font-semibold text-black">
+                        {selectedDelete?.nama}
+                      </span>
+                      ?
+                    </p>
+
+                    <div className="flex gap-3">
+                      <button
+                        onClick={confirmDelete}
+                        className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm"
+                      >
+                        Hapus
+                      </button>
+
+                      <button
+                        onClick={() => setShowDeleteModal(false)}
+                        className="flex-1 bg-gray-300 hover:bg-gray-400 text-black py-2 rounded-lg text-sm"
+                      >
+                        Batal
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
       </div>
     </AppLayout>
-  );
-}
-
-// ── Komponen modal reusable ──────────────────────────────
-function Modal({ title, children, onClose }) {
-  return (
-    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-      <div className="bg-white p-6 rounded-xl w-80 shadow-lg">
-        <h2 className="font-semibold text-base mb-4">{title}</h2>
-        {children}
-      </div>
-    </div>
-  );
-}
-
-function BtnBatal({ onClick }) {
-  return (
-    <button
-      onClick={onClick}
-      className="text-sm px-4 py-2 rounded-lg border hover:bg-gray-100 transition text-gray-600"
-    >
-      Batal
-    </button>
   );
 }
