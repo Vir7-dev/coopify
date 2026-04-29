@@ -15,7 +15,7 @@ import {
   FaChevronRight
 } from "react-icons/fa";
 
-export default function KelolaProduk() {
+export default function KelolaKategori() {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
