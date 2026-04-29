@@ -134,7 +134,7 @@ export default function KelolaProduk() {
       <div className="w-full">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 mb-6">
           <div>
             <h1 className="text-xl font-semibold">
               Kelola Kategori Produk
@@ -147,7 +147,7 @@ export default function KelolaProduk() {
           <div className="flex items-center gap-3">
             <button
               onClick={handleAdd}
-              className="flex items-center gap-2  bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-sm px-4 py-2 rounded-lg"
+              className="flex items-center gap-2  bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-sm px-4 py-2 rounded-lg w-full sm:w-auto justify-center"
             >
               <FaPlus /> Tambahkan Kategori
             </button>
@@ -155,7 +155,7 @@ export default function KelolaProduk() {
         </div>
 
         {/* CARD SUMMARY */}
-        <div className="grid grid-cols-4 gap-4 mb-6">
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
           <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3">
             <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
               <FaLayerGroup />
@@ -210,7 +210,7 @@ export default function KelolaProduk() {
         {/* TABLE MODERN */}
         <div className="bg-white rounded-xl shadow-sm overflow-hidden text-left">
           <div className="p-4 flex justify-between items-center">
-            <div className="relative w-64">
+            <div className="relative w-full sm:w-64">
               <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
               <input
                 type="text"
@@ -221,7 +221,8 @@ export default function KelolaProduk() {
           </div>
 
 
-          <table className="w-full text-sm">
+         <div className="overflow-x-auto">
+  <table className="w-full text-sm min-w-[520px]">
             <thead className="bg-gray-50 text-gray-500">
               <tr>
                 <th className="px-4 py-3">No</th>
@@ -310,9 +311,10 @@ export default function KelolaProduk() {
               ))}
             </tbody>
           </table>
+          </div>
 
           {/* PAGINATION */}
-          <div className="flex justify-between items-center p-4 text-sm text-gray-500">
+          <div className="flex flex-col sm:flex-row justify-between items-center gap-3 p-4 text-sm text-gray-500">
 
             {/* Info kiri */}
             <p>
@@ -370,7 +372,7 @@ export default function KelolaProduk() {
         {/* MODAL TAMBAH & EDIT */}
 {showModal && (
   <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-    <div className="bg-white w-[420px] rounded-2xl shadow-lg overflow-hidden">
+   <div className="bg-white w-full max-w-[420px] mx-4 rounded-2xl shadow-lg overflow-hidden">
 
       {/* HEADER */}
       <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-5 py-3 flex justify-between items-center">
