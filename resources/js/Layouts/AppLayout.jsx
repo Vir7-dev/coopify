@@ -1,5 +1,6 @@
 import React from "react";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 
 export default function AppLayout({ children, role, showNavbar = true, showFooter = true }) {
     return (
