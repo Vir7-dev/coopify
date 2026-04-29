@@ -1,15 +1,16 @@
 import React from "react";
 import Navbar from "../components/Navbar";
 
-export default function AppLayout({ children, role, showNavbar = true }) {
+export default function AppLayout({ children, role, showNavbar = true, showFooter = true }) {
     return (
-        <div className="w-full min-h-screen bg-gray-100">
+        <div className="w-full min-h-screen bg-gray-100 flex flex-col">
 
             {showNavbar && <Navbar role={role} />}
 
             <div className="w-full px-6 py-6 pt-20">
                 {children}
             </div>
+              {showFooter && <Footer role={role} />}
         </div>
     );
 }
