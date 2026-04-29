@@ -19,13 +19,13 @@ export default function ProfilPengguna() {
 
   // DATA
   const data = [
-    { id: 1, nama: "Nabati", kategori: "Makanan", harga: 15000, jumlah: 10, tgl: "2026-04-20", status: "Selesai" },
-    { id: 2, nama: "Teh kotak", kategori: "Minuman", harga: 8000, jumlah: 15, tgl: "2026-04-20", status: "Ambil Pesanan" },
-    { id: 3, nama: "Paramex", kategori: "Obat & Kesehatan", harga: 25000, jumlah: 5, tgl: "2026-04-20", status: "Selesai" },
-    { id: 4, nama: "Notebook", kategori: "Buku & Alat tulis", harga: 5000, jumlah: 10, tgl: "2026-04-20", status: "Selesai" },
-    { id: 5, nama: "Almamater", kategori: "Almamater", harga: 120000, jumlah: 10, tgl: "2026-04-20", status: "Ambil Pesanan" },
-    { id: 6, nama: "Roti O", kategori: "Makanan", harga: 7000, jumlah: 15, tgl: "2026-04-20", status: "Selesai" },
-    { id: 7, nama: "Air Mineral", kategori: "Minuman", harga: 4000, jumlah: 30, tgl: "2026-04-20", status: "Selesai" },
+    { id: 1, nama: "Nabati", kategori: "Makanan", harga: 15000, jumlah: 10, tgl: "2026-04-20", status: "Selesai",gambar: "img/makanan1.jpg" },
+    { id: 2, nama: "Teh kotak", kategori: "Minuman", harga: 8000, jumlah: 15, tgl: "2026-04-20", status: "Ambil Pesanan",gambar: "img/makanan1.jpg" },
+    { id: 3, nama: "Paramex", kategori: "Obat & Kesehatan", harga: 25000, jumlah: 5, tgl: "2026-04-20", status: "Selesai",gambar: "img/makanan1.jpg" },
+    { id: 4, nama: "Notebook", kategori: "Buku & Alat tulis", harga: 5000, jumlah: 10, tgl: "2026-04-20", status: "Selesai",gambar: "img/makanan1.jpg" },
+    { id: 5, nama: "Almamater", kategori: "Almamater", harga: 120000, jumlah: 10, tgl: "2026-04-20", status: "Ambil Pesanan",gambar: "img/makanan1.jpg" },
+    { id: 6, nama: "Roti O", kategori: "Makanan", harga: 7000, jumlah: 15, tgl: "2026-04-20", status: "Selesai",gambar: "img/makanan1.jpg" },
+    { id: 7, nama: "Air Mineral", kategori: "Minuman", harga: 4000, jumlah: 30, tgl: "2026-04-20", status: "Selesai",gambar: "img/makanan1.jpg" },
   ];
 
   //total pesanan
@@ -100,7 +100,7 @@ export default function ProfilPengguna() {
           </div>
 
           <button
-            className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-md"
+            className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
             onClick={() => navigate("/edit-profil")}
           >
             Edit Profil
@@ -161,7 +161,14 @@ export default function ProfilPengguna() {
       {/* Isi */}
       <div className="flex gap-4">
         {/* Gambar dummy */}
-        <div className="w-16 h-16 bg-gray-200 rounded"></div>
+        <div className="w-16 h-16 bg-gray-200 rounded">
+          <img
+                                src={item.gambar}
+                                alt={item.nama}
+                                className="h-28 object-contain hover:scale-110 transition"
+                            />
+
+                            </div>
 
         <div className="flex-1">
           <h4 className="font-medium text-sm">{item.nama}</h4>
