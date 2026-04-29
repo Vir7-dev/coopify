@@ -75,12 +75,9 @@ export default function ProfilAdmin() {
 
                 {/* HEADER */}
                 <div className="bg-[#3F7EA2] text-white p-6 mx-6 mt-6 rounded-t-lg relative">
-                    <span className="absolute top-4 left-4 bg-green-500 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1">
-                        <FaCheckCircle size={9} /> Profil Saya
-                    </span>
                     <div className="mt-4">
                         <h1 className="flex items-center gap-2 text-xl font-semibold">
-                        Halo, Admin !  
+                            Halo, Admin !
                         </h1>
                         <p className="text-sm">Kelola informasi akun administrator koperasi kampus</p>
                     </div>
@@ -108,8 +105,9 @@ export default function ProfilAdmin() {
                         </div>
                     </div>
 
+
                     <button
-                        className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-1"
+                        className="bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-1"
                         onClick={() => navigate("/edit-profil-admin")}
                     >
                         <FaPencilAlt size={10} className="mt-0.5" /> Edit Profil
@@ -117,15 +115,15 @@ export default function ProfilAdmin() {
                 </div>
 
                 {/* STATISTIK */}
-                <div className="mx-6 grid grid-cols-4 gap-4 mt-6 mb-6">
+                <div className="mx-6 grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mb-6">
                     {stats.map((s, i) => (
                         <div key={i} className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 h-[80px]">
                             <div className={`${s.bg} ${s.text} p-3 rounded-xl text-lg`}>
                                 {s.icon}
                             </div>
-                            <div>
+                            <div className="min-w-0">
                                 <h2 className="text-xl font-bold">{s.value}</h2>
-                                <p className="text-xs text-gray-500">{s.label}</p>
+                                <p className="text-xs text-gray-500 truncate">{s.label}</p>
                             </div>
                         </div>
                     ))}
@@ -145,9 +143,9 @@ export default function ProfilAdmin() {
                                     <div className={`${item.bg} ${item.text} p-2.5 rounded-lg text-base`}>
                                         {item.icon}
                                     </div>
-                                    <div>
-                                        <p className="font-semibold text-sm">{item.label}</p>
-                                        <p className="text-xs text-gray-400">{item.sub}</p>
+                                    <div className="min-w-0">
+                                        <p className="font-semibold text-sm truncate">{item.label}</p>
+                                        <p className="text-xs text-gray-400 truncate">{item.sub}</p>
                                     </div>
                                 </div>
                                 <FaChevronRight className="text-gray-400 text-sm" />
