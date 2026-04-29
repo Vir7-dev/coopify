@@ -1,5 +1,14 @@
 import React from "react";
 import AppLayout from "../Layouts/AppLayout";
+import { Link } from "react-router-dom";
+
+import {
+    FaHamburger,
+    FaCoffee,
+    FaPencilAlt,
+    FaPills,
+    FaUserGraduate
+} from "react-icons/fa";
 
 function Dashboard() {
 
@@ -51,8 +60,16 @@ function Dashboard() {
         { title: "Almamater", data: almamater},
     ];
 
+    const iconMap = {
+        "Makanan": <FaHamburger />,
+        "Minuman": <FaCoffee />,
+        "Alat Tulis": <FaPencilAlt />,
+        "Obat": <FaPills />,
+        "Almamater": <FaUserGraduate />
+    };
+
     return (
-        <AppLayout>
+        <AppLayout role="pengguna">
 
             <div className="bg-gray-100 min-h-screen pb-24">
 
@@ -64,29 +81,40 @@ function Dashboard() {
                     />
                 </div>
 
+                {/* BANNER */}
                 <div className="px-10 mt-14">
                     <div className="rounded-2xl overflow-hidden shadow-md">
-
                         <img
                             src="/img/banner.pengguna.png"
                             alt="banner"
-                            className="w-full h-[350px] object-cover object-center"
+                            className="w-full h-[350px] object-cover object-center object-contain"
                         />
-
                     </div>
                 </div>
-                <div className="px-10 mt-20 flex justify-center gap-12">
-                    {categories.map((cat, index) => (
-                        <div key={index} className="flex flex-col items-center">
-                            <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-xl">
-                                🛒
-                            </div>
 
-                            <p className="mt-3 text-sm font-medium">
-                                {cat.title}
-                            </p>
-                        </div>
-                    ))}
+                <div className="px-10 mt-20 flex justify-center gap-12">
+
+                    {categories.map((cat, index) => {
+
+                        const slug = cat.title.toLowerCase().replace(" ", "-");
+
+                        return (
+                            <Link
+                                key={index}
+                                to={`/produk/${slug}`}
+                                className="flex flex-col items-center"
+                            >
+                                <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-2xl text-blue-700 hover:bg-blue-500 hover:text-white transition">
+                                    {iconMap[cat.title]}
+                                </div>
+
+                                <p className="mt-3 text-sm font-medium">
+                                    {cat.title}
+                                </p>
+                            </Link>
+                        );
+                    })}
+
                 </div>
 
                 {categories.map((cat, index) => (
@@ -94,7 +122,7 @@ function Dashboard() {
 
                         <div className="bg-gray-200 rounded-xl p-6">
 
-                            <div className="bg-gradient-to-r from--400 to-blue-500 text-black font-semibold px-4 py-2 rounded-lg mb-6">
+                            <div className="bg-gradient-to-r from-blue-400 to-blue-500 text-black font-semibold px-4 py-2 rounded-lg mb-6">
                                 {cat.title}
                             </div>
 
@@ -105,7 +133,6 @@ function Dashboard() {
                                         key={i}
                                         className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition"
                                     >
-
                                         <div className="bg-gray-200 h-24 mb-3 rounded"></div>
 
                                         <h3 className="text-sm font-semibold">
@@ -129,13 +156,6 @@ function Dashboard() {
 
                     </div>
                 ))}
-
-                <div className="bg-gray-800 text-white mt-24 p-6 text-center">
-                    <p className="font-semibold">Coopify Koperasi Kampus Digital</p>
-                    <p className="text-sm text-gray-400">
-                        © 2026 Coopify
-                    </p>
-                </div>
 
             </div>
 

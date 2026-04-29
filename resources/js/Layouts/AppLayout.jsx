@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "../Components/Navbar";
+import Navbar from "../components/Navbar";
 
 export default function AppLayout({ children, role, showNavbar = true }) {
     return (
@@ -7,7 +7,7 @@ export default function AppLayout({ children, role, showNavbar = true }) {
 
             {showNavbar && <Navbar role={role} />}
 
-            <div className="w-full px-6 py-6">
+            <div className="w-full px-6 py-6 pt-20">
                 {children}
             </div>
         </div>

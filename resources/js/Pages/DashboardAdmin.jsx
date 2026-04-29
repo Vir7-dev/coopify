@@ -50,7 +50,7 @@ const DashboardAdmin = () => {
   };
 
   return (
-    <AppLayout>
+    <AppLayout role="admin">
 
       <div className="bg-gray-100 min-h-screen pb-24">
 
