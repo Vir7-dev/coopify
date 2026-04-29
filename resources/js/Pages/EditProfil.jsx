@@ -30,19 +30,19 @@ export default function EditProfil() {
     }
   };
 
-const [showConfirm, setShowConfirm] = useState(false);
-const [showSuccess, setShowSuccess] = useState(false);
+  const [showConfirm, setShowConfirm] = useState(false);
+  const [showSuccess, setShowSuccess] = useState(false);
 
-const handleSubmit = (e) => {
-  e.preventDefault();
-  setShowConfirm(true);
-};
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    setShowConfirm(true);
+  };
 
-const handleConfirmSave = () => {
-  setShowConfirm(false);
-  console.log(form);
-  setShowSuccess(true);
-};
+  const handleConfirmSave = () => {
+    setShowConfirm(false);
+    console.log(form);
+    setShowSuccess(true);
+  };
 
   return (
     <AppLayout role="pengguna">
@@ -141,14 +141,14 @@ const handleConfirmSave = () => {
               <button
                 type="button"
                 onClick={() => navigate("/profil-pengguna")}
-                className="px-3 py-2 bg-gray-300 rounded text-sm"
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
               >
                 Batal
               </button>
 
               <button
                 type="submit"
-                className="px-3 py-2 bg-green-500 text-white rounded hover:bg-green-600 text-sm"
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
               >
                 Simpan
               </button>
@@ -156,55 +156,55 @@ const handleConfirmSave = () => {
 
           </form>
         </div>
-        </div>
-        {showConfirm && (
-<div className="fixed inset-0 bg-black/10 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow w-80 text-center">
-      <h2 className="text-lg font-semibold mb-3">Konfirmasi</h2>
-      <p className="text-sm mb-5">
-        Apakah anda yakin ingin mengubah data ini?
-      </p>
-
-      <div className="flex justify-center gap-3">
-        <button
-          onClick={() => setShowConfirm(false)}
-          className="px-3 py-2 bg-gray-300 rounded text-sm"
-        >
-          Batal
-        </button>
-
-        <button
-          onClick={handleConfirmSave}
-          className="px-3 py-2 bg-green-500 text-white rounded text-sm"
-        >
-          Simpan
-        </button>
       </div>
-    </div>
-  </div>
-)}
-      {showSuccess && (
-<div className="fixed inset-0 bg-black/10 flex items-center justify-center">
-      <div className="bg-white p-6 rounded-lg shadow w-80 text-center">
-      <h2 className="text-lg font-semibold mb-3 text-green-600">
-        Berhasil
-      </h2>
-      <p className="text-sm mb-5">
-        Data berhasil disimpan
-      </p>
+      {showConfirm && (
+        <div className="fixed inset-0 bg-black/10 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow w-80 text-center">
+            <h2 className="text-lg font-semibold mb-3">Konfirmasi</h2>
+            <p className="text-sm mb-5">
+              Apakah anda yakin ingin mengubah data ini?
+            </p>
 
-      <button
-        onClick={() => {
-          setShowSuccess(false);
-          navigate("/profil-pengguna");
-        }}
-        className="px-3 py-2 bg-green-500 text-white rounded text-sm"
-      >
-        OK
-      </button>
-    </div>
-  </div>
-)}
+            <div className="flex justify-center gap-3">
+              <button
+                onClick={() => setShowConfirm(false)}
+                className="px-4 py-2 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium hover:bg-gray-300 transition"
+              >
+                Batal
+              </button>
+
+              <button
+                onClick={handleConfirmSave}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
+              >
+                Simpan
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+      {showSuccess && (
+        <div className="fixed inset-0 bg-black/10 flex items-center justify-center">
+          <div className="bg-white p-6 rounded-lg shadow w-80 text-center">
+            <h2 className="text-lg font-semibold mb-3 text-blue-600">
+              Berhasil
+            </h2>
+            <p className="text-sm mb-5">
+              Data berhasil disimpan
+            </p>
+
+            <button
+              onClick={() => {
+                setShowSuccess(false);
+                navigate("/profil-pengguna");
+              }}
+              className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
+            >
+              OK
+            </button>
+          </div>
+        </div>
+      )}
     </AppLayout>
   );
 }
