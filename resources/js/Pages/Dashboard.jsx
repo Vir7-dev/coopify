@@ -1,164 +1,215 @@
 import React from "react";
 import AppLayout from "../Layouts/AppLayout";
 import { Link } from "react-router-dom";
-
 import {
     FaHamburger,
     FaCoffee,
     FaPencilAlt,
     FaPills,
-    FaUserGraduate
+    FaUserGraduate,
+    FaShoppingCart,
+    FaHeart,
 } from "react-icons/fa";
 
 function Dashboard() {
-
-    const products = [
-        { name: "Roti", price: "5000" },
-        { name: "Susu", price: "8000" },
-        { name: "Pulpen", price: "3000" },
-        { name: "Buku", price: "10000" },
-        { name: "Snack", price: "7000" },
-        { name: "Pensil", price: "2000" },
-    ];
-
-    const drinks = [
-        { name: "Teh Botol", price: "5000" },
-        { name: "Air Mineral", price: "3000" },
-        { name: "Jus Jeruk", price: "8000" },
-        { name: "Kopi", price: "7000" },
-        { name: "Susu Coklat", price: "9000" },
-        { name: "NutriBoost", price: "6000" },
-    ];
-
-    const stationery = [
-        { name: "Pensil", price: "5000" },
-        { name: "Pena", price: "3000" },
-        { name: "Penggaris", price: "8000" },
-        { name: "Penghapus", price: "7000" },
-        { name: "Busur", price: "9000" },
-        { name: "Kertas HVS", price: "2000" },
-    ];
-
-    const drug = [
-        { name: "Panadol", price: "5000" },
-        { name: "Amoxicillin", price: "3000" },
-        { name: "Bromhexine", price: "8000" },
-        { name: "Captopril", price: "7000" },
-        { name: "Promag", price: "9000" },
-        { name: "Inhaler", price: "2000" },
-    ];
-
-    const almamater = [
-        { name: "Politeknik", price: "200.000"},
-    ];
-
     const categories = [
-        { title: "Makanan", data: products },
-        { title: "Minuman", data: drinks },
-        { title: "Alat Tulis", data: stationery },
-        { title: "Obat", data: drug },
-        { title: "Almamater", data: almamater},
+        { title: "Makanan", icon: <FaHamburger /> },
+        { title: "Minuman", icon: <FaCoffee /> },
+        { title: "Alat Tulis", icon: <FaPencilAlt /> },
+        { title: "Obat", icon: <FaPills /> },
+        { title: "Almamater", icon: <FaUserGraduate /> },
     ];
 
-    const iconMap = {
-        "Makanan": <FaHamburger />,
-        "Minuman": <FaCoffee />,
-        "Alat Tulis": <FaPencilAlt />,
-        "Obat": <FaPills />,
-        "Almamater": <FaUserGraduate />
-    };
+    const bestSeller = [
+        {
+            id: 1,
+            name: "Pocky",
+            price: 5000,
+            stok: 10,
+            terjual: 120,
+            gambar: "/img/pocky.jpg",
+        },
+        {
+            id: 2,
+            name: "Boncabe",
+            price: 7000,
+            stok: 5,
+            terjual: 80,
+            gambar: "/img/boncabe.jpg",
+        },
+        {
+            id: 3,
+            name: "Chitato",
+            price: 8000,
+            stok: 8,
+            terjual: 60,
+            gambar: "/img/chitato.jpg",
+        },
+        {
+            id: 4,
+            name: "Teh Botol",
+            price: 5000,
+            stok: 20,
+            terjual: 200,
+            gambar: "/img/teh_botol.jpg",
+        },
+        {
+            id: 5,
+            name: "Pocari",
+            price: 8000,
+            stok: 15,
+            terjual: 150,
+            gambar: "/img/pocari.jpg",
+        },
+        {
+            id: 6,
+            name: "Pocari",
+            price: 8000,
+            stok: 15,
+            terjual: 150,
+            gambar: "/img/pocari.jpg",
+        },
+    ];
 
     return (
         <AppLayout role="pengguna">
+            <div className="bg-gray-100 min-h-screen pb-20 space-y-12">
+                {/* 🔥 HERO BACKGROUND SECTION */}
+                <div
+                    className="w-full h-[400px] md:h-[500px] lg:h-[600px] flex items-center"
+                    style={{
+                        backgroundImage: "url('/img/bg2.png')",
+                        backgroundSize: "cover",
+                        backgroundPosition: "center",
+                        backgroundRepeat: "no-repeat",
+                    }}
+                >
+                    {/* overlay */}
+                    <div className="w-full h-full bg-black/20 flex items-center">
+                        <div className="px-6 md:px-12 lg:px-16 text-white max-w-xl">
+                            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-snug">
+                                Belanja Mudah <br />
+                                Kebutuhan Harian
+                            </h1>
 
-            <div className="bg-gray-100 min-h-screen pb-24">
+                            <p className="text-xs md:text-sm opacity-90 mt-3 mb-5">
+                                Snack, minuman, alat tulis dan lainnya tersedia
+                            </p>
 
-                <div className="px-10 mt-4 flex justify-end">
-                    <input
-                        type="text"
-                        placeholder="Cari produk..."
-                        className="border rounded-lg px-4 py-2 w-[450px]"
-                    />
-                </div>
-
-                {/* BANNER */}
-                <div className="px-10 mt-14">
-                    <div className="rounded-2xl overflow-hidden shadow-md">
-                        <img
-                            src="/img/banner.pengguna.png"
-                            alt="banner"
-                            className="w-full h-[350px] object-cover object-center object-contain"
-                        />
+                            <button className="bg-white text-[#1766D3] px-4 md:px-5 py-2 rounded-xl text-xs md:text-sm font-semibold hover:scale-95 transition">
+                                Tentang Aplikasi
+                            </button>
+                        </div>
                     </div>
                 </div>
+                {/* 🔥 KATEGORI MODERN */}
+                <div className="px-6 md:px-10 mt-10">
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
+                        Kategori Produk
+                    </h2>
 
-                <div className="px-10 mt-20 flex justify-center gap-12">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
+                        {categories.map((cat, i) => {
+                            const slug = cat.title
+                                .toLowerCase()
+                                .replace(" ", "-");
 
-                    {categories.map((cat, index) => {
+                            return (
+                                <Link
+                                    key={i}
+                                    to={`/produk/${slug}`}
+                                    className="group relative bg-white rounded-2xl p-5 flex flex-col items-center justify-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
+                                >
+                                    {/* BACKGROUND HOVER EFFECT */}
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-[#1766D3]/10 to-[#1766D3]/0 opacity-0 group-hover:opacity-100 transition"></div>
 
-                        const slug = cat.title.toLowerCase().replace(" ", "-");
+                                    {/* ICON */}
+                                    <div className="relative z-10 text-2xl text-[#1766D3] bg-blue-50 p-4 rounded-full group-hover:scale-110 transition">
+                                        {cat.icon}
+                                    </div>
 
-                        return (
-                            <Link
-                                key={index}
-                                to={`/produk/${slug}`}
-                                className="flex flex-col items-center"
+                                    {/* TEXT */}
+                                    <p className="relative z-10 mt-3 text-sm md:text-base font-medium text-gray-700 group-hover:text-[#1766D3] transition">
+                                        {cat.title}
+                                    </p>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </div>
+                {/* 🔥 PRODUK TERLARIS */}
+                <div className="px-10">
+                    <div className="flex justify-between items-center mb-6">
+                        <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
+                            Produk Terlaris
+                        </h2>
+                        x
+                    </div>
+
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                        {bestSeller.map((item) => (
+                            <div
+                                key={item.id}
+                                className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                             >
-                                <div className="w-16 h-16 bg-blue-200 rounded-full flex items-center justify-center text-2xl text-blue-700 hover:bg-blue-500 hover:text-white transition">
-                                    {iconMap[cat.title]}
+                                {/* IMAGE */}
+                                <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
+                                    <img
+                                        src={item.gambar}
+                                        alt={item.name}
+                                        className="h-28 object-contain hover:scale-110 transition"
+                                    />
+
+                                    <FaHeart className="absolute top-2 left-2 text-gray-300 hover:text-red-500 cursor-pointer" />
                                 </div>
 
-                                <p className="mt-3 text-sm font-medium">
-                                    {cat.title}
-                                </p>
-                            </Link>
-                        );
-                    })}
+                                {/* INFO */}
+                                <div className="mt-3">
+                                    <h3 className="text-sm font-semibold text-gray-800">
+                                        {item.name}
+                                    </h3>
 
-                </div>
+                                    <p className="text-xs text-gray-500 mt-1">
+                                        {item.terjual} terjual
+                                    </p>
 
-                {categories.map((cat, index) => (
-                    <div className="px-10 mt-20" key={index}>
+                                    <p className="text-base font-bold text-[#1297C9] mt-1">
+                                        Rp {item.price.toLocaleString("id-ID")}
+                                    </p>
 
-                        <div className="bg-gray-200 rounded-xl p-6">
-
-                            <div className="bg-gradient-to-r from-blue-400 to-blue-500 text-black font-semibold px-4 py-2 rounded-lg mb-6">
-                                {cat.title}
-                            </div>
-
-                            <div className="grid grid-cols-6 gap-6">
-
-                                {cat.data.map((item, i) => (
-                                    <div
-                                        key={i}
-                                        className="bg-white p-4 rounded-lg shadow hover:shadow-lg transition"
+                                    {/* STOK */}
+                                    <p
+                                        className={`text-xs font-semibold mt-2 ${
+                                            item.stok === 0
+                                                ? "text-gray-400"
+                                                : item.stok < 5
+                                                  ? "text-red-500"
+                                                  : "text-green-600"
+                                        }`}
                                     >
-                                        <div className="bg-gray-200 h-24 mb-3 rounded"></div>
+                                        {item.stok === 0
+                                            ? "Stok: Habis"
+                                            : `Stok: ${item.stok} tersedia`}
+                                    </p>
+                                </div>
 
-                                        <h3 className="text-sm font-semibold">
-                                            {item.name}
-                                        </h3>
-
-                                        <p className="text-green-600 text-sm">
-                                            Rp {item.price}
-                                        </p>
-
-                                        <button className="bg-green-500 text-white text-xs px-3 py-1 rounded mt-3 w-full hover:bg-green-600">
-                                            🛒 Tambah
-                                        </button>
-
-                                    </div>
-                                ))}
-
+                                {/* BUTTON */}
+                                <button
+                                    disabled={item.stok === 0}
+                                    className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition ${
+                                        item.stok === 0
+                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                            : "bg-[#1766D3] hover:bg-[#3D8FFF] active:scale-95 text-white"
+                                    }`}
+                                >
+                                    <FaShoppingCart size={12} />
+                                    {item.stok === 0 ? "Habis" : "Tambah"}
+                                </button>
                             </div>
-
-                        </div>
-
+                        ))}
                     </div>
-                ))}
-
+                </div>
             </div>
-
         </AppLayout>
     );
 }
