@@ -74,7 +74,7 @@ function Dashboard() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-gray-100 min-h-screen pb-20 space-y-12">
-                {/* 🔥 HERO BACKGROUND SECTION */}
+                {/* HERO BACKGROUND SECTION */}
                 <div
                     className="w-full h-[400px] md:h-[500px] lg:h-[600px] flex items-center"
                     style={{

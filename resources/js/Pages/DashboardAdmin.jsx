@@ -22,14 +22,18 @@ const DashboardAdmin = () => {
   const [month, setMonth] = useState("Januari");
   const [year, setYear] = useState("2026");
 
+  // 🔥 TAMBAHAN
+  const [openMonth, setOpenMonth] = useState(false);
+  const [openYear, setOpenYear] = useState(false);
+
   const data = {
     labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
     datasets: [
       {
         label: "Penjualan",
         data: [38, 29, 50, 17, 27, 5],
-        backgroundColor: "#2563eb",
-        barThickness: 20
+        backgroundColor: "#1766D3",
+        borderRadius: 8
       },
     ],
   };
@@ -51,138 +55,175 @@ const DashboardAdmin = () => {
 
   return (
     <AppLayout role="admin">
+      <div className="bg-gray-100 min-h-screen pb-20 space-y-12">
 
-      <div className="bg-gray-100 min-h-screen pb-24">
+        {/* HEADER */}
+        <div className="px-6 md:px-10 pt-6 flex justify-between items-center">
+          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+            Dashboard Admin
+          </h1>
 
-        {/* SEARCH */}
-        <div className="px-10 mt-4 flex justify-end">
           <input
             type="text"
             placeholder="Cari produk..."
-            className="border rounded-lg px-4 py-2 w-[450px]"
+            className="border border-gray-200 rounded-xl px-4 py-2 w-[250px] md:w-[320px] focus:ring-2 focus:ring-blue-400"
           />
         </div>
 
         {/* BANNER */}
-        <div className="px-10 mt-14">
-                    <div className="rounded-2xl overflow-hidden shadow-md">
-
-                        <img
-                            src="/img/banner.admin.png"
-                            alt="banner"
-                            className="w-full h-[350px] object-cover object-center"
-                        />
-
-                    </div>
-                </div>
-
-        {/* STATISTIK */}
-        <div className="px-10 grid grid-cols-1 md:grid-cols-4 gap-4 mt-6">
-
-          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
-            <div className="text-2xl">👜</div>
-            <div>
-              <p className="text-sm text-gray-500">Total Produk</p>
-              <p className="font-bold text-lg">200</p>
+        <div className="px-6 md:px-10">
+          <div
+            className="w-full h-[400px] md:h-[500px] flex items-center rounded-2xl overflow-hidden"
+            style={{
+              backgroundImage: "url('/img/banner.admin.png')",
+              backgroundSize: "cover",
+              backgroundPosition: "center",
+            }}
+          >
+            <div className="w-full h-full bg-black/30 flex items-center px-6 md:px-12 text-white">
+              <div>
+                <h1 className="text-2xl md:text-3xl font-bold">
+                  Dashboard Admin
+                </h1>
+                <p className="text-sm opacity-90 mt-2">
+                  Pantau penjualan & aktivitas sistem
+                </p>
+              </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
-            <div className="text-2xl">👥</div>
-            <div>
-              <p className="text-sm text-gray-500">Total Pengguna</p>
-              <p className="font-bold text-lg">200</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
-            <div className="text-2xl">💰</div>
-            <div>
-              <p className="text-sm text-gray-500">Pemasukan Hari Ini</p>
-              <p className="font-bold text-lg">Rp 1.500.000</p>
-            </div>
-          </div>
-
-          <div className="bg-white rounded-lg p-4 flex items-center gap-3 shadow">
-            <div className="text-2xl">📄</div>
-            <div>
-              <p className="text-sm text-gray-500">Transaksi Hari Ini</p>
-              <p className="font-bold text-lg">40</p>
-            </div>
-          </div>
-
         </div>
 
-        {/* EXPORT + FILTER */}
-        <div className="px-10 flex justify-between items-center mt-6">
+        {/* STATISTIK */}
+        <div className="px-6 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-5">
+          {[
+            { title: "Total Produk", value: "200", icon: "👜" },
+            { title: "Total Pengguna", value: "200", icon: "👥" },
+            { title: "Pemasukan", value: "Rp 1.500.000", icon: "💰" },
+            { title: "Transaksi", value: "40", icon: "📄" },
+          ].map((item, i) => (
+            <div
+              key={i}
+              className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition hover:-translate-y-1 flex items-center gap-3"
+            >
+              <div className="text-2xl bg-blue-50 p-3 rounded-xl">
+                {item.icon}
+              </div>
+
+              <div>
+                <p className="text-xs md:text-sm text-gray-500">
+                  {item.title}
+                </p>
+                <p className="font-bold text-base md:text-lg">
+                  {item.value}
+                </p>
+              </div>
+            </div>
+          ))}
+        </div>
+
+        {/* FILTER */}
+        <div className="px-6 md:px-10 flex flex-col md:flex-row gap-3 md:justify-between md:items-center">
 
           <button
             onClick={exportPDF}
-            className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600"
+            className="bg-red-500 hover:bg-red-600 active:scale-95 text-white px-4 py-2 rounded-xl transition w-full md:w-auto"
           >
             Export PDF
           </button>
 
-          <div className="flex gap-2">
+          {/* 🔥 CUSTOM DROPDOWN */}
+          <div className="flex gap-3 relative">
 
-            <select
-              value={month}
-              onChange={(e) => setMonth(e.target.value)}
-              className="border px-3 py-2 rounded"
-            >
-              <option>Januari</option>
-              <option>Februari</option>
-              <option>Maret</option>
-              <option>April</option>
-              <option>Mei</option>
-              <option>Juni</option>
-              <option>Juli</option>
-              <option>Agustus</option>
-              <option>September</option>
-              <option>Oktober</option>
-              <option>November</option>
-              <option>Desember</option>
-            </select>
+            {/* BULAN */}
+            <div className="relative w-[160px]">
+              <div
+                onClick={() => {
+                  setOpenMonth(!openMonth);
+                  setOpenYear(false);
+                }}
+                className="border border-gray-200 rounded-xl px-4 py-2 bg-white cursor-pointer flex justify-between"
+              >
+                <span>{month}</span>
+                <span>▼</span>
+              </div>
 
-            <select
-              value={year}
-              onChange={(e) => setYear(e.target.value)}
-              className="border px-3 py-2 rounded"
-            >
-              <option>2024</option>
-              <option>2025</option>
-              <option>2026</option>
-            </select>
+              {openMonth && (
+                <div className="absolute bottom-12 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50">
+                  {[
+                    "Januari","Februari","Maret","April","Mei","Juni",
+                    "Juli","Agustus","September","Oktober","November","Desember"
+                  ].map((m) => (
+                    <div
+                      key={m}
+                      onClick={() => {
+                        setMonth(m);
+                        setOpenMonth(false);
+                      }}
+                      className={`px-4 py-2 cursor-pointer text-sm
+                        ${month === m ? "bg-[#1766D3] text-white" : "hover:bg-gray-100"}
+                      `}
+                    >
+                      {m}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* TAHUN */}
+            <div className="relative w-[120px]">
+              <div
+                onClick={() => {
+                  setOpenYear(!openYear);
+                  setOpenMonth(false);
+                }}
+                className="border border-gray-200 rounded-xl px-4 py-2 bg-white cursor-pointer flex justify-between"
+              >
+                <span>{year}</span>
+                <span>▼</span>
+              </div>
+
+              {openYear && (
+                <div className="absolute bottom-12 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50">
+                  {["2024","2025","2026","2027","2028"].map((y) => (
+                    <div
+                      key={y}
+                      onClick={() => {
+                        setYear(y);
+                        setOpenYear(false);
+                      }}
+                      className={`px-4 py-2 cursor-pointer text-sm
+                        ${year === y ? "bg-[#1766D3] text-white" : "hover:bg-gray-100"}
+                      `}
+                    >
+                      {y}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
 
           </div>
 
         </div>
 
         {/* CHART */}
-        <div className="px-10">
-          <div ref={chartRef} className="bg-white mt-6 p-4 rounded-lg shadow">
+        <div className="px-6 md:px-10">
+          <div
+            ref={chartRef}
+            className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition"
+          >
+            <h3 className="text-lg font-semibold text-gray-700 mb-4">
+              Grafik Penjualan
+            </h3>
 
-            <div className="overflow-x-auto">
-              <div className="min-w-[800px] h-48">
-                <Bar data={data} options={options} />
-              </div>
+            <div className="h-56">
+              <Bar data={data} options={options} />
             </div>
-
           </div>
         </div>
 
-        {/* FOOTER */}
-        <div className="bg-green-600 text-white mt-24 p-6 text-center">
-          <p className="font-semibold">
-            Coopify Koperasi Kampus Digital
-          </p>
-          <p className="text-sm text-green-200">
-            © 2026 Coopify
-          </p>
-        </div>
-
       </div>
-
     </AppLayout>
   );
 };
