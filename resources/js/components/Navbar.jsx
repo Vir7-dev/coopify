@@ -178,7 +178,7 @@ function Navbar({ role }) {
             </div>
 
             {openMenu && (
-                <div className="md:hidden mt-4 bg-[#356c8c] rounded-lg p-4 space-y-3">
+                <div className="md:hidden mt-4 bg-[#1766D3] rounded-lg p-4 space-y-3 text-white">
                     {role === "admin" ? (
                         <>
                             <div
