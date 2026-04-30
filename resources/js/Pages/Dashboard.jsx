@@ -74,7 +74,7 @@ function Dashboard() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-gray-100 min-h-screen pb-20 space-y-12">
-                {/* 🔥 HERO BACKGROUND SECTION */}
+
                 <div
                     className="w-full h-[400px] md:h-[500px] lg:h-[600px] flex items-center"
                     style={{
@@ -84,16 +84,20 @@ function Dashboard() {
                         backgroundRepeat: "no-repeat",
                     }}
                 >
-                    {/* overlay */}
-                    <div className="w-full h-full bg-black/20 flex items-center">
+
+                    <div className="w-full h-full flex items-center">
                         <div className="px-6 md:px-12 lg:px-16 text-white max-w-xl">
-                            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold leading-snug">
-                                Belanja Mudah <br />
-                                Kebutuhan Harian
+                            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-snug">
+                                <span className="text-yellow-300">
+                                 Koperasi Digital
+                                </span>{" "}
+                                <br />
+                                untuk Transaki Cepat dan Praktis
+
                             </h1>
 
                             <p className="text-xs md:text-sm opacity-90 mt-3 mb-5">
-                                Snack, minuman, alat tulis dan lainnya tersedia
+                               Tersedia makanan, minuman, alat tulis, obat, dn almamater.
                             </p>
 
                             <button className="bg-white text-[#1766D3] px-4 md:px-5 py-2 rounded-xl text-xs md:text-sm font-semibold hover:scale-95 transition">
@@ -102,7 +106,7 @@ function Dashboard() {
                         </div>
                     </div>
                 </div>
-                {/* 🔥 KATEGORI MODERN */}
+
                 <div className="px-6 md:px-10 mt-10">
                     <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
                         Kategori Produk
@@ -137,13 +141,12 @@ function Dashboard() {
                         })}
                     </div>
                 </div>
-                {/* 🔥 PRODUK TERLARIS */}
+
                 <div className="px-10">
                     <div className="flex justify-between items-center mb-6">
                         <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
                             Produk Terlaris
                         </h2>
-                        x
                     </div>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
@@ -152,7 +155,6 @@ function Dashboard() {
                                 key={item.id}
                                 className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1"
                             >
-                                {/* IMAGE */}
                                 <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
                                     <img
                                         src={item.gambar}
@@ -163,7 +165,6 @@ function Dashboard() {
                                     <FaHeart className="absolute top-2 left-2 text-gray-300 hover:text-red-500 cursor-pointer" />
                                 </div>
 
-                                {/* INFO */}
                                 <div className="mt-3">
                                     <h3 className="text-sm font-semibold text-gray-800">
                                         {item.name}
@@ -177,7 +178,6 @@ function Dashboard() {
                                         Rp {item.price.toLocaleString("id-ID")}
                                     </p>
 
-                                    {/* STOK */}
                                     <p
                                         className={`text-xs font-semibold mt-2 ${
                                             item.stok === 0
@@ -193,7 +193,6 @@ function Dashboard() {
                                     </p>
                                 </div>
 
-                                {/* BUTTON */}
                                 <button
                                     disabled={item.stok === 0}
                                     className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition ${
