@@ -17,13 +17,9 @@ function Navbar({ role }) {
     const [openProfile, setOpenProfile] = useState(false);
     const [openMenu, setOpenMenu] = useState(false);
 
-    const profilePath = role === "admin" ? "/profil-admin" : "/profil-pengguna";
-    const passwordPath =
-        role === "admin" ? "/ubah-password-admin" : "/ubah-password";
-
     const [openPasswordModal, setOpenPasswordModal] = useState(false);
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-[#3F7EA2] text-white shadow-md px-6 py-3">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3">
             <div className="flex justify-between items-center">
                 <div
                     className="flex items-center gap-2 cursor-pointer"
@@ -54,19 +50,19 @@ function Navbar({ role }) {
                         <>
                             <li
                                 onClick={() => navigate("/dashboard-admin")}
-                                className="cursor-pointer hover:text-green-200"
+                                className="cursor-pointer hover:text-[#0F4DB8]"
                             >
                                 Dashboard
                             </li>
                             <li
                                 onClick={() => navigate("/kelola-produk")}
-                                className="cursor-pointer hover:text-green-200"
+                                className="cursor-pointer hover:text-[#0F4DB8]"
                             >
                                 Produk
                             </li>
                             <li
                                 onClick={() => navigate("/kelola-kategori")}
-                                className="cursor-pointer hover:text-green-200"
+                                className="cursor-pointer hover:text-[#0F4DB8]"
                             >
                                 Kategori
                             </li>
@@ -75,13 +71,13 @@ function Navbar({ role }) {
                         <>
                             <li
                                 onClick={() => navigate("/")}
-                                className="cursor-pointer hover:text-green-200"
+                                className="cursor-pointer hover:text-[#0F4DB8]"
                             >
                                 Home
                             </li>
                             <li
                                 onClick={() => navigate("/kontak")}
-                                className="cursor-pointer hover:text-green-200"
+                                className="cursor-pointer hover:text-[#0F4DB8]"
                             >
                                 Kontak
                             </li>
@@ -89,7 +85,6 @@ function Navbar({ role }) {
                     )}
                 </ul>
 
-                {/* ICON DESKTOP */}
                 <div className="hidden md:flex items-center gap-5 relative">
                     {role === "admin" ? (
                         <FaTachometerAlt
@@ -109,14 +104,14 @@ function Navbar({ role }) {
                     {/* PROFILE */}
                     <div
                         className="relative"
-                        onMouseEnter={() => setOpenProfile(true)}
-                        onMouseLeave={() => setOpenProfile(false)}
+
+                        onClick={() => setOpenProfile(true)}
                     >
                         <FaUserCircle className="text-2xl cursor-pointer" />
 
                         {openProfile && (
-                            <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-50">
-                                <div className="bg-gradient-to-r from-[#3F7EA2] to-[#54A2CF] p-4 flex items-center gap-3 text-white">
+                            <div onMouseLeave={() => setOpenProfile(false)} className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-50">
+                                <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
                                     <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] flex items-center justify-center font-bold">
                                         {role === "admin" ? "A" : "U"}
                                     </div>
@@ -141,7 +136,7 @@ function Navbar({ role }) {
                                         onClick={() => navigate(profilePath)}
                                         className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                     >
-                                        <FaUser className="text-[#3F7EA2]" />
+                                        <FaUser className="text-[#1766D3]" />
                                         Lihat Profil
                                     </div>
 
@@ -151,7 +146,7 @@ function Navbar({ role }) {
                                         }
                                         className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                     >
-                                        <FaLock className="text-[#3F7EA2]" />
+                                        <FaLock className="text-[#1766D3]" />
                                         Ubah Kata Sandi
                                     </div>
 
@@ -160,7 +155,7 @@ function Navbar({ role }) {
                                             onClick={() => navigate("/login")}
                                             className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                         >
-                                            <FaUser className="text-[#3F7EA2]" />
+                                            <FaUser className="text-[#1766D3]" />
                                             Login
                                         </div>
                                     )}
@@ -264,7 +259,7 @@ function Navbar({ role }) {
                             ></div>
 
                             <div className="bg-white rounded-xl shadow-xl w-[400px] overflow-hidden z-50">
-                                <div className="bg-[#3F7EA2] px-5 py-3 flex justify-between items-center">
+                                <div className="bg-[#1766D3] px-5 py-3 flex justify-between items-center">
                                     <div className="flex items-center gap-2 text-white font-semibold">
                                         Ganti Password Akun
                                     </div>
@@ -274,7 +269,6 @@ function Navbar({ role }) {
                                         }
                                         className="text-white text-xl"
                                     >
-                                        ✕
                                     </button>
                                 </div>
 
