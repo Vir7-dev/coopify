@@ -11,6 +11,8 @@ import {
     FaLayerGroup,
     FaTimes,
     FaCheck,
+    FaChevronLeft,
+    FaChevronRight,
 } from "react-icons/fa";
 
 export default function KelolaProduk() {
@@ -43,11 +45,9 @@ export default function KelolaProduk() {
         }
     };
 
-    
-
-    // PAGINATION
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
+
     const products = [
         {
             id: 1,
@@ -243,14 +243,14 @@ export default function KelolaProduk() {
                     <div className="flex items-center gap-3">
                         <button
                             onClick={handleAdd}
-                            className="flex items-center gap-2  bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-sm px-4 py-2 rounded-lg"
+                            className="flex items-center gap-2  bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
                         >
                             <FaPlus /> Tambahkan Produk
                         </button>
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6">
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
                     <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 w-full">
                         <div className="bg-green-100 text-green-600 p-3 rounded-lg">
                             <FaBox />
@@ -328,132 +328,134 @@ export default function KelolaProduk() {
                             />
                         </div>
                     </div>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm min-w-[700px]">
+                            <thead className="bg-gray-50 text-gray-500">
+                                <tr>
+                                    <th className="px-4 py-3">No</th>
+                                    <th className="px-4 py-3">Nama Produk</th>
+                                    <th className="px-4 py-3">Nama Kategori</th>
+                                    <th className="px-4 py-3">Harga</th>
+                                    <th className="px-4 py-3">Jumlah Stok</th>
+                                    <th className="px-4 py-3">
+                                        Tanggal Kadalurasa
+                                    </th>
+                                    <th className="px-4 py-3">Aksi</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {currentItems.map((item, i) => (
+                                    <tr
+                                        key={item.id}
+                                        className="hover:bg-gray-50"
+                                    >
+                                        <td className="px-4 py-3 text-gray-400">
+                                            {indexOfFirstItem + i + 1}
+                                        </td>
 
-                    <table className="w-full text-sm">
-                        <thead className="bg-gray-50 text-gray-500">
-                            <tr>
-                                <th className="px-4 py-3">No</th>
-                                <th className="px-4 py-3">Nama Produk</th>
-                                <th className="px-4 py-3">Nama Kategori</th>
-                                <th className="px-4 py-3">Harga</th>
-                                <th className="px-4 py-3">Jumlah Stok</th>
-                                <th className="px-4 py-3">
-                                    Tanggal Kadalurasa
-                                </th>
-                                <th className="px-4 py-3">Aksi</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {currentItems.map((item, i) => (
-                                <tr key={item.id} className="hover:bg-gray-50">
-                                    <td className="px-4 py-3 text-gray-400">
-                                        {indexOfFirstItem + i + 1}
-                                    </td>
+                                        <td className="border-b border-gray-200 px-4 py-3">
+                                            <p className="font-medium">
+                                                {item.nama}
+                                            </p>
+                                        </td>
 
-                                    <td className="border-b border-gray-200 px-4 py-3">
-                                        <p className="font-medium">
-                                            {item.nama}
-                                        </p>
-                                    </td>
-
-                                    <td className="border-b border-gray-200 px-4 py-3">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-9 h-9 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full">
-                                                <FaBox size={14} />
-                                            </div>
-                                            <div>
+                                        <td className="border-b border-gray-200 px-4 py-3">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-9 h-9 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full">
+                                                    <FaBox size={14} />
+                                                </div>
                                                 <div>
-                                                    <p className="font-medium">
-                                                        {item.kategori}
-                                                    </p>
-                                                    <p className="text-xs text-gray-400">
-                                                        Kategori produk{" "}
-                                                        {item.kategori.toLowerCase()}
-                                                    </p>
+                                                    <div>
+                                                        <p className="font-medium">
+                                                            {item.kategori}
+                                                        </p>
+                                                        <p className="text-xs text-gray-400">
+                                                            Kategori produk{" "}
+                                                            {item.kategori.toLowerCase()}
+                                                        </p>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </td>
+                                        </td>
 
-                                    <td className="border-b border-gray-200 px-4 py-3 text-gray-700">
-                                        Rp {item.harga.toLocaleString("id-ID")}
-                                    </td>
+                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-700">
+                                            Rp{" "}
+                                            {item.harga.toLocaleString("id-ID")}
+                                        </td>
 
-                                    <td className="border-b border-gray-200 px-4 py-3">
-                                        <span
-                                            className={`px-3 py-1 rounded-full text-xs ${
-                                                item.stok <= 5
-                                                    ? "bg-red-100 text-orange-600"
-                                                    : "bg-green-100 text-green-600"
-                                            }`}
-                                        >
-                                            {item.stok}
-                                        </span>
-                                    </td>
+                                        <td className="border-b border-gray-200 px-4 py-3">
+                                            <span
+                                                className={`px-3 py-1 rounded-full text-xs ${
+                                                    item.stok <= 5
+                                                        ? "bg-red-100 text-orange-600"
+                                                        : "bg-green-100 text-green-600"
+                                                }`}
+                                            >
+                                                {item.stok}
+                                            </span>
+                                        </td>
 
-                                    <td className="border-b border-gray-200 px-4 py-3 text-gray-500">
-                                        {new Date(item.tgl).toLocaleDateString(
-                                            "id-ID",
-                                            {
+                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-500">
+                                            {new Date(
+                                                item.tgl,
+                                            ).toLocaleDateString("id-ID", {
                                                 day: "numeric",
                                                 month: "long",
                                                 year: "numeric",
-                                            },
-                                        )}
-                                        <p className="text-xs text-gray-400">
-                                            10:30 WIB
-                                        </p>
-                                    </td>
+                                            })}
+                                            <p className="text-xs text-gray-400">
+                                                10:30 WIB
+                                            </p>
+                                        </td>
 
-                                    <td className="border-b border-gray-200 px-4 py-3">
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => handleEdit(item)}
-                                                className="border border-blue-500 text-blue-500 px-3 py-1 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1"
-                                            >
-                                                <FaEdit size={10} />
-                                                Edit
-                                            </button>
+                                        <td className="border-b border-gray-200 px-4 py-3">
+                                            <div className="flex gap-2">
+                                                <button
+                                                    onClick={() =>
+                                                        handleEdit(item)
+                                                    }
+                                                    className="border border-blue-500 text-blue-500 px-3 py-1 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1"
+                                                >
+                                                    <FaEdit size={10} />
+                                                    Edit
+                                                </button>
 
-                                            <button
-                                                onClick={() =>
-                                                    handleDeleteClick(item)
-                                                }
-                                                className="border border-red-400 text-red-500 px-3 py-1 rounded-md text-xs hover:bg-red-50 flex items-center gap-1"
-                                            >
-                                                <FaTrash size={10} />
-                                                Hapus
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
+                                                <button
+                                                    onClick={() =>
+                                                        handleDeleteClick(item)
+                                                    }
+                                                    className="border border-red-400 text-red-500 px-3 py-1 rounded-md text-xs hover:bg-red-50 flex items-center gap-1"
+                                                >
+                                                    <FaTrash size={10} />
+                                                    Hapus
+                                                </button>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                ))}
+                            </tbody>
+                        </table>
+                    </div>
 
                     {/* PAGINATION */}
                     <div className="flex justify-between items-center p-4 text-sm text-gray-500">
                         <p>
-                            Menampilkan {filteredProducts.length} dari{" "}
+                            Menampilkan {currentItems.length} dari{" "}
                             {products.length} produk
                         </p>
-
-                        <div className="flex gap-2">
+                        <div className="flex items-center gap-1">
                             <button
                                 onClick={() => setCurrentPage(currentPage - 1)}
                                 disabled={currentPage === 1}
-                                className="px-3 py-1 border rounded-md disabled:opacity-40"
-                            ></button>
-
+                                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition-colors ${currentPage === 1 ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50" : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"}`}
+                            >
+                                <FaChevronLeft size={10} /> Previous
+                            </button>
                             {[...Array(totalPages)].map((_, i) => (
                                 <button
                                     key={i}
                                     onClick={() => setCurrentPage(i + 1)}
-                                    className={`px-3 py-1 rounded-md ${
-                                        currentPage === i + 1
-                                            ? "bg-blue-500 text-white"
-                                            : "border"
-                                    }`}
+                                    className={`px-2 py-1 text-xs rounded-md border ${currentPage === i + 1 ? "bg-blue-500 text-white border-blue-500" : "bg-gray-100 hover:bg-gray-200"}`}
                                 >
                                     {i + 1}
                                 </button>
@@ -461,8 +463,10 @@ export default function KelolaProduk() {
                             <button
                                 onClick={() => setCurrentPage(currentPage + 1)}
                                 disabled={currentPage === totalPages}
-                                className="px-3 py-1 border rounded-md disabled:opacity-40"
-                            ></button>
+                                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition-colors ${currentPage === totalPages ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50" : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"}`}
+                            >
+                                Next <FaChevronRight size={10} />
+                            </button>
                         </div>
                     </div>
                 </div>
