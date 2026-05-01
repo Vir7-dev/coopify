@@ -12,6 +12,7 @@ import { Bar } from "react-chartjs-2";
 
 import jsPDF from "jspdf";
 import html2canvas from "html2canvas";
+import { ShoppingBasket, Users, BanknoteArrowUp, NotepadText } from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
@@ -22,7 +23,6 @@ const DashboardAdmin = () => {
   const [month, setMonth] = useState("Januari");
   const [year, setYear] = useState("2026");
 
-  // 🔥 TAMBAHAN
   const [openMonth, setOpenMonth] = useState(false);
   const [openYear, setOpenYear] = useState(false);
 
@@ -96,16 +96,32 @@ const DashboardAdmin = () => {
         {/* STATISTIK */}
         <div className="px-6 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-5">
           {[
-            { title: "Total Produk", value: "200", icon: "👜" },
-            { title: "Total Pengguna", value: "200", icon: "👥" },
-            { title: "Pemasukan", value: "Rp 1.500.000", icon: "💰" },
-            { title: "Transaksi", value: "40", icon: "📄" },
+            { 
+              title: "Total Produk", 
+              value: "200", 
+              icon: <ShoppingBasket size={22} className="text-[#1766D3]" /> 
+            },
+            { 
+              title: "Total Pengguna", 
+              value: "200", 
+              icon: <Users size={22} className="text-[#1766D3]" /> 
+            },
+            { 
+              title: "Pemasukan", 
+              value: "Rp 1.500.000", 
+              icon: <BanknoteArrowUp size={22} className="text-[#1766D3]" /> 
+            },
+            { 
+              title: "Transaksi", 
+              value: "40", 
+              icon: <NotepadText size={22} className="text-[#1766D3]" /> 
+            },
           ].map((item, i) => (
             <div
               key={i}
               className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition hover:-translate-y-1 flex items-center gap-3"
             >
-              <div className="text-2xl bg-blue-50 p-3 rounded-xl">
+              <div className="bg-blue-50 p-3 rounded-xl flex items-center justify-center">
                 {item.icon}
               </div>
 
@@ -131,7 +147,7 @@ const DashboardAdmin = () => {
             Export PDF
           </button>
 
-          {/* 🔥 CUSTOM DROPDOWN */}
+          {/* DROPDOWN */}
           <div className="flex gap-3 relative">
 
             {/* BULAN */}
@@ -141,14 +157,14 @@ const DashboardAdmin = () => {
                   setOpenMonth(!openMonth);
                   setOpenYear(false);
                 }}
-                className="border border-gray-200 rounded-xl px-4 py-2 bg-white cursor-pointer flex justify-between"
+                className="border border-gray-200 rounded-xl px-4 py-2 bg-white cursor-pointer flex justify-between items-center hover:ring-2 hover:ring-blue-300 transition"
               >
                 <span>{month}</span>
-                <span>▼</span>
+                <span className={`transition ${openMonth ? "rotate-180" : ""}`}>▼</span>
               </div>
 
               {openMonth && (
-                <div className="absolute bottom-12 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50">
+                <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50 border border-gray-100">
                   {[
                     "Januari","Februari","Maret","April","Mei","Juni",
                     "Juli","Agustus","September","Oktober","November","Desember"
@@ -159,8 +175,8 @@ const DashboardAdmin = () => {
                         setMonth(m);
                         setOpenMonth(false);
                       }}
-                      className={`px-4 py-2 cursor-pointer text-sm
-                        ${month === m ? "bg-[#1766D3] text-white" : "hover:bg-gray-100"}
+                      className={`px-4 py-2 cursor-pointer text-sm transition
+                        ${month === m ? "bg-[#1766D3] text-white" : "hover:bg-blue-50"}
                       `}
                     >
                       {m}
@@ -177,14 +193,14 @@ const DashboardAdmin = () => {
                   setOpenYear(!openYear);
                   setOpenMonth(false);
                 }}
-                className="border border-gray-200 rounded-xl px-4 py-2 bg-white cursor-pointer flex justify-between"
+                className="border border-gray-200 rounded-xl px-4 py-2 bg-white cursor-pointer flex justify-between items-center hover:ring-2 hover:ring-blue-300 transition"
               >
                 <span>{year}</span>
-                <span>▼</span>
+                <span className={`transition ${openYear ? "rotate-180" : ""}`}>▼</span>
               </div>
 
               {openYear && (
-                <div className="absolute bottom-12 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50">
+                <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50 border border-gray-100">
                   {["2024","2025","2026","2027","2028"].map((y) => (
                     <div
                       key={y}
@@ -192,8 +208,8 @@ const DashboardAdmin = () => {
                         setYear(y);
                         setOpenYear(false);
                       }}
-                      className={`px-4 py-2 cursor-pointer text-sm
-                        ${year === y ? "bg-[#1766D3] text-white" : "hover:bg-gray-100"}
+                      className={`px-4 py-2 cursor-pointer text-sm transition
+                        ${year === y ? "bg-[#1766D3] text-white" : "hover:bg-blue-50"}
                       `}
                     >
                       {y}

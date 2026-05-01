@@ -74,50 +74,64 @@ function Dashboard() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-gray-100 min-h-screen pb-20 space-y-12">
-                {/* HERO BACKGROUND SECTION */}
 
-                <div
-                    className="w-full h-[400px] md:h-[500px] lg:h-[600px] flex items-center"
-                    style={{
-                        backgroundImage: "url('/img/bg2.png')",
-                        backgroundSize: "cover",
-                        backgroundPosition: "center",
-                        backgroundRepeat: "no-repeat",
-                    }}
-                >
+                {/* ✅ HEADER + SEARCH */}
+                <div className="px-6 md:px-10 pt-6 flex justify-between items-center">
+                    <h1 className="text-xl md:text-2xl font-bold text-gray-800">
+                        Dashboard Pengguna
+                    </h1>
 
-                    <div className="w-full h-full flex items-center">
-                        <div className="px-6 md:px-12 lg:px-16 text-white max-w-xl">
-                            <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-snug">
-                                <span className="text-yellow-300">
-                                 Koperasi Digital
-                                </span>{" "}
-                                <br />
-                                untuk Transaki Cepat dan Praktis
+                    <input
+                        type="text"
+                        placeholder="Cari produk..."
+                        className="border border-gray-200 rounded-xl px-4 py-2 w-[250px] md:w-[320px] focus:ring-2 focus:ring-blue-400"
+                    />
+                </div>
 
-                            </h1>
+                {/* ✅ BANNER + TOMBOL (FIX) */}
+                <div className="px-6 md:px-10">
+                    <div
+                        className="w-full h-[400px] md:h-[500px] flex items-center rounded-2xl overflow-hidden"
+                        style={{
+                            backgroundImage: "url('/img/bg2.png')",
+                            backgroundSize: "cover",
+                            backgroundPosition: "center",
+                        }}
+                    >
+                        <div className="w-full h-full bg-black/30 flex items-center">
+                            <div className="px-6 md:px-12 lg:px-16 text-white max-w-xl">
+                                
+                                <h1 className="text-2xl md:text-4xl lg:text-5xl font-bold leading-snug">
+                                    <span className="text-yellow-300">
+                                        Koperasi Digital
+                                    </span>
+                                    <br />
+                                    untuk Transaksi Cepat dan Praktis
+                                </h1>
 
-                            <p className="text-xs md:text-sm opacity-90 mt-3 mb-5">
-                               Tersedia makanan, minuman, alat tulis, obat, dn almamater.
-                            </p>
+                                <p className="text-xs md:text-sm opacity-90 mt-3 mb-5">
+                                    Tersedia makanan, minuman, alat tulis, obat, dan almamater.
+                                </p>
 
-                            <button className="bg-white text-[#1766D3] px-4 md:px-5 py-2 rounded-xl text-xs md:text-sm font-semibold hover:scale-95 transition">
-                                Tentang Aplikasi
-                            </button>
+                                {/* 🔥 TOMBOL TETAP ADA */}
+                                <button className="bg-white text-[#1766D3] px-4 md:px-5 py-2 rounded-xl text-xs md:text-sm font-semibold hover:scale-95 transition">
+                                    Tentang Aplikasi
+                                </button>
+
+                            </div>
                         </div>
                     </div>
                 </div>
 
-                <div className="px-6 md:px-10 mt-10">
+                {/* ✅ KATEGORI */}
+                <div className="px-6 md:px-10">
                     <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
                         Kategori Produk
                     </h2>
 
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-5">
                         {categories.map((cat, i) => {
-                            const slug = cat.title
-                                .toLowerCase()
-                                .replace(" ", "-");
+                            const slug = cat.title.toLowerCase().replace(" ", "-");
 
                             return (
                                 <Link
@@ -125,15 +139,12 @@ function Dashboard() {
                                     to={`/produk/${slug}`}
                                     className="group relative bg-white rounded-2xl p-5 flex flex-col items-center justify-center shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden"
                                 >
-                                    {/* BACKGROUND HOVER EFFECT */}
-                                    <div className="absolute inset-0 bg-gradient-to-tr from-[#1766D3]/10 to-[#1766D3]/0 opacity-0 group-hover:opacity-100 transition"></div>
+                                    <div className="absolute inset-0 bg-gradient-to-tr from-[#1766D3]/10 to-transparent opacity-0 group-hover:opacity-100 transition"></div>
 
-                                    {/* ICON */}
                                     <div className="relative z-10 text-2xl text-[#1766D3] bg-blue-50 p-4 rounded-full group-hover:scale-110 transition">
                                         {cat.icon}
                                     </div>
 
-                                    {/* TEXT */}
                                     <p className="relative z-10 mt-3 text-sm md:text-base font-medium text-gray-700 group-hover:text-[#1766D3] transition">
                                         {cat.title}
                                     </p>
@@ -143,12 +154,11 @@ function Dashboard() {
                     </div>
                 </div>
 
-                <div className="px-10">
-                    <div className="flex justify-between items-center mb-6">
-                        <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
-                            Produk Terlaris
-                        </h2>
-                    </div>
+                {/* ✅ PRODUK TERLARIS */}
+                <div className="px-6 md:px-10">
+                    <h2 className="text-xl md:text-2xl font-bold text-gray-800 mb-6">
+                        Produk Terlaris
+                    </h2>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
                         {bestSeller.map((item) => (
@@ -184,8 +194,8 @@ function Dashboard() {
                                             item.stok === 0
                                                 ? "text-gray-400"
                                                 : item.stok < 5
-                                                  ? "text-red-500"
-                                                  : "text-green-600"
+                                                ? "text-red-500"
+                                                : "text-green-600"
                                         }`}
                                     >
                                         {item.stok === 0
@@ -209,6 +219,7 @@ function Dashboard() {
                         ))}
                     </div>
                 </div>
+
             </div>
         </AppLayout>
     );

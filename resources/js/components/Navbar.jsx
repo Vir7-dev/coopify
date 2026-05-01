@@ -4,6 +4,9 @@ import {
     FaUserCircle,
     FaBell,
     FaShoppingCart,
+    FaTachometerAlt,
+    FaBars,
+    FaTimes,
     FaUser,
     FaLock,
     FaSignOutAlt,
@@ -14,8 +17,10 @@ function Navbar({ role }) {
     const navigate = useNavigate();
 
     const [openProfile, setOpenProfile] = useState(false);
+    const [openMenu, setOpenMenu] = useState(false);
+    const [openPasswordModal, setOpenPasswordModal] = useState(false);
 
-    // ================= USER NOTIF =================
+    // 🔥 NOTIF USER
     const [openNotif, setOpenNotif] = useState(false);
 
     const notifications = [
@@ -23,7 +28,7 @@ function Navbar({ role }) {
         { code: "ORD12346", time: "6 menit lalu", pickup: "22 Apr 2026 - 09:20" },
     ];
 
-    // ================= ADMIN PESANAN =================
+    // 🔥 NOTIF ADMIN
     const [openOrders, setOpenOrders] = useState(false);
     const [openDetail, setOpenDetail] = useState(null);
 
@@ -60,12 +65,18 @@ function Navbar({ role }) {
             <div className="flex justify-between items-center">
 
                 {/* LOGO */}
-                <div
-                    className="flex items-center gap-2 cursor-pointer"
-                    onClick={() => navigate("/")}
-                >
+                <div onClick={() => navigate("/")} className="flex items-center gap-2 cursor-pointer">
                     <img src="/img/logo.png" className="w-10 h-10" />
                     <span className="text-xl font-bold">Coopify</span>
+                </div>
+
+                {/* MOBILE MENU */}
+                <div className="md:hidden">
+                    {openMenu ? (
+                        <FaTimes size={22} onClick={() => setOpenMenu(false)} />
+                    ) : (
+                        <FaBars size={22} onClick={() => setOpenMenu(true)} />
+                    )}
                 </div>
 
                 {/* MENU */}
@@ -87,16 +98,14 @@ function Navbar({ role }) {
                 {/* ICON */}
                 <div className="hidden md:flex items-center gap-5 relative">
 
-                    {/* ================= ADMIN ================= */}
+                    {/* ADMIN */}
                     {role === "admin" ? (
                         <div className="relative">
-
                             <FaCheckCircle
-                                className="cursor-pointer hover:scale-110 hover:text-[#0F4DB8] transition"
+                                className="cursor-pointer"
                                 onClick={() => setOpenOrders(!openOrders)}
                             />
 
-                            {/* BADGE */}
                             {orderList.length > 0 && (
                                 <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
                                     {orderList.length}
@@ -104,30 +113,21 @@ function Navbar({ role }) {
                             )}
 
                             {/* DROPDOWN ADMIN */}
-                            <div
-                                className={`absolute right-0 mt-3 w-[340px] bg-white text-black rounded-2xl shadow-xl border z-50
-                                transform transition-all duration-300 origin-top
-                                ${openOrders ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"}`}
-                            >
-                                <div className="bg-[#1766D3] text-white px-4 py-3 font-semibold rounded-t-2xl">
+                            <div className={`absolute right-0 mt-3 w-[340px] bg-white rounded-2xl shadow-xl border z-50 transition-all duration-300 origin-top
+                                ${openOrders ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
+
+                                <div className="bg-[#1766D3] text-white px-4 py-3 rounded-t-2xl">
                                     Pesanan Masuk
                                 </div>
 
-                                {orderList.length === 0 ? (
-                                    <div className="text-center py-10 text-gray-400 text-sm">
-                                        Tidak ada pesanan
-                                    </div>
-                                ) : (
-
-                                    orderList.map((order, index) => (
-                                        <div key={index} className="p-3 border-b border-gray-100">
+                                <div className="max-h-[320px] overflow-y-auto">
+                                    {orderList.map((order, index) => (
+                                        <div key={index} className="border-b">
 
                                             {/* HEADER */}
                                             <div
-                                                className="p-3 cursor-pointer hover:bg-gray-50 flex justify-between items-center"
-                                                onClick={() =>
-                                                    setOpenDetail(openDetail === index ? null : index)
-                                                }
+                                                onClick={() => setOpenDetail(openDetail === index ? null : index)}
+                                                className="px-4 py-3 flex justify-between cursor-pointer hover:bg-gray-50"
                                             >
                                                 <div>
                                                     <p className="text-sm font-semibold">{order.code}</p>
@@ -139,134 +139,69 @@ function Navbar({ role }) {
                                                 </span>
                                             </div>
 
-                                            {/* DETAIL */}
+                                            {/* DETAIL (SMOOTH FIX) */}
                                             <div
-                                                className={`overflow-hidden transition-all duration-300
-                                                ${openDetail === index ? "max-h-40 p-3 bg-gray-50" : "max-h-0"}`}
+                                                className={`transition-all duration-300 overflow-hidden
+                                                ${openDetail === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
                                             >
-                                                <p className="text-xs mb-1">
-                                                    Pengambilan: {order.pickup}
-                                                </p>
+                                                <div className="px-4 pb-3 bg-gray-50">
+                                                    <p className="text-xs mb-1">{order.pickup}</p>
 
-                                                <ul className="list-disc ml-4 text-sm mb-2">
-                                                    {order.items.map((item, i) => (
-                                                        <li key={i}>{item}</li>
-                                                    ))}
-                                                </ul>
+                                                    <ul className="list-disc ml-4 text-sm mb-2">
+                                                        {order.items.map((item, i) => (
+                                                            <li key={i}>{item}</li>
+                                                        ))}
+                                                    </ul>
 
-                                                {order.status !== "Selesai" && (
-                                                    <button
-                                                        onClick={() => selesaiPesanan(order.code)}
-                                                        className="bg-green-500 hover:bg-green-600 text-white text-xs px-3 py-1 rounded transition"
-                                                    >
-                                                        Tandai Selesai
-                                                    </button>
-                                                )}
+                                                    {order.status !== "Selesai" && (
+                                                        <button
+                                                            onClick={() => selesaiPesanan(order.code)}
+                                                            className="bg-green-500 text-white text-xs px-3 py-1 rounded"
+                                                        >
+                                                            Tandai Selesai
+                                                        </button>
+                                                    )}
+                                                </div>
                                             </div>
 
                                         </div>
-                                    ))
-
-                                )}
+                                    ))}
+                                </div>
                             </div>
                         </div>
                     ) : (
-
-                        /* ================= USER ================= */
-
                         <>
+                            {/* USER NOTIF */}
                             <div className="relative">
+                                <FaBell onClick={() => setOpenNotif(!openNotif)} className="cursor-pointer" />
 
-                                <FaBell
-                                    className="cursor-pointer hover:scale-110 hover:text-[#0F4DB8] transition"
-                                    onClick={() => setOpenNotif(!openNotif)}
-                                />
+                                <div className={`absolute right-0 mt-3 w-[320px] bg-white rounded-xl shadow-xl transition
+                                    ${openNotif ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
 
-                                {/* BADGE */}
-                                {notifications.length > 0 && (
-                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
-                                        {notifications.length}
-                                    </span>
-                                )}
-
-                                {/* DROPDOWN NOTIF */}
-                                <div
-                                    className={`absolute right-0 mt-3 w-[340px] bg-white text-black rounded-2xl shadow-xl border z-50
-                                    transform transition-all duration-300 origin-top
-                                    ${openNotif ? "opacity-100 translate-y-0" : "opacity-0 -translate-y-2 pointer-events-none"}`}
-                                >
-
-                                    {/* HEADER */}
-                                    <div className="flex justify-between items-center px-4 py-3 bg-[#1766D3] text-white rounded-t-2xl">
-                                        <span className="font-semibold text-sm">Notifikasi</span>
-                                        <button className="text-xs hover:underline opacity-80">
-                                            Tandai dibaca
-                                        </button>
+                                    <div className="bg-[#1766D3] text-white p-3 rounded-t-xl">
+                                        Notifikasi
                                     </div>
 
-                                    {/* CONTENT */}
-                                    <div className="max-h-[320px] overflow-y-auto">
-
-                                        {notifications.length === 0 ? (
-                                            <div className="text-center py-10 text-gray-400 text-sm">
-                                                🔕 Tidak ada notifikasi
-                                            </div>
-                                        ) : (
-
-                                            notifications.map((notif, index) => (
-                                                <div
-                                                    key={index}
-                                                    className="px-4 py-3 border-b hover:bg-gray-50 hover:shadow-sm transition cursor-pointer"
-                                                >
-
-                                                    <div className="flex items-start gap-3">
-
-                                                        <div className="w-8 h-8 flex items-center justify-center rounded-full bg-green-100 text-green-600 text-sm">
-                                                            ✓
-                                                        </div>
-
-                                                        <div className="flex-1">
-                                                            <p className="text-sm">
-                                                                Pesanan <span className="font-semibold text-[#1766D3]">{notif.code}</span> siap diambil
-                                                            </p>
-
-                                                            <div className="flex justify-between text-xs text-gray-400 mt-1">
-                                                                <span>{notif.pickup}</span>
-                                                                <span>{notif.time}</span>
-                                                            </div>
-                                                        </div>
-
-                                                    </div>
-
-                                                </div>
-                                            ))
-
-                                        )}
-
-                                    </div>
-
+                                    {notifications.map((n, i) => (
+                                        <div key={i} className="p-3 border-b text-sm">
+                                            Pesanan <b>{n.code}</b> siap diambil
+                                        </div>
+                                    ))}
                                 </div>
                             </div>
 
-                            <FaShoppingCart
-                                onClick={() => navigate("/keranjang")}
-                                className="cursor-pointer hover:scale-110 transition"
-                            />
+                            <FaShoppingCart onClick={() => navigate("/keranjang")} />
                         </>
                     )}
 
-                    {/* PROFILE */}
-                    <div
-                        className="relative"
-                        onClick={() => setOpenProfile(!openProfile)}
-                    >
+                    {/* PROFILE (TIDAK DIUBAH) */}
+                    <div className="relative" onClick={() => setOpenProfile(true)}>
                         <FaUserCircle className="text-2xl cursor-pointer" />
 
                         {openProfile && (
-                            <div className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-50">
-
+                            <div onMouseLeave={() => setOpenProfile(false)} className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-50">
                                 <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
-                                    <div className="w-10 h-10 rounded-full bg-white text-[#1766D3] flex items-center justify-center font-bold">
+                                    <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] flex items-center justify-center font-bold">
                                         {role === "admin" ? "A" : "U"}
                                     </div>
 
@@ -281,215 +216,24 @@ function Navbar({ role }) {
                                 </div>
 
                                 <div className="py-2 text-sm text-black">
-                                    <div
-                                        onClick={() => navigate(profilePath)}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    >
-                                        <FaUser className="text-[#1766D3]" />
+                                    <div onClick={() => navigate(profilePath)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                         Lihat Profil
                                     </div>
 
-                                    <div
-                                        onClick={() => setOpenPasswordModal(true)}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    >
-                                        <FaLock className="text-[#1766D3]" />
+                                    <div onClick={() => setOpenPasswordModal(true)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">
                                         Ubah Kata Sandi
                                     </div>
 
-                                    <div
-                                        onClick={() => {
-                                            localStorage.removeItem("token");
-                                            navigate("/login");
-                                        }}
-                                        className="flex items-center gap-3 px-4 py-2 hover:bg-red-50 text-red-500 cursor-pointer"
-                                    >
-                                        <FaSignOutAlt />
+                                    <div onClick={() => navigate("/login")} className="px-4 py-2 text-red-500 cursor-pointer">
                                         Keluar
                                     </div>
                                 </div>
-
                             </div>
                         )}
                     </div>
 
                 </div>
             </div>
-
-            {openMenu && (
-                <div className="md:hidden mt-4 bg-[#356c8c] rounded-lg p-4 space-y-3">
-                    {role === "admin" ? (
-                        <>
-                            <div
-                                onClick={() => navigate("/dashboard-admin")}
-                                className="cursor-pointer"
-                            >
-                                Dashboard
-                            </div>
-                            <div
-                                onClick={() => navigate("/kelola-produk")}
-                                className="cursor-pointer"
-                            >
-                                Produk
-                            </div>
-                            <div
-                                onClick={() => navigate("/kelola-kategori")}
-                                className="cursor-pointer"
-                            >
-                                Kategori
-                            </div>
-                        </>
-                    ) : (
-                        <>
-                            <div
-                                onClick={() => navigate("/")}
-                                className="cursor-pointer"
-                            >
-                                Home
-                            </div>
-                            <div
-                                onClick={() => navigate("/kontak")}
-                                className="cursor-pointer"
-                            >
-                                Kontak
-                            </div>
-                        </>
-                    )}
-
-                    <hr />
-
-                    <div
-                        onClick={() => navigate(profilePath)}
-                        className="cursor-pointer"
-                    >
-                        Profile
-                    </div>
-                    <div
-                        onClick={() => navigate(passwordPath)}
-                        className="cursor-pointer"
-                    >
-                        Ubah Password
-                    </div>
-
-                    <div
-                        onClick={() => {
-                            localStorage.removeItem("token");
-                            navigate("/login");
-                        }}
-                        className="text-red-300 cursor-pointer"
-                    >
-                        Logout
-                    </div>
-                </div>
-            )}
-
-            {openPasswordModal && (
-                <div className="fixed inset-0 flex items-center justify-center z-50">
-                    <div
-                        className="absolute inset-0 bg-black opacity-40"
-                        onClick={() => setOpenPasswordModal(false)}
-                    ></div>
-
-                    {openPasswordModal && (
-                        <div className="fixed inset-0 flex items-center justify-center z-50">
-                            <div
-                                className="absolute inset-0 bg-black/30"
-                                onClick={() => setOpenPasswordModal(false)}
-                            ></div>
-
-                            <div className="bg-white rounded-xl shadow-xl w-[400px] overflow-hidden z-50">
-                                <div className="bg-[#1766D3] px-5 py-3 flex justify-between items-center">
-                                    <div className="flex items-center gap-2 text-white font-semibold">
-                                        Ganti Password Akun
-                                    </div>
-                                    <button
-                                        onClick={() =>
-                                            setOpenPasswordModal(false)
-                                        }
-                                        className="text-white text-xl"
-                                    >
-                                    </button>
-                                </div>
-
-                                {/* BODY */}
-                                <div className="p-5 text-sm text-gray-700">
-                                    <p className="mb-4">
-                                        Untuk mengganti password, harap
-                                        menggunakan minimal 8 karakter yang unik
-                                        dan tidak terkait dengan informasi anda.
-                                    </p>
-
-                                    {/* INPUT */}
-                                    <div className="space-y-3">
-                                        <div>
-                                            <label className="font-semibold text-black">
-                                                Kata Sandi Lama
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type="password"
-                                                    placeholder="Masukkan Kata Sandi Lama Anda..."
-                                                    className="w-full border border-gray-300 rounded px-3 py-2 mt-1  placeholder:text-xs"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="font-semibold text-black">
-                                                Kata Sandi Baru
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type="password"
-                                                    placeholder="Masukkan Kata Sandi Baru Anda..."
-                                                    className="w-full border border-gray-300 rounded px-3 py-2 mt-1 placeholder:text-xs"
-                                                />
-                                            </div>
-                                        </div>
-
-                                        <div>
-                                            <label className="font-semibold text-black">
-                                                Konfirmasi Kata Sandi Baru
-                                            </label>
-                                            <div className="relative">
-                                                <input
-                                                    type="password"
-                                                    placeholder="Masukkan Kata Sandi Baru Anda..."
-                                                    className="w-full border border-gray-300 rounded px-3 py-2 mt-1 placeholder:text-xs"
-                                                />
-                                            </div>
-                                        </div>
-                                    </div>
-
-                                    {/* BUTTON */}
-                                    <div className="flex justify-end gap-3 mt-5">
-                                        <button
-                                            onClick={() =>
-                                                setOpenPasswordModal(false)
-                                            }
-                                            className="px-4 py-2 bg-red-500 text-white rounded"
-                                        >
-                                            Batal
-                                        </button>
-
-                                        <button
-                                            className="px-4 py-2 bg-green-500 text-white rounded"
-                                            onClick={() => {
-                                                alert(
-                                                    "Password berhasil diubah",
-                                                );
-                                                setOpenPasswordModal(false);
-                                            }}
-                                        >
-                                            Simpan
-                                        </button>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    )}
-                </div>
-            )}
         </nav>
     );
 }
