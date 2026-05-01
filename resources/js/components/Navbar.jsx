@@ -315,6 +315,181 @@ function Navbar({ role }) {
 
                 </div>
             </div>
+
+            {openMenu && (
+                <div className="md:hidden mt-4 bg-[#356c8c] rounded-lg p-4 space-y-3">
+                    {role === "admin" ? (
+                        <>
+                            <div
+                                onClick={() => navigate("/dashboard-admin")}
+                                className="cursor-pointer"
+                            >
+                                Dashboard
+                            </div>
+                            <div
+                                onClick={() => navigate("/kelola-produk")}
+                                className="cursor-pointer"
+                            >
+                                Produk
+                            </div>
+                            <div
+                                onClick={() => navigate("/kelola-kategori")}
+                                className="cursor-pointer"
+                            >
+                                Kategori
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div
+                                onClick={() => navigate("/")}
+                                className="cursor-pointer"
+                            >
+                                Home
+                            </div>
+                            <div
+                                onClick={() => navigate("/kontak")}
+                                className="cursor-pointer"
+                            >
+                                Kontak
+                            </div>
+                        </>
+                    )}
+
+                    <hr />
+
+                    <div
+                        onClick={() => navigate(profilePath)}
+                        className="cursor-pointer"
+                    >
+                        Profile
+                    </div>
+                    <div
+                        onClick={() => navigate(passwordPath)}
+                        className="cursor-pointer"
+                    >
+                        Ubah Password
+                    </div>
+
+                    <div
+                        onClick={() => {
+                            localStorage.removeItem("token");
+                            navigate("/login");
+                        }}
+                        className="text-red-300 cursor-pointer"
+                    >
+                        Logout
+                    </div>
+                </div>
+            )}
+
+            {openPasswordModal && (
+                <div className="fixed inset-0 flex items-center justify-center z-50">
+                    <div
+                        className="absolute inset-0 bg-black opacity-40"
+                        onClick={() => setOpenPasswordModal(false)}
+                    ></div>
+
+                    {openPasswordModal && (
+                        <div className="fixed inset-0 flex items-center justify-center z-50">
+                            <div
+                                className="absolute inset-0 bg-black/30"
+                                onClick={() => setOpenPasswordModal(false)}
+                            ></div>
+
+                            <div className="bg-white rounded-xl shadow-xl w-[400px] overflow-hidden z-50">
+                                <div className="bg-[#1766D3] px-5 py-3 flex justify-between items-center">
+                                    <div className="flex items-center gap-2 text-white font-semibold">
+                                        Ganti Password Akun
+                                    </div>
+                                    <button
+                                        onClick={() =>
+                                            setOpenPasswordModal(false)
+                                        }
+                                        className="text-white text-xl"
+                                    >
+                                    </button>
+                                </div>
+
+                                {/* BODY */}
+                                <div className="p-5 text-sm text-gray-700">
+                                    <p className="mb-4">
+                                        Untuk mengganti password, harap
+                                        menggunakan minimal 8 karakter yang unik
+                                        dan tidak terkait dengan informasi anda.
+                                    </p>
+
+                                    {/* INPUT */}
+                                    <div className="space-y-3">
+                                        <div>
+                                            <label className="font-semibold text-black">
+                                                Kata Sandi Lama
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="password"
+                                                    placeholder="Masukkan Kata Sandi Lama Anda..."
+                                                    className="w-full border border-gray-300 rounded px-3 py-2 mt-1  placeholder:text-xs"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="font-semibold text-black">
+                                                Kata Sandi Baru
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="password"
+                                                    placeholder="Masukkan Kata Sandi Baru Anda..."
+                                                    className="w-full border border-gray-300 rounded px-3 py-2 mt-1 placeholder:text-xs"
+                                                />
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label className="font-semibold text-black">
+                                                Konfirmasi Kata Sandi Baru
+                                            </label>
+                                            <div className="relative">
+                                                <input
+                                                    type="password"
+                                                    placeholder="Masukkan Kata Sandi Baru Anda..."
+                                                    className="w-full border border-gray-300 rounded px-3 py-2 mt-1 placeholder:text-xs"
+                                                />
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* BUTTON */}
+                                    <div className="flex justify-end gap-3 mt-5">
+                                        <button
+                                            onClick={() =>
+                                                setOpenPasswordModal(false)
+                                            }
+                                            className="px-4 py-2 bg-red-500 text-white rounded"
+                                        >
+                                            Batal
+                                        </button>
+
+                                        <button
+                                            className="px-4 py-2 bg-green-500 text-white rounded"
+                                            onClick={() => {
+                                                alert(
+                                                    "Password berhasil diubah",
+                                                );
+                                                setOpenPasswordModal(false);
+                                            }}
+                                        >
+                                            Simpan
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            )}
         </nav>
     );
 }
