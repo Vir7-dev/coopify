@@ -1,5 +1,6 @@
 import React, { useState } from "react";
 import AppLayout from "../Layouts/AppLayout";
+import { useNavigate } from "react-router-dom";
 import { Hamburger, Pill, Shirt, CalendarClock, NotebookPen } from "lucide-react";
 
 const SIZE_PRICES = {
@@ -13,8 +14,8 @@ const SIZE_PRICES = {
 const initialItems = [
     { id: 1, name: "Pringles", category: "Makanan", price: 10000, qty: 1, checked: true, icon: "food", size: null },
     { id: 2, name: "Betadine", category: "Obat", price: 15000, qty: 1, checked: true, icon: "pill", size: null },
-    { id: 3, name: "Buku Sidu", category: "Alat Tulis Kantor", price: 5000, qty: 1, checked: true, icon: "note", size: null },
-    { id: 4, name: "Almamater", category: "Almamater", price: 150000, baseprice: 150000, size: null, qty: 1, checked: false, icon: "shirt", size: null },
+    { id: 3, name: "Buku Sidu", category: "Alat Tulis Kantor", price: 5000, qty: 1, checked: true, icon: "notepen", size: null },
+    { id: 4, name: "Almamater", category: "Almamater", price: 150000, basePrice: 150000, size: null, qty: 1, checked: false, icon: "shirt"},
 ];
 
 const SIZES = ["S", "M", "L", "XL", "XXL"];
@@ -50,7 +51,7 @@ export default function Keranjang() {
     const changeQty = (id, delta) =>
         setItems(items.map((i) => i.id === id ? { ...i, qty: Math.max(1, i.qty + delta) } : i));
     const changeSize = (id, size) =>
-        setItems(items.map((i) => i.id === id ? { ...i, size, price: SIZE_PRICES[size] ?? i.price } : i));
+        setItems(items.map((i) => i.id === id && i.category === "Almamater" ? { ...i, size, price: SIZE_PRICES[size] ?? i.basePrice } : i));
 
     const confirmPickup = () => {
         if (tempDate && tempTime) {
@@ -61,6 +62,8 @@ export default function Keranjang() {
         }
     };
 
+    const navigate = useNavigate();
+
     return (
         <AppLayout showNavbar={false}>
             <div className="w-full relative">
@@ -68,7 +71,7 @@ export default function Keranjang() {
                 {/* PAGE HEADER */}
                 <div className="mb-6 flex items-center gap-3">
                     <button
-                        onClick={() => window.history.back()}
+                        onClick={() => navigate(-1)}
                         className="w-9 h-9 flex items-center justify-center border border-gray-200 rounded-xl bg-white hover:bg-gray-50 transition flex-shrink-0">
                         <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 16 16">
                             <path d="M10 4L6 8l4 4" />
@@ -162,14 +165,19 @@ export default function Keranjang() {
                     </div>
 
                     {/* RIGHT: SUMMARY PANEL */}
-                    <div className="w-full lg:w-80 flex-shrink-0 sticky top-6 self-start h-[calc(100vh-3rem)]">
-                        <div className="bg-[#2D5A74] text-white rounded-xl overflow-hidden flex flex-col h-full">
+                    <div className="w-full lg:w-80 flex-shrink-0 lg:sticky lg:top-6 lg-self-start lg:max-h-[calc(100vh-3rem)]">
+                        <div className="bg-[#2D5A74] text-white rounded-xl overflow-hidden flex flex-col">
 
                             {/* PICKUP */}
                             <div className="px-4 pt-4 pb-3 border-b border-[#1E3F52]">
                                 <p className="text-xs text-gray-400 mb-2">Waktu Pengambilan</p>
                                 <button
-                                    onClick={() => setShowPickupModal(true)}
+                                    onClick={() => {
+                                        if (pickupTime) {
+                                        }
+                                        setTempDate("");
+                                        setTempTime("");
+                                        setShowPickupModal(true);}}
                                     className="w-full flex items-center gap-3 bg-[#1E3F52] rounded-xl px-3 py-3 hover:bg-[#3A6F8A] transition"
                                 >
                                     <div className="w-8 h-8 rounded-lg bg-[#3A6F8A]/20 flex items-center justify-center flex-shrink-0">
@@ -219,7 +227,7 @@ export default function Keranjang() {
                             {/* CHECKOUT */}
                             <div className="px-4 pb-4 mt-auto">
                                 <button
-                                    disabled={checkedItems.length === 0 || hasUnselectedSize}
+                                    disabled={checkedItems.length === 0 || hasUnselectedSize || !pickupTime}
                                     className="w-full py-3 bg-white text-gray-900 font-medium text-sm rounded-xl disabled:bg-gray-600 disabled:text-gray-400 hover:bg-gray-100 transition active:scale-95"
                                 >
                                     Checkout ({checkedItems.length} item)
@@ -241,6 +249,7 @@ export default function Keranjang() {
                                     <input
                                         type="date"
                                         value={tempDate}
+                                        min={new Date().toISOString().split("T")[0]}
                                         onChange={(e) => setTempDate(e.target.value)}
                                         className="w-full border border-gray-200 rounded-xl px-3 py-2.5 text-sm outline-none focus:border-emerald-500"
                                     />
