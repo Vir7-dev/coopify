@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -41,5 +43,26 @@ class AuthController extends Controller
             'message' => 'Logout berhasil'
         ]);
     }
+public function gantiPassword(Request $request)
+{
+    $request->validate([
+        'old_password' => 'required',
+        'new_password' => 'required|min:6|confirmed',
+    ]);
 
+    $user = User::find(1); // sementara ambil user id 1
+
+    if (!Hash::check($request->old_password, $user->password)) {
+        return response()->json([
+            'message' => 'Password lama salah'
+        ], 400);
+    }
+
+    $user->password = Hash::make($request->new_password);
+    $user->save();
+
+    return response()->json([
+        'message' => 'Password berhasil diubah'
+    ]);
+}
 }
