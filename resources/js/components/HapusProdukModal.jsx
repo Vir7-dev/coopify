@@ -2,6 +2,7 @@ export default function DeleteModal({
     showDeleteModal,
     setShowDeleteModal,
     confirmDelete,
+    selectedDelete,
 }) {
     if (!showDeleteModal) return null;
 
