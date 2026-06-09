@@ -1,5 +1,10 @@
-import React, { useState, useRef } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import AppLayout from "../Layouts/AppLayout";
+import axios from "axios";
+import Swal from "sweetalert2";
+import ProdukModal from "../components/ProdukModal";
+import HapusProdukModal from "../components/HapusProdukModal";
+import Pagination from "../components/Pagination";
 import {
     FaSearch,
     FaEdit,
@@ -11,8 +16,7 @@ import {
     FaLayerGroup,
     FaTimes,
     FaCheck,
-    FaChevronLeft,
-    FaChevronRight,
+    FaExclamationTriangle,
 } from "react-icons/fa";
 
 export default function KelolaProduk() {
@@ -23,12 +27,16 @@ export default function KelolaProduk() {
     const [selectedDelete, setSelectedDelete] = useState(null);
     const [search, setSearch] = useState("");
     const [filterKategori, setFilterKategori] = useState("Semua");
+    const [products, setProducts] = useState([]);
 
-    const [form, setForm] = useState({
-        nama: "",
-        stok: "",
-        tgl: "",
-    });
+    useEffect(() => {
+        fetch("http://127.0.0.1:8000/api/produk")
+            .then((res) => res.json())
+            .then((data) => {
+                setProducts(data);
+            })
+            .catch((err) => console.log(err));
+    }, []);
 
     const fileInputRef = useRef(null);
     const [fileName, setFileName] = useState("");
@@ -38,121 +46,25 @@ export default function KelolaProduk() {
     };
 
     const handleFileChange = (event) => {
-        const file = event.target.files[0];
-        if (file) {
-            setFileName(file.name);
-            console.log("File terpilih:", file);
+        const files = event.target.files;
+
+        if (files.length > 0) {
+            setFileName(`${files.length} file dipilih`);
+            console.log(`${files.length} file dipilih`);
         }
     };
 
     const [currentPage, setCurrentPage] = useState(1);
     const itemsPerPage = 10;
 
-    const products = [
-        {
-            id: 1,
-            nama: "Nabati",
-            kategori: "Makanan",
-            harga: 15000,
-            stok: 10,
-            tgl: "2026-04-20",
-        },
-
-        {
-            id: 2,
-            nama: "Teh kotak",
-            kategori: "Minuman",
-            harga: 8000,
-            stok: 15,
-            tgl: "2026-04-20",
-        },
-
-        {
-            id: 3,
-            nama: "Paramex",
-            kategori: "Obat & Kesehatan",
-            harga: 25000,
-            stok: 5,
-            tgl: "2026-04-20",
-        },
-
-        {
-            id: 4,
-            nama: "Notebook",
-            kategori: "Buku & Alat tulis",
-            harga: 5000,
-            stok: 10,
-            tgl: "2026-04-20",
-        },
-
-        {
-            id: 5,
-            nama: "Almamater Polibatam",
-            kategori: "Almamater",
-            harga: 120000,
-            stok: 10,
-            tgl: "2026-04-20",
-        },
-
-        {
-            id: 6,
-            nama: "Roti O",
-            kategori: "Makanan",
-            harga: 7000,
-            stok: 25,
-            tgl: "2026-04-20",
-        },
-
-        {
-            id: 7,
-            nama: "Air Mineral",
-            kategori: " Minuman",
-            harga: 4000,
-            stok: 30,
-            tgl: "2026-04-20",
-        },
-        {
-            id: 8,
-            nama: "Teh Pucuk",
-            kategori: " Minuman",
-            harga: 4000,
-            stok: 30,
-            tgl: "2026-04-20",
-        },
-        {
-            id: 9,
-            nama: "Pena",
-            kategori: " Buku & Alat tulis",
-            harga: 4000,
-            stok: 30,
-            tgl: "2026-04-20",
-        },
-        {
-            id: 10,
-            nama: "Minyak kayu putih",
-            kategori: " Obat & Kesehatan",
-            harga: 4000,
-            stok: 30,
-            tgl: "2026-04-20",
-        },
-        {
-            id: 11,
-            nama: "Roma kelapa",
-            kategori: " Makanan",
-            harga: 4000,
-            stok: 30,
-            tgl: "2026-04-20",
-        },
-    ];
-
     const filteredProducts = products.filter((item) => {
-        const matchSearch = item.nama
+        const matchSearch = item.nama_produk
             .toLowerCase()
             .includes(search.toLowerCase());
-
         const matchKategori =
             filterKategori === "Semua" ||
-            item.kategori.trim().toLowerCase() === filterKategori.toLowerCase();
+            item.kategori?.nama_kategori?.trim().toLowerCase() ===
+                filterKategori.toLowerCase();
 
         return matchSearch && matchKategori;
     });
@@ -171,14 +83,24 @@ export default function KelolaProduk() {
         setSelectedProduct(null);
 
         setForm({
-            nama: "",
-            kategori: "",
-            harga: "",
+            nama_produk: "",
+            harga_jual: "",
             stok: "",
-            tgl: "",
+            tgl_kadaluarsa: "",
+            id_kat_fk_p: "",
+            deskripsi: "",
         });
         setShowModal(true);
     };
+
+    const [form, setForm] = useState({
+        nama_produk: "",
+        harga_jual: "",
+        stok: "",
+        tgl_kadaluarsa: "",
+        id_kat_fk_p: "",
+        deskripsi: "",
+    });
 
     // EDIT
     const handleEdit = (item) => {
@@ -186,11 +108,12 @@ export default function KelolaProduk() {
         setSelectedProduct(item);
 
         setForm({
-            nama: item.nama,
-            kategori: item.kategori,
-            harga: item.harga,
+            nama_produk: item.nama_produk,
+            harga_jual: item.harga_jual,
             stok: item.stok,
-            tgl: item.tgl,
+            tgl_kadaluarsa: item.tgl_kadaluarsa,
+            id_kat_fk_p: item.id_kat_fk_p,
+            deskripsi: item.deskripsi,
         });
 
         setShowModal(true);
@@ -208,25 +131,131 @@ export default function KelolaProduk() {
         });
     };
 
-    const handleSubmit = () => {
-        if (!form.nama || !form.stok || !form.tgl) {
-            alert("Isi semua data!");
-            return;
-        }
+    const handleSubmit = async () => {
+        try {
+            const formData = new FormData();
+            formData.append("nama_produk", form.nama_produk);
+            formData.append("harga_jual", form.harga_jual);
+            formData.append("stok", form.stok);
+            formData.append("tgl_kadaluarsa", form.tgl_kadaluarsa);
+            formData.append("id_kat_fk_p", form.id_kat_fk_p);
+            formData.append("deskripsi", form.deskripsi);
 
-        if (isEdit) {
-            console.log("Update:", form);
-        } else {
-            console.log("Tambah:", form);
-        }
+            const files = fileInputRef.current.files;
 
-        setShowModal(false);
+            for (let i = 0; i < files.length; i++) {
+                formData.append("url_gambar[]", files[i]);
+            }
+
+            for (let [key, value] of formData.entries()) {
+                console.log(key, value);
+            }
+
+            if (isEdit) {
+                formData.append("_method", "PUT");
+                await axios.post(
+                    `http://127.0.0.1:8000/api/produk/${selectedProduct.id_produk}`,
+                    formData,
+                    { headers: { "Content-Type": "multipart/form-data" } },
+                );
+            } else {
+                await axios.post("http://127.0.0.1:8000/api/produk", formData, {
+                    headers: { "Content-Type": "multipart/form-data" },
+                });
+            }
+
+            const res = await axios.get("http://127.0.0.1:8000/api/produk");
+            setProducts(res.data);
+
+            setShowModal(false);
+            setFileName("");
+            setForm({
+                nama_produk: "",
+                harga_jual: "",
+                stok: "",
+                tgl_kadaluarsa: "",
+                id_kat_fk_p: "",
+                deskripsi: "",
+            });
+
+            setShowModal(false);
+
+            setTimeout(() => {
+                Swal.fire({
+                    icon: "success",
+                    title: "Berhasil!",
+                    text: isEdit
+                        ? "Produk berhasil diupdate"
+                        : "Produk berhasil ditambahkan",
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            }, 300);
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal!",
+                text: error.response?.data?.message || "Terjadi kesalahan",
+            });
+        }
+    };
+    const confirmDelete = async () => {
+        try {
+            await axios.delete(
+                `http://127.0.0.1:8000/api/produk/${selectedDelete.id_produk}`,
+            );
+
+            const res = await fetch("http://127.0.0.1:8000/api/produk");
+            const data = await res.json();
+            setProducts(data);
+
+            setShowDeleteModal(false);
+            setSelectedDelete(null);
+
+            setTimeout(() => {
+                Swal.fire({
+                    icon: "success",
+                    title: "Berhasil!",
+                    text: "Produk berhasil dihapus",
+                    timer: 2000,
+                    showConfirmButton: false,
+                });
+            }, 300);
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal!",
+                text: error.response?.data?.message || "Terjadi kesalahan",
+            });
+        }
     };
 
-    const confirmDelete = () => {
-        console.log("Data dihapus:", selectedDelete);
-        setShowDeleteModal(false);
-        setSelectedDelete(null);
+    const stokMenipisCount = products.filter(
+        (item) => Number(item.stok) > 0 && Number(item.stok) <= 5,
+    ).length;
+
+    const getKategoriTerbanyak = () => {
+        const kategoriCount = {};
+
+        products.forEach((item) => {
+            const kategori = item.kategori?.nama_kategori;
+
+            if (kategori) {
+                kategoriCount[kategori] = (kategoriCount[kategori] || 0) + 1;
+            }
+        });
+
+        let maxKategori = "-";
+        let maxJumlah = 0;
+
+        Object.entries(kategoriCount).forEach(([nama, jumlah]) => {
+            if (jumlah > maxJumlah) {
+                maxJumlah = jumlah;
+                maxKategori = nama;
+            }
+        });
+
+        return maxKategori;
     };
 
     return (
@@ -240,54 +269,94 @@ export default function KelolaProduk() {
                         </p>
                     </div>
 
-                    <div className="flex items-center gap-3">
-                        <button
-                            onClick={handleAdd}
-                            className="flex items-center gap-2  bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
-                        >
-                            <FaPlus /> Tambahkan Produk
-                        </button>
-                    </div>
+                    <button
+                        onClick={handleAdd}
+                        className="flex items-center gap-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
+                    >
+                        <FaPlus /> Tambahkan Produk
+                    </button>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 w-full">
-                        <div className="bg-green-100 text-green-600 p-3 rounded-lg">
-                            <FaBox />
+                    <div className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 w-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                        <div className="relative z-10 bg-blue-100 text-blue-600 p-3 rounded-lg group-hover:scale-110 transition duration-300">
+                            <FaLayerGroup />
                         </div>
-                        <div>
+                        <div className="relative z-10">
                             <p className="text-sm text-gray-500">
                                 Total Produk
                             </p>
-                            <h2 className="text-lg font-semibold">55</h2>
-                        </div>
-                    </div>
-
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 w-full">
-                        <div className="bg-orange-100 text-orange-600 p-3 rounded-lg">
-                            <FaCalendarAlt />
-                        </div>
-
-                        <div>
-                            <p className="text-sm text-gray-500">
-                                Terakhir Update
-                            </p>
-                            <h2 className="text-sm font-semibold">
-                                20 April 2026
+                            <h2 className="text-lg font-semibold group-hover:text-blue-600 transition">
+                                {products.length}
                             </h2>
                         </div>
                     </div>
 
-                    <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4 w-full">
-                        <div className="bg-purple-100 text-purple-600 p-3 rounded-lg">
-                            <FaTags />
+                    <div
+                        className={`group relative bg-white p-4 rounded-xl shadow-sm flex items-center justify-between w-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default ${
+                            stokMenipisCount > 0 ? "border border-red-100" : ""
+                        }`}
+                    >
+                        <div
+                            className={`absolute inset-0 opacity-0 group-hover:opacity-100 transition duration-300 ${
+                                stokMenipisCount > 0
+                                    ? "bg-gradient-to-tr from-red-500/10 to-transparent"
+                                    : "bg-gradient-to-tr from-orange-500/10 to-transparent"
+                            }`}
+                        ></div>
+
+                        <div className="relative z-10 flex items-center gap-4">
+                            <div
+                                className={`p-3 rounded-lg group-hover:scale-110 transition duration-300 ${
+                                    stokMenipisCount > 0
+                                        ? "bg-red-100 text-red-600"
+                                        : "bg-orange-100 text-orange-600"
+                                }`}
+                            >
+                                {stokMenipisCount > 0 ? (
+                                    <FaExclamationTriangle />
+                                ) : (
+                                    <FaBox />
+                                )}
+                            </div>
+
+                            <div>
+                                <p className="text-sm text-gray-500">
+                                    Stok Menipis
+                                </p>
+
+                                <h2
+                                    className={`text-lg font-semibold transition ${
+                                        stokMenipisCount > 0
+                                            ? "group-hover:text-red-600"
+                                            : "group-hover:text-orange-600"
+                                    }`}
+                                >
+                                    {stokMenipisCount} Produk
+                                </h2>
+                            </div>
                         </div>
 
-                        <div>
+                        {stokMenipisCount > 0 && (
+                            <span className="relative z-10 px-2 py-1 text-xs font-medium bg-red-100 text-red-600 rounded-full">
+                                Perlu Restock
+                            </span>
+                        )}
+                    </div>
+
+                    <div className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 w-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
+                        <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
+                        <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-lg group-hover:scale-110 transition duration-300">
+                            <FaTags />
+                        </div>
+                        <div className="relative z-10">
                             <p className="text-sm text-gray-500">
                                 Kategori Terbanyak
                             </p>
-                            <h2 className="text-sm font-semibold">Minuman</h2>
+                            <h2 className="text-sm font-semibold group-hover:text-purple-600 transition">
+                                {getKategoriTerbanyak()}
+                            </h2>
                         </div>
                     </div>
                 </div>
@@ -305,12 +374,8 @@ export default function KelolaProduk() {
                             <option value="Semua">Semua Kategori</option>
                             <option value="Makanan">Makanan</option>
                             <option value="Minuman">Minuman</option>
-                            <option value="Obat & Kesehatan">
-                                Obat & Kesehatan
-                            </option>
-                            <option value="Buku & Alat tulis">
-                                Buku & Alat tulis
-                            </option>
+                            <option value="Obat">Obat & Kesehatan</option>
+                            <option value="Buku">Buku & Alat tulis</option>
                             <option value="Almamater">Almamater</option>
                         </select>
 
@@ -329,10 +394,10 @@ export default function KelolaProduk() {
                         </div>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm min-w-[700px]">
+                        <table className="w-full text-sm min-w-[1000px] whitespace-nowrap">
                             <thead className="bg-gray-50 text-gray-500">
-                                <tr>
-                                    <th className="px-4 py-3">No</th>
+                                <tr className="">
+                                    <th className="px-4 py-3 ">No</th>
                                     <th className="px-4 py-3">Nama Produk</th>
                                     <th className="px-4 py-3">Nama Kategori</th>
                                     <th className="px-4 py-3">Harga</th>
@@ -340,50 +405,68 @@ export default function KelolaProduk() {
                                     <th className="px-4 py-3">
                                         Tanggal Kadalurasa
                                     </th>
+                                    <th className="px-4 py-3">Deskripsi</th>
                                     <th className="px-4 py-3">Aksi</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {currentItems.map((item, i) => (
                                     <tr
-                                        key={item.id}
+                                        key={item.id_produk}
                                         className="hover:bg-gray-50"
                                     >
-                                        <td className="px-4 py-3 text-gray-400">
+                                        <td className="px-4 py-3 text-gray-400 ">
                                             {indexOfFirstItem + i + 1}
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3">
-                                            <p className="font-medium">
-                                                {item.nama}
-                                            </p>
+                                        <td className="border-b border-gray-200 px-4 py-3 ">
+                                            <div className="flex items-center gap-3">
+                                                <div className=" ">
+                                                    {item.gambar?.length > 0 ? (
+                                                        <img
+                                                            src={`http://127.0.0.1:8000/storage/${item.gambar[0].url_gambar}`}
+                                                            alt={
+                                                                item.nama_produk
+                                                            }
+                                                            className="w-12 h-12 rounded-lg object-cover"
+                                                        />
+                                                    ) : (
+                                                        <div className="w-12 h-12 rounded-lg bg-gray-100 flex items-center justify-center">
+                                                            <FaBox className="text-gray-400" />
+                                                        </div>
+                                                    )}
+                                                </div>
+                                                <p className="font-medium">
+                                                    {item.nama_produk}
+                                                </p>
+                                            </div>
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3">
+                                        <td className="border-b border-gray-200 px-4 py-3 ">
                                             <div className="flex items-center gap-3">
-                                                <div className="w-9 h-9 bg-blue-100 text-blue-600 flex items-center justify-center rounded-full">
-                                                    <FaBox size={14} />
-                                                </div>
                                                 <div>
-                                                    <div>
-                                                        <p className="font-medium">
-                                                            {item.kategori}
-                                                        </p>
-                                                        <p className="text-xs text-gray-400">
-                                                            Kategori produk{" "}
-                                                            {item.kategori.toLowerCase()}
-                                                        </p>
-                                                    </div>
+                                                    <p className="font-medium">
+                                                        {
+                                                            item.kategori
+                                                                ?.nama_kategori
+                                                        }
+                                                    </p>
+                                                    <p className="text-xs text-gray-400">
+                                                        Kategori produk{" "}
+                                                        {item.kategori?.nama_kategori?.toLowerCase()}
+                                                    </p>
                                                 </div>
                                             </div>
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-700">
+                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-700 ">
                                             Rp{" "}
-                                            {item.harga.toLocaleString("id-ID")}
+                                            {Number(
+                                                item.harga_jual,
+                                            ).toLocaleString("id-ID")}
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3">
+                                        <td className="border-b border-gray-200 px-4 py-3 ">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-xs ${
                                                     item.stok <= 5
@@ -391,24 +474,30 @@ export default function KelolaProduk() {
                                                         : "bg-green-100 text-green-600"
                                                 }`}
                                             >
-                                                {item.stok}
+                                                {item.stok} stok
                                             </span>
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-500">
+                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-500 ">
                                             {new Date(
-                                                item.tgl,
+                                                item.tgl_kadaluarsa,
                                             ).toLocaleDateString("id-ID", {
                                                 day: "numeric",
                                                 month: "long",
                                                 year: "numeric",
                                             })}
-                                            <p className="text-xs text-gray-400">
-                                                10:30 WIB
-                                            </p>
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3">
+                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-500">
+                                            <div
+                                                className="max-w-[200px] truncate"
+                                                title={item.deskripsi}
+                                            >
+                                                {item.deskripsi}
+                                            </div>
+                                        </td>
+
+                                        <td className="border-b border-gray-200 px-4 py-3 ">
                                             <div className="flex gap-2">
                                                 <button
                                                     onClick={() =>
@@ -437,205 +526,35 @@ export default function KelolaProduk() {
                         </table>
                     </div>
 
-                    {/* PAGINATION */}
-                    <div className="flex justify-between items-center p-4 text-sm text-gray-500">
-                        <p>
-                            Menampilkan {currentItems.length} dari{" "}
-                            {products.length} produk
-                        </p>
-                        <div className="flex items-center gap-1">
-                            <button
-                                onClick={() => setCurrentPage(currentPage - 1)}
-                                disabled={currentPage === 1}
-                                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition-colors ${currentPage === 1 ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50" : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"}`}
-                            >
-                                <FaChevronLeft size={10} /> Previous
-                            </button>
-                            {[...Array(totalPages)].map((_, i) => (
-                                <button
-                                    key={i}
-                                    onClick={() => setCurrentPage(i + 1)}
-                                    className={`px-2 py-1 text-xs rounded-md border ${currentPage === i + 1 ? "bg-blue-500 text-white border-blue-500" : "bg-gray-100 hover:bg-gray-200"}`}
-                                >
-                                    {i + 1}
-                                </button>
-                            ))}
-                            <button
-                                onClick={() => setCurrentPage(currentPage + 1)}
-                                disabled={currentPage === totalPages}
-                                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition-colors ${currentPage === totalPages ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50" : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"}`}
-                            >
-                                Next <FaChevronRight size={10} />
-                            </button>
-                        </div>
-                    </div>
+                    <Pagination
+                        currentItems={currentItems.length}
+                        totalItems={products.length}
+                        currentPage={currentPage}
+                        totalPages={totalPages}
+                        setCurrentPage={setCurrentPage}
+                    />
                 </div>
-
-                {/* MODAL TAMBAH & EDIT */}
-                {showModal && (
-                    <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
-                        <div className="bg-white w-full max-w-[400px] rounded-[10px] shadow-2xl overflow-hidden">
-                            <div className="bg-[#0099D5] text-white px-5 py-3 flex justify-between items-center">
-                                <div className="flex items-center gap-2">
-                                    <FaBox className="text-white text-lg" />
-                                    <h2 className="text-lg font-bold tracking-tight">
-                                        {isEdit
-                                            ? "Edit Produk"
-                                            : "Tambah Produk"}
-                                    </h2>
-                                </div>
-                                <button
-                                    onClick={() => setShowModal(false)}
-                                    className="hover:scale-110 transition-transform"
-                                >
-                                    <FaTimes size={16} />
-                                </button>
-                            </div>
-
-                            <div className="p-5 space-y-3.5">
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                            Nama Produk
-                                        </label>
-                                        <input
-                                            type="text"
-                                            name="nama"
-                                            placeholder="Nama produk"
-                                            value={form.nama}
-                                            onChange={handleChange}
-                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                            Harga Produk
-                                        </label>
-                                        <input
-                                            type="number"
-                                            name="harga"
-                                            placeholder="Harga"
-                                            value={form.harga}
-                                            onChange={handleChange}
-                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
-                                        />
-                                    </div>
-                                </div>
-
-                                <div className="space-y-1">
-                                    <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                        Upload Gambar
-                                    </label>
-
-                                    <input
-                                        type="file"
-                                        ref={fileInputRef}
-                                        onChange={handleFileChange}
-                                        className="hidden"
-                                        accept="image/*"
-                                    />
-
-                                    <div
-                                        onClick={handleUploadClick}
-                                        className="border-2 border-dashed border-gray-200 rounded-xl py-4 flex flex-col items-center justify-center bg-gray-50 hover:bg-gray-100 transition-colors cursor-pointer"
-                                    >
-                                        <div className="bg-[#1D63D3] p-1.5 rounded text-white mb-1">
-                                            <FaPlus size={10} />
-                                        </div>
-                                        <span className="text-[10px] text-gray-400 font-medium">
-                                            {fileName
-                                                ? fileName
-                                                : "Choose File"}
-                                        </span>
-                                    </div>
-                                </div>
-
-                                <div className="grid grid-cols-2 gap-3">
-                                    <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                            Jumlah Stok
-                                        </label>
-                                        <input
-                                            type="number"
-                                            name="stok"
-                                            placeholder="Stok"
-                                            value={form.stok}
-                                            onChange={handleChange}
-                                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
-                                        />
-                                    </div>
-
-                                    <div className="space-y-1">
-                                        <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                            Tgl Kadaluarsa
-                                        </label>
-                                        <div className="relative">
-                                            <input
-                                                type="date"
-                                                name="tgl"
-                                                value={form.tgl}
-                                                onChange={handleChange}
-                                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
-                                            />
-                                        </div>
-                                    </div>
-                                </div>
-
-                                <div className="flex gap-3 pt-2">
-                                    <button
-                                        onClick={handleSubmit}
-                                        className="flex-1 bg-[#1D63D3] hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
-                                    >
-                                        Simpan
-                                    </button>
-
-                                    <button
-                                        onClick={() => setShowModal(false)}
-                                        className="flex-1 bg-[#0099D5] hover:bg-[#0088C0] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
-                                    >
-                                        Batal
-                                    </button>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                )}
-
-                {/* MODAL HAPUS */}
-                {showDeleteModal && (
-                    <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-                        <div className="bg-white w-[350px] rounded-xl shadow-lg p-5">
-                            <h2 className="text-lg font-semibold mb-2">
-                                Konfirmasi Hapus
-                            </h2>
-
-                            <p className="text-sm text-gray-500 mb-4">
-                                Yakin mau hapus produk{" "}
-                                <span className="font-semibold text-black">
-                                    {selectedDelete?.nama}
-                                </span>
-                            </p>
-
-                            <div className="flex gap-3">
-                                <button
-                                    onClick={confirmDelete}
-                                    className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm"
-                                >
-                                    Hapus
-                                </button>
-
-                                <button
-                                    onClick={() => setShowDeleteModal(false)}
-                                    className="flex-1 bg-gray-300 hover:bg-gray-400 text-black py-2 rounded-lg text-sm"
-                                >
-                                    Batal
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
+
+            <ProdukModal
+                showModal={showModal}
+                setShowModal={setShowModal}
+                isEdit={isEdit}
+                form={form}
+                handleChange={handleChange}
+                handleSubmit={handleSubmit}
+                fileInputRef={fileInputRef}
+                handleFileChange={handleFileChange}
+                handleUploadClick={handleUploadClick}
+                fileName={fileName}
+            />
+
+            <HapusProdukModal
+                showDeleteModal={showDeleteModal}
+                setShowDeleteModal={setShowDeleteModal}
+                confirmDelete={confirmDelete}
+                selectedDelete={selectedDelete}
+            />
         </AppLayout>
     );
 }
