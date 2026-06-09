@@ -1,54 +1,80 @@
 import React, { useState, useEffect } from "react";
 import AppLayout from "../Layouts/AppLayout";
+import { router } from "@inertiajs/react";
 
-export default function Pembayaran({ total = 19000000, metode = "QRIS" }) {
+export default function Pembayaran({ total = 19000000, metode = "QRIS", pesanan_id, snap_token: initialToken }) {
     const [seconds, setSeconds] = useState(599);
+    const [snapToken, setSnapToken] = useState(initialToken || null);
+    const [status, setStatus] = useState("idle"); // idle | loading | waiting | paid | failed
 
+    // Countdown
     useEffect(() => {
-        if (seconds <= 0) return;
+        if (seconds <= 0 || status === "paid") return;
         const interval = setInterval(() => setSeconds((s) => s - 1), 1000);
         return () => clearInterval(interval);
-    }, [seconds]);
+    }, [seconds, status]);
+
+    // Load Snap.js sekali
+    useEffect(() => {
+        const script = document.createElement("script");
+        script.src = import.meta.env.VITE_MIDTRANS_SNAP_URL || "https://app.sandbox.midtrans.com/snap/snap.js";
+        script.setAttribute("data-client-key", import.meta.env.VITE_MIDTRANS_CLIENT_KEY);
+        script.async = true;
+        document.body.appendChild(script);
+        return () => document.body.removeChild(script);
+    }, []);
+
+    const bayar = async () => {
+        setStatus("loading");
+
+        let token = snapToken;
+
+        // Kalau belum ada token, minta ke backend
+        if (!token) {
+            const res = await fetch("/pembayaran/create", {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "X-CSRF-TOKEN": document.querySelector('meta[name="csrf-token"]').content,
+                },
+                body: JSON.stringify({ pesanan_id }),
+            });
+            const data = await res.json();
+            token = data.snap_token;
+            setSnapToken(token);
+        }
+
+        // Buka popup Snap Midtrans
+        window.snap.pay(token, {
+            onSuccess: () => {
+                setStatus("paid");
+                // Redirect ke halaman sukses setelah 1.5 detik
+                setTimeout(() => router.visit("/"), 1500);
+            },
+            onPending: () => setStatus("waiting"),
+            onError: () => setStatus("failed"),
+            onClose: () => setStatus("idle"),
+        });
+    };
 
     const menit = String(Math.floor(seconds / 60)).padStart(2, "0");
     const detik = String(seconds % 60).padStart(2, "0");
     const isUrgent = seconds <= 120;
-
     const fmt = (n) => "Rp " + n.toLocaleString("id-ID");
 
     return (
         <AppLayout showNavbar={false}>
             <div className="w-full min-h-[calc(100vh-6rem)] flex flex-col">
+                {/* ... header yang sama ... */}
 
-                {/* PAGE HEADER */}
-                <div className="mb-6 flex items-center justify-between flex-shrink-0">
-                    <button
-                        onClick={() => window.history.back()}
-                        className="flex items-center gap-2 border border-gray-200 bg-white hover:bg-gray-50 transition rounded-xl px-4 py-2"
-                    >
-                        <svg className="w-4 h-4 text-gray-600" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" viewBox="0 0 16 16">
-                            <path d="M10 4L6 8l4 4" />
-                        </svg>
-                        <span className="text-sm font-medium text-gray-700">Kembali</span>
-                    </button>
-
-                    <h1 className="text-xl font-semibold text-gray-800">Pembayaran</h1>
-
-                    <div className="bg-gray-900 text-white text-sm font-semibold px-4 py-2 rounded-xl">
-                        {metode}
-                    </div>
-                </div>
-
-                {/* MAIN CARD — center horizontal & vertical */}
                 <div className="flex-1 flex items-center justify-center">
                     <div className="w-full max-w-lg">
                         <div className="bg-gray-800 rounded-2xl overflow-hidden">
-
-                            {/* TOP — total & timer */}
-                            <div className={`px-5 py-4 flex items-center justify-between transition-colors duration-500 ${isUrgent ? "bg-red-700" : "bg-emerald-600"}`}>
+                            {/* TOP */}
+                            <div className={`px-5 py-4 flex items-center justify-between ${isUrgent ? "bg-red-700" : "bg-emerald-600"}`}>
                                 <div>
                                     <p className="text-xs text-white/70 mb-1">Total tagihan</p>
-                                    <p className="text-2xl font-semibold text-white tracking-tight">{fmt(total)}</p>
+                                    <p className="text-2xl font-semibold text-white">{fmt(total)}</p>
                                 </div>
                                 <div className={`flex items-center gap-2 rounded-xl px-4 py-2 ${isUrgent ? "bg-red-900/40" : "bg-white/15"}`}>
                                     <div>
@@ -60,67 +86,35 @@ export default function Pembayaran({ total = 19000000, metode = "QRIS" }) {
                             </div>
 
                             {/* BODY */}
-                            <div className="px-5 py-4">
-
-                                {/* STATUS */}
-                                <div className="flex items-center gap-2 mb-4">
-                                    <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                                    <span className="text-sm text-emerald-400 font-medium">Menunggu pembayaran...</span>
-                                </div>
-
-                                {/* QR FRAME */}
-                                <div className="border border-gray-600 rounded-xl p-4 mb-4 flex flex-col items-center gap-3">
-                                    {/* QRIS logo */}
-                                    <div className="flex items-center gap-2 w-full">
-                                        <div className="bg-red-600 rounded px-2 py-0.5">
-                                            <span className="text-white text-xs font-bold tracking-widest">QRIS</span>
-                                        </div>
-                                        <div>
-                                            <p className="text-xs text-gray-400 leading-tight">QR Code Standar</p>
-                                            <p className="text-xs text-gray-400 leading-tight">Pembayaran Nasional</p>
-                                        </div>
+                            <div className="px-5 py-6 flex flex-col items-center gap-4">
+                                {status === "paid" && (
+                                    <div className="text-emerald-400 text-center">
+                                        <p className="text-2xl font-bold">✓ Pembayaran Berhasil!</p>
+                                        <p className="text-sm text-gray-400 mt-1">Mengalihkan...</p>
                                     </div>
+                                )}
 
-                                    {/* QR IMAGE */}
-                                    <div className="relative w-48 h-48 bg-white rounded-lg flex items-center justify-center">
-                                        {["top-2 left-2 border-t-2 border-l-2 rounded-tl", "top-2 right-2 border-t-2 border-r-2 rounded-tr", "bottom-2 left-2 border-b-2 border-l-2 rounded-bl", "bottom-2 right-2 border-b-2 border-r-2 rounded-br"].map((cls, i) => (
-                                            <span key={i} className={`absolute w-6 h-6 border-emerald-500 ${cls}`} />
-                                        ))}
-                                        {/* Ganti dengan <img src={qrCodeUrl} className="w-full h-full object-contain p-2" /> kalau sudah ada dari backend */}
-                                        <p className="text-gray-400 text-xs text-center px-4">QR Code akan muncul di sini</p>
-                                    </div>
-                                </div>
+                                {status === "failed" && (
+                                    <p className="text-red-400 text-sm">Pembayaran gagal. Silakan coba lagi.</p>
+                                )}
 
-                                {/* STEPS */}
-                                <div className="space-y-3 mb-4">
-                                    {[
-                                        "Buka aplikasi e-wallet atau mobile banking kamu",
-                                        "Pilih menu Scan QR atau Bayar QRIS",
-                                        "Arahkan kamera ke QR Code di atas dan konfirmasi pembayaran",
-                                    ].map((text, i) => (
-                                        <div key={i} className="flex items-start gap-3">
-                                            <span className="w-5 h-5 rounded-full bg-emerald-600/20 text-emerald-400 text-xs font-semibold flex items-center justify-center flex-shrink-0 mt-0.5">
-                                                {i + 1}
-                                            </span>
-                                            <p className="text-sm text-gray-300 leading-relaxed">{text}</p>
-                                        </div>
-                                    ))}
-                                </div>
+                                {status !== "paid" && (
+                                    <button
+                                        onClick={bayar}
+                                        disabled={status === "loading" || seconds <= 0}
+                                        className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition"
+                                    >
+                                        {status === "loading" ? "Memuat..." : "Bayar Sekarang"}
+                                    </button>
+                                )}
 
-                                {/* TRUST */}
-                                <div className="flex items-center justify-center gap-2 pt-3 border-t border-gray-700">
-                                    <svg className="w-3.5 h-3.5 text-gray-400" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" viewBox="0 0 14 14">
-                                        <rect x="2" y="6" width="10" height="7" rx="2" />
-                                        <path d="M4.5 6V4a2.5 2.5 0 015 0v2" />
-                                    </svg>
-                                    <span className="text-xs text-gray-400 font-medium">Transaksi aman & Terenkripsi</span>
-                                </div>
-
+                                <p className="text-xs text-gray-500">
+                                    Klik tombol di atas → Popup QRIS Midtrans akan terbuka
+                                </p>
                             </div>
                         </div>
                     </div>
                 </div>
-
             </div>
         </AppLayout>
     );
