@@ -1,6 +1,6 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import AppLayout from "../Layouts/AppLayout";
-import { useParams } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import {
     FaShoppingCart,
     FaSearch,
@@ -11,6 +11,63 @@ import {
     FaRedo,
     FaTimes,
 } from "react-icons/fa";
+
+function ProductImageSlider({ images }) {
+    const [current, setCurrent] = useState(0);
+    const [isHover, setIsHover] = useState(false);
+
+    useEffect(() => {
+        if (!isHover || !images || images.length <= 1) return;
+
+        const interval = setInterval(() => {
+            setCurrent((prev) =>
+                prev === images.length - 1 ? 0 : prev + 1
+            );
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [isHover, images]);
+
+    if (!images || images.length === 0) {
+        return (
+            <div className="h-28 flex items-center justify-center text-gray-400">
+                Tidak ada gambar
+            </div>
+        );
+    }
+
+    return (
+        <div
+            className="relative h-full w-full flex items-center justify-center"
+            onMouseEnter={() => setIsHover(true)}
+            onMouseLeave={() => {
+                setIsHover(false);
+                setCurrent(0);
+            }}
+        >
+            <img
+                src={`http://127.0.0.1:8000/storage/${images[current].url_gambar}`}
+                alt=""
+                className="h-28 object-contain mx-auto transition-all duration-500"
+            />
+
+            {images.length > 1 && (
+                <div className="absolute bottom-2 left-0 right-0 flex justify-center gap-1">
+                    {images.map((_, i) => (
+                        <span
+                            key={i}
+                            className={`w-2 h-2 rounded-full transition-all ${
+                                current === i
+                                    ? "bg-[#1297C9] w-4"
+                                    : "bg-gray-300"
+                            }`}
+                        />
+                    ))}
+                </div>
+            )}
+        </div>
+    );
+}
 
 export default function Produk() {
     const { kategori } = useParams();
@@ -24,229 +81,58 @@ export default function Produk() {
         setMaxHarga("");
     };
 
-    const allProducts = {
-        makanan: [
-            {
-                id: 1,
-                nama: "Pocky",
-                harga: 5000,
-                stok: 10,
-                terjual: 120,
-                gambar: "/img/pocky.jpg",
-            },
-            {
-                id: 2,
-                nama: "Boncabe",
-                harga: 6000,
-                stok: 5,
-                terjual: 80,
-                gambar: "/img/boncabe.jpg",
-            },
-            {
-                id: 3,
-                nama: "Brownies",
-                harga: 8000,
-                stok: 5,
-                terjual: 80,
-                gambar: "/img/brownies.jpg",
-            },
-            {
-                id: 4,
-                nama: "Chitato",
-                harga: 7000,
-                stok: 5,
-                terjual: 80,
-                gambar: "/img/chitato.jpg",
-            },
-            {
-                id: 5,
-                nama: "Yupi",
-                harga: 2000,
-                stok: 5,
-                terjual: 80,
-                gambar: "/img/yupi.jpg",
-            },
-            {
-                id: 6,
-                nama: "Yupi",
-                harga: 7000,
-                stok: 5,
-                terjual: 80,
-                gambar: "/img/yupi.jpg",
-            },
-        ],
-        minuman: [
-            {
-                id: 7,
-                nama: "Teh Botol",
-                harga: 5000,
-                stok: 20,
-                terjual: 200,
-                gambar: "/img/teh_botol.jpg",
-            },
-            {
-                id: 8,
-                nama: "Teh Pucuk",
-                harga: 3000,
-                stok: 30,
-                terjual: 300,
-                gambar: "/img/teh_pucuk.jpg",
-            },
-            {
-                id: 9,
-                nama: "Pocari",
-                harga: 3000,
-                stok: 30,
-                terjual: 300,
-                gambar: "/img/pocari.jpg",
-            },
-            {
-                id: 10,
-                nama: "Nipis Madu",
-                harga: 3000,
-                stok: 30,
-                terjual: 300,
-                gambar: "/img/nipis_madu.jpg",
-            },
-            {
-                id: 11,
-                nama: "Good Day",
-                harga: 3000,
-                stok: 30,
-                terjual: 300,
-                gambar: "/img/good_day.jpg",
-            },
-            {
-                id: 12,
-                nama: "Good Day",
-                harga: 3000,
-                stok: 30,
-                terjual: 300,
-                gambar: "/img/good_day.jpg",
-            },
-        ],
-        "alat-tulis": [
-            {
-                id: 13,
-                nama: "Pulpen",
-                harga: 3000,
-                stok: 50,
-                terjual: 150,
-                gambar: "/img/pena.jpg",
-            },
-            {
-                id: 14,
-                nama: "Buku",
-                harga: 10000,
-                stok: 20,
-                terjual: 90,
-                gambar: "/img/buku.jpg",
-            },
-            {
-                id: 15,
-                nama: "Lem",
-                harga: 10000,
-                stok: 20,
-                terjual: 90,
-                gambar: "/img/lem.jpg",
-            },
-            {
-                id: 16,
-                nama: "Penghapus",
-                harga: 10000,
-                stok: 20,
-                terjual: 90,
-                gambar: "/img/penghapus.jpg",
-            },
-            {
-                id: 17,
-                nama: "Tip-X",
-                harga: 10000,
-                stok: 20,
-                terjual: 90,
-                gambar: "/img/tipex.jpg",
-            },
-            {
-                id: 18,
-                nama: "Tip-X",
-                harga: 10000,
-                stok: 20,
-                terjual: 90,
-                gambar: "/img/tipex.jpg",
-            },
-        ],
-        obat: [
-            {
-                id: 19,
-                nama: "Hansaplas",
-                harga: 5000,
-                stok: 15,
-                terjual: 70,
-                gambar: "/img/hansaplas.jpg",
-            },
-            {
-                id: 20,
-                nama: "Minyak Kayu Putih",
-                harga: 9000,
-                stok: 12,
-                terjual: 55,
-                gambar: "/img/minyak.jpg",
-            },
-            {
-                id: 21,
-                nama: "Promag",
-                harga: 6000,
-                stok: 8,
-                terjual: 40,
-                gambar: "/img/promag.jpg",
-            },
-            {
-                id: 22,
-                nama: "Tolak Angin",
-                harga: 4000,
-                stok: 20,
-                terjual: 120,
-                gambar: "/img/tolak_angin.jpg",
-            },
-            {
-                id: 23,
-                nama: "Insto",
-                harga: 4000,
-                stok: 20,
-                terjual: 120,
-                gambar: "/img/insto.jpg",
-            },
-            {
-                id: 24,
-                nama: "Insto",
-                harga: 4000,
-                stok: 20,
-                terjual: 120,
-                gambar: "/img/insto.jpg",
-            },
-        ],
-        almamater: [
-            {
-                id: 25,
-                nama: "Jaket Almamater",
-                harga: 200000,
-                stok: 5,
-                terjual: 30,
-                gambar: "/img/almet.png",
-            },
-        ],
-    };
+    const [products, setProducts] = useState([]);
 
-    const products = allProducts[kategori] || [];
+    useEffect(() => {
+        fetch("http://127.0.0.1:8000/api/produk")
+            .then((res) => res.json())
+            .then((data) => {
+                let filteredKategori = data;
+
+                if (kategori === "makanan") {
+                    filteredKategori = data.filter(
+                        (item) =>
+                            item.kategori?.nama_kategori?.toLowerCase() ===
+                            "makanan",
+                    );
+                } else if (kategori === "minuman") {
+                    filteredKategori = data.filter(
+                        (item) =>
+                            item.kategori?.nama_kategori?.toLowerCase() ===
+                            "minuman",
+                    );
+                } else if (kategori === "obat") {
+                    filteredKategori = data.filter((item) =>
+                        item.kategori?.nama_kategori
+                            ?.toLowerCase()
+                            .includes("obat"),
+                    );
+                } else if (kategori === "alat-tulis") {
+                    filteredKategori = data.filter((item) =>
+                        item.kategori?.nama_kategori
+                            ?.toLowerCase()
+                            .includes("alat"),
+                    );
+                } else if (kategori === "almamater") {
+                    filteredKategori = data.filter(
+                        (item) =>
+                            item.kategori?.nama_kategori?.toLowerCase() ===
+                            "almamater",
+                    );
+                }
+
+                setProducts(filteredKategori);
+            });
+    }, [kategori]);
 
     let filtered = products.filter((item) =>
-        item.nama.toLowerCase().includes(search.toLowerCase()),
+        item.nama_produk?.toLowerCase().includes(search.toLowerCase()),
     );
 
     filtered = filtered.filter((item) => {
         const min = minHarga ? parseInt(minHarga) : 0;
         const max = maxHarga ? parseInt(maxHarga) : Infinity;
-        return item.harga >= min && item.harga <= max;
+        return item.harga_jual >= min && item.harga_jual <= max;
     });
 
     // SORTING
@@ -255,6 +141,8 @@ export default function Produk() {
     } else if (sortBy === "terbaru") {
         filtered.sort((a, b) => b.id - a.id);
     }
+
+    const navigate = useNavigate();
 
     return (
         <AppLayout role="pengguna">
@@ -339,25 +227,20 @@ export default function Produk() {
             </div>
 
             <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-
                 {filtered.map((item) => (
                     <div
-                        key={item.id}
+                        key={item.id_produk}
+                        onClick={() => navigate(`/detail-produk/${item.id_produk}`)}
                         className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100"
                     >
-
                         <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
-                            <img
-                                src={item.gambar}
-                                alt={item.nama}
-                                className="h-28 object-contain hover:scale-110 transition"
-                            />
+                            <ProductImageSlider images={item.gambar} />
                             <FaHeart className="absolute top-2 left-2 text-gray-300 hover:text-red-500 cursor-pointer" />
                         </div>
 
                         <div className="mt-3 space-y-1">
                             <h3 className="text-sm font-semibold text-gray-800">
-                                {item.nama}
+                                {item.nama_produk}
                             </h3>
 
                             <p className="text-xs text-gray-500">
@@ -365,7 +248,7 @@ export default function Produk() {
                             </p>
 
                             <p className="text-base font-bold text-[#1297C9]">
-                                Rp {item.harga.toLocaleString("id-ID")}
+                                Rp {item.harga_jual.toLocaleString("id-ID")}
                             </p>
 
                             <p

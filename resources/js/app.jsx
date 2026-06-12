@@ -15,6 +15,7 @@ import DetailAlmet from "./Pages/DetailAlmet";
 import Search from "./Pages/Search";
 import DashboardAdmin from "./Pages/DashboardAdmin";
 import Dashboard from "./Pages/Dashboard";
+import DetailProduk from "./Pages/DetailProduk";
 
 function App() {
     return (
@@ -31,12 +32,11 @@ function App() {
             <Route path="/profil-admin" element={<ProfilAdmin />} />
             <Route path="/edit-profil" element={<EditProfil />} />
             <Route path="/produk" element={<Produk />} />
-            <Route path="/product/:id" element={<DetailProduk/>} />
-            <Route path="/detail-almet" element={<DetailAlmet />} />
-            <Route path="/search" element={<Search/>} />
             <Route path="/dashboard-admin" element={<DashboardAdmin />} />
 
-            <Route path="*" element={<Dashboard />} />
+
+
+
         </Routes>
     );
 }
