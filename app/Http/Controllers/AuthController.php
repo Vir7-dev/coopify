@@ -41,7 +41,7 @@ class AuthController extends Controller
             'message' => 'Logout berhasil'
         ]);
     }
-
+//
     public function gantiPassword(Request $request)
     {
         $request->validate([

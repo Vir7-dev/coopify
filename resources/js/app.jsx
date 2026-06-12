@@ -11,11 +11,9 @@ import EditProfil from "./Pages/EditProfil";
 import Produk from "./Pages/Produk";
 import Login from "./Pages/Login";
 import DetailProduk from "./Pages/DetailProduk";
-import DetailAlmet from "./Pages/DetailAlmet";
 import Search from "./Pages/Search";
 import DashboardAdmin from "./Pages/DashboardAdmin";
 import Dashboard from "./Pages/Dashboard";
-import DetailProduk from "./Pages/DetailProduk";
 
 function App() {
     return (

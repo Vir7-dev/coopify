@@ -31,7 +31,6 @@ function Login() {
         }),
       });
 
-      // 🔥 FIX UTAMA (PAKAI JSON BUKAN TEXT)
       const data = await res.json();
 
       if (res.ok) {
@@ -67,7 +66,7 @@ function Login() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    handleLogin(); // 🔥 ENTER TETAP BERFUNGSI
+    handleLogin();
   };
 
   return (

@@ -11,15 +11,13 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ================= AUTH =================
+// ================= AUTH =================//
 Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
-// ================= PRODUCTS =================
+// ================= PRODUCTS =================//
 Route::get('/products', [ProductController::class, 'index']);
 
-// ================= CART =================
-Route::post('/cart/add', [KeranjangController::class, 'add']);
 
 // ================= PEMBAYARAN =================
 Route::middleware('auth')->group(function () {
