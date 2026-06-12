@@ -3,43 +3,42 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
 class AuthController extends Controller
 {
     public function login(Request $request)
     {
-        // validasi input
-        $credentials = $request->validate([
+        $request->validate([
             'nim_nik' => 'required',
             'password' => 'required',
         ]);
 
-        // attempt login
-        if (Auth::attempt($credentials)) {
-            $request->session()->regenerate();
+        $user = User::where('nim_nik', $request->nim_nik)->first();
 
+        if (!$user) {
             return response()->json([
-                'message' => 'Login berhasil',
-                'user' => Auth::user()
-            ]);
+                'message' => 'NIM/NIK tidak ditemukan'
+            ], 401);
+        }
+
+        //trim biar tidak gagal karena spasi
+        if (trim($user->password) !== trim($request->password)) {
+            return response()->json([
+                'message' => 'Password salah'
+            ], 401);
         }
 
         return response()->json([
-            'message' => 'NIM/NIK atau password salah'
-        ], 401);
+            'message' => 'Login berhasil',
+            'user' => $user
+        ]);
     }
 
     public function logout(Request $request)
     {
-        Auth::logout();
-
-        $request->session()->invalidate();
-        $request->session()->regenerateToken();
-
         return response()->json([
             'message' => 'Logout berhasil'
         ]);
     }
-
 }
