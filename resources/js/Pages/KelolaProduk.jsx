@@ -394,8 +394,8 @@ export default function KelolaProduk() {
                         </div>
                     </div>
                     <div className="overflow-x-auto">
-                        <table className="w-full text-sm min-w-[1000px] whitespace-nowrap">
-                            <thead className="bg-gray-50 text-gray-500">
+                        <table className="w-full text-sm min-w-[1000px] whitespace-nowrap p-5">
+                            <thead className="bg-gray-100 text-gray-500">
                                 <tr className="">
                                     <th className="px-4 py-3 ">No</th>
                                     <th className="px-4 py-3">Nama Produk</th>

@@ -12,6 +12,7 @@ import Produk from "./Pages/Produk";
 import Login from "./Pages/Login";
 import DashboardAdmin from "./Pages/DashboardAdmin";
 import Dashboard from "./Pages/Dashboard";
+import DetailProduk from "./Pages/DetailProduk";
 
 function App() {
     return (
@@ -28,9 +29,12 @@ function App() {
             <Route path="/profil-admin" element={<ProfilAdmin />} />
             <Route path="/edit-profil" element={<EditProfil />} />
             <Route path="/produk" element={<Produk />} />
+            <Route path="/detail-produk/:id" element={<DetailProduk />} />
             <Route path="/dashboard-admin" element={<DashboardAdmin />} />
 
-            <Route path="*" element={<Dashboard />} />
+
+
+
         </Routes>
     );
 }
