@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Laravel\Sanctum\HasApiTokens; // ← tambah ini
 use Database\Factories\UserFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -9,43 +10,23 @@ use Illuminate\Notifications\Notifiable;
 
 class User extends Authenticatable
 {
-    use HasFactory, Notifiable;
+    use HasApiTokens, HasFactory, Notifiable; // ← tambah HasApiTokens di sini
 
-    // 🔥 pakai tabel pengguna
-    protected $table = 'pengguna';
-
-    // 🔥 kalau tetap pakai id_pengguna
+    protected $table      = 'pengguna';
     protected $primaryKey = 'id_pengguna';
+    public    $timestamps = false;
 
-    // 🔥 kolom yang bisa diisi
     protected $fillable = [
         'nim_nik',
         'nama',
-        'password',
-        'foto_profl',
+        'email',
         'no_hp',
+        'foto_profil',
         'role',
-    ];
-
-    // 🔥 kolom yang disembunyikan
-    protected $hidden = [
         'password',
     ];
 
-    // 🔥 kalau gak pakai timestamps
-    public $timestamps = false;
-
-    // 🔥 biar Laravel tetap bisa akses "name"
-    public function getNameAttribute()
-    {
-        return $this->nama;
-    }
-
-    // 🔥 pakai nim_nik untuk login
-    public function username()
-    {
-        return 'nim_nik';
-    }
+    protected $hidden = ['password'];
 
     public function pesanan()
     {
@@ -70,5 +51,15 @@ class User extends Authenticatable
         return [
             'password' => 'hashed',
         ];
+    }
+
+    public function getNameAttribute()
+    {
+        return $this->nama;
+    }
+
+    public function username()
+    {
+        return 'nim_nik';
     }
 }

@@ -6,11 +6,9 @@ use Illuminate\Database\Eloquent\Model;
 
 class Pesanan extends Model
 {
-    protected $table = 'pesanan';
-
+    protected $table      = 'pesanan';
     protected $primaryKey = 'id_pesanan';
-
-    public $timestamps = false;
+    public    $timestamps = false;
 
     protected $fillable = [
         'kode_pesanan',

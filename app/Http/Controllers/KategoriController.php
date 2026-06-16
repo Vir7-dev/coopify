@@ -15,7 +15,7 @@ class KategoriController extends Controller
                 'nama' => $item->nama_kategori,
                 'ikon' => $item->ikon,
                 'stok' => $item->produk_count,
-                'tgl'  => $item->tgl_dibuat,  // ✅ fix: was tanggal_dibuat
+                'tgl'  => $item->tgl_dibuat,  
             ];
         });
 
@@ -57,7 +57,7 @@ class KategoriController extends Controller
 
         $kategori->update([
             'nama_kategori' => $request->nama_kategori,
-            'ikon'          => $request->ikon ?? $kategori->ikon,  // ✅ tambah ikon
+            'ikon'          => $request->ikon ?? $kategori->ikon,  
         ]);
 
         return response()->json([

@@ -1,18 +1,18 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\ProductController;
 use App\Http\Controllers\KeranjangController;
+use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\CheckoutController;
 
+// ================= ROOT =================
 Route::get('/', function () {
     return view('welcome');
 });
 
-// auth routes
-Route::post('/login', [AuthController::class, 'login']);
-Route::post('/logout', [AuthController::class, 'logout']);
+// ================= PRODUCTS =================//
+Route::get('/products', [ProductController::class, 'index']);
 
 
 
@@ -50,6 +50,13 @@ Route::post(
     [PembayaranController::class, 'handleNotification']
 )->name('midtrans.callback');
 
+// ================= PEMBAYARAN =================
+Route::middleware('auth')->group(function () {
+    Route::get('/pembayaran/{id}', [PembayaranController::class, 'show']);
+    Route::post('/pembayaran/create', [PembayaranController::class, 'createTransaction']);
+});
+
+// ================= SPA REACT =================
 Route::get('/{any}', function () {
     return view('welcome');
 })->where('any', '.*');
