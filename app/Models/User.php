@@ -47,6 +47,24 @@ class User extends Authenticatable
         return 'nim_nik';
     }
 
+    public function pesanan()
+    {
+        return $this->hasMany(
+            Pesanan::class,
+            'id_peng_fk_ps',
+            'id_pengguna'
+        );
+    }
+
+    public function keranjang()
+    {
+        return $this->hasMany(
+            Keranjang::class,
+            'id_peng_fk_k',
+            'id_pengguna'
+        );
+    }
+
     protected function casts(): array
     {
         return [
