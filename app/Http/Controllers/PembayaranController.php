@@ -4,13 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
 use App\Models\Pembayaran;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
-use Inertia\Inertia;
 use Midtrans\Config;
 use Midtrans\Notification;
 use Midtrans\Snap;
+use Throwable;
 
 class PembayaranController extends Controller
 {
@@ -22,10 +23,51 @@ class PembayaranController extends Controller
         Config::$is3ds = true;
     }
 
-    public function show(int $id_pesanan)
+    private function expirePaymentIfNeeded(Pembayaran $pembayaran): bool
+    {
+        if (
+            $pembayaran->status_pem !== 'menunggu' ||
+            !$pembayaran->batas_wkt_pem ||
+            !now()->greaterThan($pembayaran->batas_wkt_pem)
+        ) {
+            return false;
+        }
+
+        $pembayaran->update([
+            'status_pem' => 'kadaluarsa',
+        ]);
+        $pembayaran->refresh();
+
+        return true;
+    }
+
+    private function terminalStatusMessage(string $status): ?string
+    {
+        return match ($status) {
+            'lunas' => 'Pesanan sudah dibayar',
+            'kadaluarsa' => 'Pembayaran sudah kadaluarsa',
+            'gagal' => 'Pembayaran gagal',
+            default => null,
+        };
+    }
+
+    private function rejectIfTerminalStatus(Pembayaran $pembayaran): ?JsonResponse
+    {
+        $message = $this->terminalStatusMessage($pembayaran->status_pem);
+
+        if (!$message) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => $message,
+        ], 422);
+    }
+
+    public function show(int $id)
     {
         $pesanan = Pesanan::with('pembayaran')
-            ->findOrFail($id_pesanan);
+            ->findOrFail($id);
 
         $user = Auth::user();
 
@@ -37,19 +79,32 @@ class PembayaranController extends Controller
             abort(404, 'Data pembayaran tidak ditemukan');
         }
 
-        return Inertia::render('Pembayaran', [
+        $pembayaran = $pesanan->pembayaran;
+        $this->expirePaymentIfNeeded($pembayaran);
+
+        return response()->json([
             'pesanan_id' => $pesanan->id_pesanan,
+            'kode_pesanan' => $pesanan->kode_pesanan,
             'total' => $pesanan->total_harga,
-            'status_pembayaran' => $pesanan->pembayaran->status_pem,
-            'snap_token' => $pesanan->pembayaran->snap_token,
-            'metode' => 'QRIS'
+            'status_pembayaran' => $pembayaran->status_pem,
+            'snap_token' => $pembayaran->snap_token,
+            'batas_wkt_pem' => $pembayaran->batas_wkt_pem,
+            'server_time' => now()->toIso8601String(),
+            'metode' => 'QRIS',
         ]);
     }
 
     public function createTransaction(Request $request)
     {
+        $request->merge([
+            'id_pesanan' => $request->input(
+                'id_pesanan',
+                $request->input('pesanan_id')
+            ),
+        ]);
+
         $request->validate([
-            'id_pesanan' => 'required|integer'
+            'id_pesanan' => 'required|integer',
         ]);
 
         $pesanan = Pesanan::with('pembayaran')
@@ -65,32 +120,19 @@ class PembayaranController extends Controller
 
         if (!$pembayaran) {
             return response()->json([
-                'message' => 'Data pembayaran tidak ditemukan'
+                'message' => 'Data pembayaran tidak ditemukan',
             ], 404);
         }
 
-        if ($pembayaran->status_pem === 'lunas') {
-            return response()->json([
-                'message' => 'Pesanan sudah dibayar'
-            ], 422);
-        }
+        $this->expirePaymentIfNeeded($pembayaran);
 
-        if (
-            $pembayaran->batas_wkt_pem &&
-            now()->greaterThan($pembayaran->batas_wkt_pem)
-        ) {
-            $pembayaran->update([
-                'status_pem' => 'kadaluarsa'
-            ]);
-
-            return response()->json([
-                'message' => 'Pembayaran sudah kadaluarsa'
-            ], 422);
+        if ($response = $this->rejectIfTerminalStatus($pembayaran)) {
+            return $response;
         }
 
         if ($pembayaran->snap_token) {
             return response()->json([
-                'snap_token' => $pembayaran->snap_token
+                'snap_token' => $pembayaran->snap_token,
             ]);
         }
 
@@ -99,25 +141,37 @@ class PembayaranController extends Controller
         $params = [
             'transaction_details' => [
                 'order_id' => $pesanan->kode_pesanan,
-                'gross_amount' => (int)$pesanan->total_harga
+                'gross_amount' => (int) round($pesanan->total_harga),
             ],
             'customer_details' => [
                 'first_name' => $user->nama,
-                'phone' => $user->no_hp
+                'phone' => $user->no_hp,
             ],
             'enabled_payments' => [
-                'qris'
-            ]
+                'qris',
+            ],
         ];
 
-        $snapToken = Snap::getSnapToken($params);
+        try {
+            $snapToken = Snap::getSnapToken($params);
+        } catch (Throwable $e) {
+            report($e);
+
+            $message = config('app.debug')
+                ? 'Gagal membuat transaksi Midtrans: ' . $e->getMessage()
+                : 'Gagal membuat transaksi pembayaran';
+
+            return response()->json([
+                'message' => $message,
+            ], 500);
+        }
 
         $pembayaran->update([
-            'snap_token' => $snapToken
+            'snap_token' => $snapToken,
         ]);
 
         return response()->json([
-            'snap_token' => $snapToken
+            'snap_token' => $snapToken,
         ]);
     }
 
@@ -128,6 +182,7 @@ class PembayaranController extends Controller
         $orderId = $request->input('order_id');
         $statusCode = $request->input('status_code');
         $grossAmount = $request->input('gross_amount');
+        $signatureKey = (string) $request->input('signature_key', '');
 
         $expectedSignature = hash(
             'sha512',
@@ -137,67 +192,74 @@ class PembayaranController extends Controller
             config('midtrans.server_key')
         );
 
-        if (
-            !hash_equals(
-                $expectedSignature,
-                $request->input('signature_key')
-            )
-        ) {
+        if (!hash_equals($expectedSignature, $signatureKey)) {
             return response()->json([
-                'message' => 'Signature tidak valid'
+                'message' => 'Signature tidak valid',
             ], 403);
         }
 
-        $notif = new Notification();
+        try {
+            $notif = new Notification();
 
-        $pesanan = Pesanan::where(
-            'kode_pesanan',
-            $notif->order_id
-        )->first();
+            $pesanan = Pesanan::where(
+                'kode_pesanan',
+                $notif->order_id
+            )->first();
 
-        if (!$pesanan) {
+            if (!$pesanan) {
+                return response()->json([
+                    'message' => 'Pesanan tidak ditemukan',
+                ], 404);
+            }
+
+            $pembayaran = Pembayaran::where(
+                'id_pes_fk_pb',
+                $pesanan->id_pesanan
+            )->first();
+
+            if (!$pembayaran) {
+                return response()->json([
+                    'message' => 'Pembayaran tidak ditemukan',
+                ], 404);
+            }
+
+            $statusTransaksi = match ($notif->transaction_status) {
+                'capture', 'settlement' => 'berhasil',
+                'pending' => 'menunggu',
+                default => 'gagal',
+            };
+
+            DB::statement(
+                "CALL konfirmasi_pembayaran(
+                    ?, ?, ?, ?, ?, @hasil
+                )",
+                [
+                    $pembayaran->id_pembayaran,
+                    $notif->transaction_id,
+                    $statusTransaksi,
+                    $notif->gross_amount,
+                    $signatureKey,
+                ]
+            );
+
+            $hasil = DB::selectOne(
+                "SELECT @hasil AS pesan"
+            );
+
             return response()->json([
-                'message' => 'Pesanan tidak ditemukan'
-            ], 404);
-        }
+                'status' => 'ok',
+                'message' => $hasil->pesan ?? 'Notifikasi diproses',
+            ]);
+        } catch (Throwable $e) {
+            report($e);
 
-        $pembayaran = Pembayaran::where(
-            'id_pes_fk_pb',
-            $pesanan->id_pesanan
-        )->first();
+            $message = config('app.debug')
+                ? 'Gagal memproses notifikasi: ' . $e->getMessage()
+                : 'Gagal memproses notifikasi pembayaran';
 
-        if (!$pembayaran) {
             return response()->json([
-                'message' => 'Pembayaran tidak ditemukan'
-            ], 404);
+                'message' => $message,
+            ], 500);
         }
-
-        $statusTransaksi = match ($notif->transaction_status) {
-            'capture', 'settlement' => 'berhasil',
-            'pending' => 'menunggu',
-            default => 'gagal'
-        };
-
-        DB::statement(
-            "CALL konfirmasi_pembayaran(
-                ?, ?, ?, ?, ?, @hasil
-            )",
-            [
-                $pembayaran->id_pembayaran,
-                $notif->transaction_id,
-                $statusTransaksi,
-                $notif->gross_amount,
-                $request->input('signature_key')
-            ]
-        );
-
-        $hasil = DB::selectOne(
-            "SELECT @hasil AS pesan"
-        );
-
-        return response()->json([
-            'status' => 'ok',
-            'message' => $hasil->pesan
-        ]);
     }
 }

@@ -41,8 +41,10 @@ class AuthController extends Controller
     {
         /** @var \App\Models\User $user */
         $user = $request->user();
-        if ($user) {
-            $user->currentAccessToken()->delete();
+        $token = $user?->currentAccessToken();
+
+        if ($token) {
+            $token->delete();
         }
 
         return response()->json([

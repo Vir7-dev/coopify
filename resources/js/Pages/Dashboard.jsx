@@ -21,7 +21,7 @@ function Dashboard() {
 
     // ================= FETCH =================
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/products")
+        axios.get("/api/produk")
             .then(res => setProducts(res.data))
             .catch(err => console.log(err));
     }, []);
@@ -38,9 +38,9 @@ function Dashboard() {
 
         setLoadingCart(item.id_produk);
 
-        axios.post("http://127.0.0.1:8000/cart/add", {
-            product_id: item.id_produk,
-            qty: 1
+        axios.post("/api/keranjang", {
+            id_produk: item.id_produk,
+            jumlah: 1
         })
         .then(res => alert(res.data.message))
         .catch(() => alert("Gagal menambah keranjang"))

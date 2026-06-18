@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import AppLayout from "../Layouts/AppLayout";
+import api from "../api";
 import {
   FaSearch, FaEdit, FaTrash, FaPlus, FaBox, FaTags,
   FaCalendarAlt, FaLayerGroup, FaTimes, FaChevronLeft, FaChevronRight,
@@ -30,12 +31,9 @@ export default function KelolaKategori() {
   const [form, setForm] = useState({ nama: "", ikon: "FaBox" });
 
   const fetchData = () => {
-    fetch("http://localhost:8000/api/kategori")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
-        return r.json();
-      })
-      .then((d) => {
+    api.get("/kategori")
+      .then((res) => {
+        const d = res.data;
         console.log("Data kategori diterima:", d);
         const normalized = d.map((item) => ({
           id: item?.id ?? null,
@@ -114,9 +112,7 @@ export default function KelolaKategori() {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
-          await fetch(`http://localhost:8000/api/kategori/${item.id}`, {
-            method: "DELETE",
-          });
+          await api.delete(`/kategori/${item.id}`);
           setProducts((prev) => prev.filter((p) => p.id !== item.id));
           if (filterKat === item.id) setFilterKat(null);
           Swal.fire({
@@ -151,12 +147,8 @@ export default function KelolaKategori() {
 
     try {
       if (isEdit) {
-        const r = await fetch(`http://localhost:8000/api/kategori/${selectedProduct.id}`, {
-          method: "PUT",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const updated = await r.json();
+        const r = await api.put(`/kategori/${selectedProduct.id}`, body);
+        const updated = r.data;
         setProducts((prev) =>
           prev.map((p) =>
             p.id === selectedProduct.id
@@ -165,12 +157,8 @@ export default function KelolaKategori() {
           )
         );
       } else {
-        const r = await fetch("http://localhost:8000/api/kategori", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(body),
-        });
-        const newItem = await r.json();
+        const r = await api.post("/kategori", body);
+        const newItem = r.data;
         setProducts((prev) => [...prev, newItem]);
       }
 

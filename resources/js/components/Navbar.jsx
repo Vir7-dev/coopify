@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../api";
 
 import {
     FaUserCircle,
@@ -59,6 +60,19 @@ function Navbar({ role }) {
 
     const profilePath = role === "admin" ? "/profil-admin" : "/profil-pengguna";
 
+    const handleLogout = async () => {
+        try {
+            await api.post("/logout");
+        } catch (error) {
+            console.error("Logout request failed:", error);
+        } finally {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            delete axios.defaults.headers.common.Authorization;
+            navigate("/login");
+        }
+    };
+
     const handleChangePassword = async () => {
         if (!oldPassword || !newPassword || !confirmPassword) {
             alert("Semua field harus diisi");
@@ -71,8 +85,8 @@ function Navbar({ role }) {
         }
 
         try {
-            const response = await axios.post(
-                "http://127.0.0.1:8000/api/ganti-password",
+            const response = await api.post(
+                "/ganti-password",
                 {
                     old_password: oldPassword,
                     new_password: newPassword,
@@ -267,7 +281,7 @@ function Navbar({ role }) {
                                     </div>
 
                                     <div
-                                        onClick={() => navigate("/login")}
+                                        onClick={handleLogout}
                                         className="px-4 py-2 text-red-500 cursor-pointer"
                                     >
                                         Keluar

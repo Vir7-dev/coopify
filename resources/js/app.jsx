@@ -17,20 +17,28 @@ import Dashboard from "./Pages/Dashboard";
 function App() {
     return (
         <Routes>
-            <Route path="/"                   element={<Dashboard />}      />
-            <Route path="/dashboard-pengguna" element={<Dashboard />}      />
-            <Route path="/dashboard-admin"    element={<DashboardAdmin />} />
-            <Route path="/login"              element={<Login />}          />
-            <Route path="/produk"             element={<Produk />}         />
-            <Route path="/produk/:kategori"   element={<Produk />}         />
-            <Route path="/produk/detail/:id"  element={<DetailProduk />}   />
-            <Route path="/kelola-produk"      element={<KelolaProduk />}   />
-            <Route path="/kelola-kategori"    element={<KelolaKategori />} />
-            <Route path="/keranjang"          element={<Keranjang />}      />
-            <Route path="/pembayaran"         element={<Pembayaran />}     />
-            <Route path="/profil-pengguna"    element={<ProfilPengguna />} />
-            <Route path="/profil-admin"       element={<ProfilAdmin />}    />
-            <Route path="/edit-profil"        element={<EditProfil />}     />
+            <Route path="/" element={<Dashboard />} />
+            <Route path="/dashboard-pengguna" element={<Dashboard />} />
+            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+            <Route path="/login" element={<Login />} />
+
+            <Route path="/produk/detail/:id" element={<DetailProduk />} />
+            <Route path="/produk/:kategori" element={<Produk />} />
+            <Route path="/produk" element={<Produk />} />
+
+            {/* Route /detail-produk/:id ini redundant, tapi biarkan kalau ada yang link ke sini */}
+            <Route path="/detail-produk/:id" element={<DetailProduk />} />
+
+            <Route path="/kelola-produk" element={<KelolaProduk />} />
+            <Route path="/kelola-kategori" element={<KelolaKategori />} />
+            <Route path="/keranjang" element={<Keranjang />} />
+            <Route path="/pembayaran" element={<Pembayaran />} />
+            <Route path="/profil-pengguna" element={<ProfilPengguna />} />
+            <Route path="/profil-admin" element={<ProfilAdmin />} />
+            <Route path="/edit-profil" element={<EditProfil />} />
+            <Route path="/edit-profil-admin" element={<EditProfil />} />
+            <Route path="/search" element={<Produk />} />
+            <Route path="*" element={<Dashboard />} />
         </Routes>
     );
 }

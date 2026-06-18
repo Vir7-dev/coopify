@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { Eye, EyeOff } from "lucide-react";
 import Swal from "sweetalert2";
+import api from "../api";
 
 function Login() {
   const [nim, setNim] = useState("");
@@ -20,20 +21,12 @@ function Login() {
 
   const handleLogin = async () => {
     try {
-      const res = await fetch("http://127.0.0.1:8000/api/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
+      const res = await api.post("/login", {
           nim_nik: nim,
           password: password,
-        }),
       });
+      const data = res.data;
 
-      const data = await res.json();
-
-      if (res.ok) {
         localStorage.setItem("user", JSON.stringify(data.user));
         localStorage.setItem("token", data.token);
 
@@ -49,18 +42,11 @@ function Login() {
             window.location.href = "/dashboard-pengguna";
           }
         }, 1500);
-      } else {
-        Toast.fire({
-          icon: "error",
-          title: data.message || "Login gagal",
-        });
-      }
     } catch (error) {
       console.error(error);
-
       Toast.fire({
-        icon: "warning",
-        title: "Masukkan Nama Pengguna dan Kata Sandi",
+        icon: "error",
+        title: error.response?.data?.message || "Login gagal",
       });
     }
   };

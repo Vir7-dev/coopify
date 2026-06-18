@@ -11,8 +11,7 @@ import {
     FaBoxOpen,
 } from "react-icons/fa";
 import axios from "axios";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+import { API_BASE_URL } from "../api";
 
 function ProductImageSlider({ images }) {
     const [current, setCurrent] = useState(0);
@@ -44,7 +43,7 @@ function ProductImageSlider({ images }) {
             }}
         >
             <img
-                src={`${BASE_URL}/storage/${images[current].url_gambar}`}
+                src={`${API_BASE_URL}/storage/${images[current].url_gambar}`}
                 alt=""
                 className="h-28 object-contain mx-auto transition-all duration-500"
             />
@@ -90,7 +89,7 @@ export default function Produk() {
         setLoading(true);
         setError(null);
 
-        fetch(`${BASE_URL}/api/produk`)
+        fetch(`${API_BASE_URL}/api/produk`)
             .then((res) => {
                 if (!res.ok) throw new Error("Gagal memuat produk");
                 return res.json();
@@ -125,7 +124,7 @@ export default function Produk() {
         setLoadingKeranjang(idProduk);
         try {
             await axios.post(
-                `${BASE_URL}/api/keranjang`,
+                `${API_BASE_URL}/api/keranjang`,
                 { id_produk: idProduk, jumlah: 1 },
                 { withCredentials: true }
             );

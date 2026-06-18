@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import AppLayout from "../Layouts/AppLayout";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
-
-const BASE_URL = import.meta.env.VITE_API_URL || "http://127.0.0.1:8000";
+import { API_BASE_URL } from "../api";
 
 export default function Keranjang() {
     const navigate = useNavigate();
@@ -114,8 +113,12 @@ export default function Keranjang() {
                 },
                 { withCredentials: true },
             );
-            navigate("/pembayaran", {
-                state: { kode_pesanan: res.data.kode_pesanan },
+            navigate(`/pembayaran?pesanan=${res.data.id_pesanan}`, {
+                state: {
+                    id_pesanan: res.data.id_pesanan,
+                    kode_pesanan: res.data.kode_pesanan,
+                    total: res.data.total_harga ?? total,
+                },
             });
         } catch (err) {
             alert(err.response?.data?.message || "Checkout gagal");
@@ -184,7 +187,7 @@ export default function Keranjang() {
                                             <img
                                                 src={
                                                     item.produk?.gambar?.length
-                                                        ? `${BASE_URL}/storage/${item.produk.gambar[0].url_gambar}`
+                                                        ? `${API_BASE_URL}/storage/${item.produk.gambar[0].url_gambar}`
                                                         : "/img/no-image.png"
                                                 }
                                                 alt={item.produk.nama_produk}

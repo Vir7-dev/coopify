@@ -4,11 +4,18 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Gambar;
 
 class ProdukController extends Controller
 {
+    private function authorizeAdmin(): void
+    {
+        if (!Auth::user() || Auth::user()->role !== 'admin') {
+            abort(403, 'Akses ditolak');
+        }
+    }
 
     public function index()
     {
@@ -18,6 +25,8 @@ class ProdukController extends Controller
 
     public function store(Request $request)
     {
+        $this->authorizeAdmin();
+
         $request->validate([
             'nama_produk' => 'required',
             'harga_jual' => 'required',
@@ -70,6 +79,8 @@ class ProdukController extends Controller
 
     public function update(Request $request, $produk)
     {
+        $this->authorizeAdmin();
+
         $request->validate([
             'nama_produk' => 'required',
             'harga_jual' => 'required',
@@ -126,6 +137,8 @@ class ProdukController extends Controller
 
     public function destroy($produk)
     {
+        $this->authorizeAdmin();
+
         $produk = Produk::findOrFail($produk);
         $produk->delete();
 
