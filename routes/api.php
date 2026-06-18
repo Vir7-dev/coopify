@@ -40,6 +40,10 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/logout', [AuthController::class, 'logout']);
     Route::post('/ganti-password', [AuthController::class, 'gantiPassword']);
 
+    // Profil Pengguna
+    Route::get('/profil-pengguna', [App\Http\Controllers\ProfilPenggunaController::class, 'index']);
+    Route::post('/profil-pengguna', [App\Http\Controllers\ProfilPenggunaController::class, 'update']);
+
     // Kategori
     Route::post('/kategori', [KategoriController::class, 'store']);
     Route::put('/kategori/{id}', [KategoriController::class, 'update']);

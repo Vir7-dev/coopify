@@ -255,7 +255,7 @@ function Navbar({ role }) {
                                 </div>
                             </div>
                         </div>
-                    ) : (
+                    ) : user ? (
                         <>
                             <div className="relative">
                                 <FaBell
@@ -283,60 +283,82 @@ function Navbar({ role }) {
                                 onClick={() => navigate("/keranjang")}
                             />
                         </>
+                    ) : null}
+
+                    {/* PROFILE OR LOGIN */}
+                    {user ? (
+                        <div className="relative">
+                            {user?.foto_profil ? (
+                                <img
+                                    src={user.foto_profil}
+                                    alt="Profile"
+                                    className="w-8 h-8 rounded-full object-cover cursor-pointer border border-gray-200"
+                                    onClick={() => setOpenProfile(!openProfile)}
+                                />
+                            ) : (
+                                <FaUserCircle
+                                    className="text-2xl cursor-pointer"
+                                    onClick={() => setOpenProfile(!openProfile)}
+                                />
+                            )}
+
+                            {openProfile && (
+                                <div
+                                    className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-[999]"
+                                    onMouseLeave={() => setOpenProfile(false)}
+                                >
+                                    <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
+                                        <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] overflow-hidden flex items-center justify-center font-bold">
+                                            {user?.foto_profil ? (
+                                                <img src={user.foto_profil} alt="Profile" className="w-full h-full object-cover" />
+                                            ) : (
+                                                (user?.nama || user?.name) ? (user?.nama || user?.name).charAt(0).toUpperCase() : <FaUserCircle size={28} />
+                                            )}
+                                        </div>
+
+                                        <div>
+                                            <p className="font-semibold text-sm">
+                                                {user?.nama || user?.name || (role === "admin" ? "Admin Koperasi" : "Pengguna")}
+                                            </p>
+                                        </div>
+                                    </div>
+
+                                    <div className="py-2 text-sm text-black">
+                                        <div
+                                            onClick={() => navigate(profilePath)}
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                        >
+                                            Lihat Profil
+                                        </div>
+
+                                        <div
+                                            onClick={() => {
+                                                setOpenProfile(false);
+                                                setOpenPasswordModal(true);
+                                            }}
+                                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                                        >
+                                            Ubah Kata Sandi
+                                        </div>
+
+                                        <div
+                                            onClick={handleLogout}
+                                            className="px-4 py-2 text-red-500 cursor-pointer"
+                                        >
+                                            Keluar
+                                        </div>
+                                    </div>
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <div 
+                            onClick={() => navigate('/login')}
+                            className="cursor-pointer font-bold text-white bg-[#1766D3] hover:bg-[#3D8FFF] px-4 py-2 rounded-lg shadow-sm transition active:scale-95"
+                        >
+                            Log in
+                        </div>
                     )}
-
-                    {/* PROFILE */}
-                    <div className="relative">
-                        <FaUserCircle
-                            className="text-2xl cursor-pointer"
-                            onClick={() => setOpenProfile(!openProfile)}
-                        />
-
-                        {openProfile && (
-                            <div
-                                className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-[999]"
-                                onMouseLeave={() => setOpenProfile(false)}
-                            >
-                                <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
-                                    <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] flex items-center justify-center font-bold">
-                                        {(user?.nama || user?.name) ? (user?.nama || user?.name).charAt(0).toUpperCase() : (role === "admin" ? "A" : "U")}
-                                    </div>
-
-                                    <div>
-                                        <p className="font-semibold text-sm">
-                                            {user?.nama || user?.name || (role === "admin" ? "Admin Koperasi" : "(Belum Login)")}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                <div className="py-2 text-sm text-black">
-                                    <div
-                                        onClick={() => navigate(profilePath)}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    >
-                                        Lihat Profil
-                                    </div>
-
-                                    <div
-                                        onClick={() => {
-                                            setOpenProfile(false);
-                                            setOpenPasswordModal(true);
-                                        }}
-                                        className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                                    >
-                                        Ubah Kata Sandi
-                                    </div>
-
-                                    <div
-                                        onClick={handleLogout}
-                                        className="px-4 py-2 text-red-500 cursor-pointer"
-                                    >
-                                        Keluar
-                                    </div>
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 {/* MODAL */}

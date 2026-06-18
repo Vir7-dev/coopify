@@ -33,6 +33,7 @@ class AuthController extends Controller
                 'nama'        => $user->nama,
                 'nim_nik'     => $user->nim_nik,
                 'role'        => $user->role,
+                'foto_profil' => $user->foto_profil ? '/storage/' . $user->foto_profil : null,
             ]
         ]);
     }

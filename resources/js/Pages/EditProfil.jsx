@@ -1,20 +1,48 @@
-import React, { useState } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import AppLayout from "../Layouts/AppLayout";
 import { useNavigate } from "react-router-dom";
-import { useRef } from "react";
-import { FaBell, FaShoppingCart, FaUserCircle, FaCamera, FaIdCard, FaPhone, FaEnvelope } from "react-icons/fa";
+import api from "../api";
+import { FaCamera, FaIdCard, FaPhone, FaEnvelope } from "react-icons/fa";
+import Swal from "sweetalert2";
 
 export default function EditProfil() {
   const navigate = useNavigate();
   const fileInputRef = useRef(null);
   const [form, setForm] = useState({
-    nama: "Winda",
-    nim: "434234235",
-    phone: "08123456789",
-    email: "winda@mail.com",
+    nama: "",
+    nim: "",
+    phone: "",
+    email: "",
   });
 
   const [preview, setPreview] = useState(null);
+  const [fileToUpload, setFileToUpload] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchProfile();
+  }, []);
+
+  const fetchProfile = async () => {
+    try {
+      const res = await api.get("/profil-pengguna");
+      const userData = res.data.user;
+      setForm({
+        nama: userData.nama || "",
+        nim: userData.nim_nik || "",
+        phone: userData.no_hp || "",
+        email: userData.email || "",
+      });
+      if (userData.foto_profil) {
+        setPreview(userData.foto_profil);
+      }
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Error", "Gagal mengambil data profil", "error");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const handleChange = (e) => {
     setForm({
@@ -26,23 +54,64 @@ export default function EditProfil() {
   const handleImage = (e) => {
     const file = e.target.files[0];
     if (file) {
+      setFileToUpload(file);
       setPreview(URL.createObjectURL(file));
     }
   };
 
   const [showConfirm, setShowConfirm] = useState(false);
-  const [showSuccess, setShowSuccess] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
     setShowConfirm(true);
   };
 
-  const handleConfirmSave = () => {
+  const handleConfirmSave = async () => {
     setShowConfirm(false);
-    console.log(form);
-    setShowSuccess(true);
+    setIsSaving(true);
+    try {
+      const formData = new FormData();
+      formData.append("nama", form.nama);
+      formData.append("no_hp", form.phone);
+      formData.append("email", form.email);
+      if (fileToUpload) {
+        formData.append("foto", fileToUpload);
+      }
+
+      const res = await api.post("/profil-pengguna", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+      });
+
+      // Update local storage so Navbar also gets updated
+      localStorage.setItem("user", JSON.stringify(res.data.user));
+
+      Swal.fire({
+        icon: "success",
+        title: "Berhasil",
+        text: "Data profil berhasil disimpan!",
+      }).then(() => {
+        navigate("/profil-pengguna");
+      });
+    } catch (error) {
+      console.error(error);
+      Swal.fire("Gagal", "Terjadi kesalahan saat menyimpan data", "error");
+    } finally {
+      setIsSaving(false);
+    }
   };
+
+  if (loading) {
+    return (
+      <AppLayout role="pengguna">
+        <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+          <p>Loading...</p>
+        </div>
+      </AppLayout>
+    );
+  }
 
   return (
     <AppLayout role="pengguna">
@@ -50,7 +119,7 @@ export default function EditProfil() {
 
         {/* Header */}
         <div className="bg-[#3F7EA2] text-white p-6  rounded-t-lg">
-          <h2 className="text-lg font-semibold">Halo, Winda! 👋</h2>
+          <h2 className="text-lg font-semibold">Halo, {form.nama || "Pengguna"}! 👋</h2>
           <p className="text-sm">
             Atur informasi akun Anda di sini.
           </p>
@@ -62,21 +131,22 @@ export default function EditProfil() {
 
           {/* Foto Profil */}
           <div className="flex justify-center">
-            <div className="relative w-20 h-20">
+            <div className="relative w-24 h-24">
 
-              <div className="w-20 h-20 rounded-full bg-gray-300 overflow-hidden flex items-center justify-center">
+              <div className="w-24 h-24 rounded-full bg-blue-500 overflow-hidden flex items-center justify-center text-white text-3xl font-bold uppercase">
                 {preview ? (
-                  <img src={preview} className="w-full h-full object-cover" />
+                  <img src={preview} className="w-full h-full object-cover" alt="Foto Profil" />
                 ) : (
-                  "WI"
+                  form.nama ? form.nama.substring(0, 2) : "US"
                 )}
               </div>
 
               <button
+                type="button"
                 onClick={() => fileInputRef.current.click()}
-                className="absolute bottom-0 right-0 bg-white border rounded-full p-1.5 shadow"
+                className="absolute bottom-0 right-0 bg-white border rounded-full p-2 shadow text-gray-700 hover:text-blue-500 transition"
               >
-                <FaCamera size={12} />
+                <FaCamera size={14} />
               </button>
 
               <input
@@ -84,60 +154,64 @@ export default function EditProfil() {
                 ref={fileInputRef}
                 onChange={handleImage}
                 className="hidden"
+                accept="image/*"
               />
 
             </div>
           </div>
 
           {/* Form */}
-          <form onSubmit={handleSubmit} className="space-y-4">
+          <form onSubmit={handleSubmit} className="space-y-4 mt-6">
 
             <div>
-              <label className="text-sm">Nama</label>
+              <label className="text-sm font-medium text-gray-700">Nama</label>
               <input
                 type="text"
                 name="nama"
                 value={form.nama}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                required
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="text-sm">NIM</label>
+              <label className="text-sm font-medium text-gray-700">NIM / NIK</label>
               <input
                 type="text"
                 name="nim"
                 value={form.nim}
-                onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                disabled
+                className="w-full border border-gray-300 bg-gray-100 text-gray-500 rounded px-3 py-2 mt-1 cursor-not-allowed"
               />
+              <p className="text-xs text-gray-400 mt-1">NIM / NIK tidak dapat diubah karena merupakan identitas tetap.</p>
             </div>
 
             <div>
-              <label className="text-sm">No HP</label>
+              <label className="text-sm font-medium text-gray-700">No HP</label>
               <input
                 type="text"
                 name="phone"
                 value={form.phone}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             <div>
-              <label className="text-sm">Email</label>
+              <label className="text-sm font-medium text-gray-700">Email</label>
               <input
                 type="email"
                 name="email"
                 value={form.email}
                 onChange={handleChange}
-                className="w-full border border-gray-300 rounded px-3 py-2 mt-1"
+                required
+                className="w-full border border-gray-300 rounded px-3 py-2 mt-1 focus:outline-none focus:ring-1 focus:ring-blue-500"
               />
             </div>
 
             {/* Button */}
-            <div className="flex justify-end gap-2 pt-2">
+            <div className="flex justify-end gap-3 pt-4">
               <button
                 type="button"
                 onClick={() => navigate("/profil-pengguna")}
@@ -148,9 +222,10 @@ export default function EditProfil() {
 
               <button
                 type="submit"
-                className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
+                disabled={isSaving}
+                className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition disabled:opacity-50"
               >
-                Simpan
+                {isSaving ? "Menyimpan..." : "Simpan"}
               </button>
             </div>
 
@@ -158,11 +233,11 @@ export default function EditProfil() {
         </div>
       </div>
       {showConfirm && (
-        <div className="fixed inset-0 bg-black/10 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow w-80 text-center">
-            <h2 className="text-lg font-semibold mb-3">Konfirmasi</h2>
-            <p className="text-sm mb-5">
-              Apakah anda yakin ingin mengubah data ini?
+        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-sm text-center">
+            <h2 className="text-lg font-bold mb-3 text-gray-800">Konfirmasi</h2>
+            <p className="text-sm mb-6 text-gray-600">
+              Apakah Anda yakin ingin menyimpan perubahan data profil ini?
             </p>
 
             <div className="flex justify-center gap-3">
@@ -177,31 +252,9 @@ export default function EditProfil() {
                 onClick={handleConfirmSave}
                 className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
               >
-                Simpan
+                Ya, Simpan
               </button>
             </div>
-          </div>
-        </div>
-      )}
-      {showSuccess && (
-        <div className="fixed inset-0 bg-black/10 flex items-center justify-center">
-          <div className="bg-white p-6 rounded-lg shadow w-80 text-center">
-            <h2 className="text-lg font-semibold mb-3 text-blue-600">
-              Berhasil
-            </h2>
-            <p className="text-sm mb-5">
-              Data berhasil disimpan
-            </p>
-
-            <button
-              onClick={() => {
-                setShowSuccess(false);
-                navigate("/profil-pengguna");
-              }}
-              className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
-            >
-              OK
-            </button>
           </div>
         </div>
       )}
