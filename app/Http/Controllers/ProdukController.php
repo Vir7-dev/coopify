@@ -23,6 +23,18 @@ class ProdukController extends Controller
         return response()->json($produk);
     }
 
+    // ================= SEARCH =================
+    public function search(Request $request)
+    {
+        $keyword = $request->q;
+
+        $produk = Produk::with(['kategori', 'gambar'])
+            ->where('nama_produk', 'like', '%' . $keyword . '%')
+            ->get();
+
+        return response()->json($produk);
+    }
+
     public function store(Request $request)
     {
         $this->authorizeAdmin();
@@ -56,6 +68,7 @@ class ProdukController extends Controller
         if ($request->hasFile('url_gambar')) {
             foreach ($request->file('url_gambar') as $file) {
                 $path = $file->store('produk', 'public');
+
                 Gambar::create([
                     'url_gambar' => $path,
                     'id_prod_fk_g' => $produk->id_produk
@@ -89,11 +102,6 @@ class ProdukController extends Controller
             'id_kat_fk_p' => 'required',
             'deskripsi' => 'required',
             'url_gambar.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
-        ], [
-            'stok.min' => 'Stok tidak boleh kurang dari 0.',
-            'url_gambar.image' => 'File harus berupa gambar.',
-            'url_gambar.mimes' => 'Gambar hanya boleh JPG, JPEG, atau PNG.',
-            'url_gambar.max' => 'Ukuran gambar maksimal 2 MB.'
         ]);
 
         $produk = Produk::findOrFail($produk);
@@ -106,26 +114,6 @@ class ProdukController extends Controller
             'id_kat_fk_p' => $request->id_kat_fk_p,
             'deskripsi' => $request->deskripsi
         ];
-
-        if ($request->hasFile('url_gambar')) {
-            $gambarLama = Gambar::where('id_prod_fk_g', $produk->id_produk)->get();
-            foreach ($gambarLama as $gambar) {
-                if (Storage::disk('public')->exists($gambar->url_gambar)) {
-                    Storage::disk('public')->delete($gambar->url_gambar);
-                }
-            }
-
-            Gambar::where('id_prod_fk_g', $produk->id_produk)->delete();
-
-            foreach ($request->file('url_gambar') as $file) {
-                $path = $file->store('produk', 'public');
-
-                Gambar::create([
-                    'url_gambar' => $path,
-                    'id_prod_fk_g' => $produk->id_produk
-                ]);
-            }
-        }
 
         $produk->update($data);
 

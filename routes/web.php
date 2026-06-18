@@ -1,6 +1,8 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\ProductController;
 
 // ================= ROOT =================
@@ -9,7 +11,7 @@ Route::get('/', function () {
 });
 
 // ================= PRODUCTS =================//
-Route::get('/products', [ProductController::class, 'index']);
+Route::get('/produk', [ProdukController::class, 'index']);
 
 // ================= SPA REACT =================
 Route::get('/{any}', function () {
