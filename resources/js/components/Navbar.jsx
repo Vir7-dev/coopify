@@ -23,6 +23,14 @@ function Navbar({ role }) {
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
 
+    const userString = localStorage.getItem("user");
+    let user = null;
+    try {
+        user = userString ? JSON.parse(userString) : null;
+    } catch (e) {
+        user = null;
+    }
+
     const [openNotif, setOpenNotif] = useState(false);
     const [keyword, setKeyword] = useState("");
 
@@ -93,13 +101,8 @@ function Navbar({ role }) {
         }
 
         try {
-<<<<<<< HEAD
-            const response = await axios.post(
-                "http://127.0.0.1:8000/api/ubah-sandi",
-=======
             const response = await api.post(
                 "/ganti-password",
->>>>>>> 6542abf70738f9fd6a1ff37abb05c22f5eea2168
                 {
                     old_password: oldPassword,
                     new_password: newPassword,
@@ -296,12 +299,14 @@ function Navbar({ role }) {
                             >
                                 <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
                                     <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] flex items-center justify-center font-bold">
-                                        {role === "admin" ? "A" : "U"}
+                                        {(user?.nama || user?.name) ? (user?.nama || user?.name).charAt(0).toUpperCase() : (role === "admin" ? "A" : "U")}
                                     </div>
 
-                                    <p className="font-semibold text-sm">
-                                        {role === "admin" ? "Admin Koperasi" : "Pengguna"}
-                                    </p>
+                                    <div>
+                                        <p className="font-semibold text-sm">
+                                            {user?.nama || user?.name || (role === "admin" ? "Admin Koperasi" : "(Belum Login)")}
+                                        </p>
+                                    </div>
                                 </div>
 
                                 <div className="py-2 text-sm text-black">

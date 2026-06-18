@@ -24,14 +24,6 @@ Route::post('/midtrans/notification', [PembayaranController::class, 'handleNotif
 
 // Produk & Kategori (Public)
 Route::get('/kategori', [KategoriController::class, 'index']);
-<<<<<<< HEAD
-Route::post('/kategori', [KategoriController::class, 'store']);
-Route::put('/kategori/{id}', [KategoriController::class, 'update']);
-Route::delete('/kategori/{id}', [KategoriController::class, 'destroy']);
-Route::resource('produk', ProdukController::class);
-Route::post('/ubah-sandi', [UbahSandiController::class, 'ubahPassword']);
-=======
-
 Route::get('/produk/search', [ProdukController::class, 'search']);
 Route::get('/produk', [ProdukController::class, 'index']);
 Route::get('/produk/{produk}', [ProdukController::class, 'show']);
@@ -73,4 +65,3 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/admin/profil', [AdminProfilController::class, 'index']);
     Route::post('/admin/profil', [AdminProfilController::class, 'update']);
 });
->>>>>>> 6542abf70738f9fd6a1ff37abb05c22f5eea2168

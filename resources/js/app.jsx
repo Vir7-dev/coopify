@@ -44,16 +44,7 @@ function App() {
             <Route path="/profil-pengguna" element={<ProfilPengguna />} />
             <Route path="/profil-admin" element={<ProfilAdmin />} />
             <Route path="/edit-profil" element={<EditProfil />} />
-<<<<<<< HEAD
-            <Route path="/produk" element={<Produk />} />
-            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
-            <Route path="/ubah-sandi" element={<UbahSandi />} />
 
-
-
-
-=======
->>>>>>> 6542abf70738f9fd6a1ff37abb05c22f5eea2168
         </Routes>
     );
 }
