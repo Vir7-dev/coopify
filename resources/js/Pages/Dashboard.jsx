@@ -12,42 +12,38 @@ import {
 } from "react-icons/fa";
 
 function Dashboard() {
-
     const [search, setSearch] = useState("");
     const [products, setProducts] = useState([]);
     const [loadingCart, setLoadingCart] = useState(null);
 
     const navigate = useNavigate();
 
-    // ================= FETCH =================
     useEffect(() => {
-        axios.get("http://127.0.0.1:8000/products")
-            .then(res => setProducts(res.data))
-            .catch(err => console.log(err));
+        axios
+            .get("http://127.0.0.1:8000/api/produk")
+            .then((res) => setProducts(res.data))
+            .catch((err) => console.log(err));
     }, []);
 
-    // ================= SEARCH =================
     const handleSearch = (e) => {
         if (e.key === "Enter") {
             navigate(`/search?q=${search}`);
         }
     };
 
-    // ================= ADD TO CART =================
     const addToCart = (item) => {
-
         setLoadingCart(item.id_produk);
 
-        axios.post("http://127.0.0.1:8000/cart/add", {
-            product_id: item.id_produk,
-            qty: 1
-        })
-        .then(res => alert(res.data.message))
-        .catch(() => alert("Gagal menambah keranjang"))
-        .finally(() => setLoadingCart(null));
+        axios
+            .post("http://127.0.0.1:8000/cart/add", {
+                product_id: item.id_produk,
+                qty: 1,
+            })
+            .then((res) => alert(res.data.message))
+            .catch(() => alert("Gagal menambah keranjang"))
+            .finally(() => setLoadingCart(null));
     };
 
-    // ================= KATEGORI =================
     const categories = [
         { title: "Makanan", icon: <FaHamburger /> },
         { title: "Minuman", icon: <FaCoffee /> },
@@ -58,11 +54,10 @@ function Dashboard() {
 
     return (
         <AppLayout role="pengguna">
-
             <div className="bg-gray-100 min-h-screen pb-20">
 
-                {/* ================= HEADER ================= */}
-                <div className="px-6 md:px-10 pt-6 flex justify-between items-center">
+                {/* HEADER */}
+                <div className="px-6 md:px-10 pt-6 flex justify-end">
 
                     <input
                         type="text"
@@ -70,11 +65,12 @@ function Dashboard() {
                         value={search}
                         onChange={(e) => setSearch(e.target.value)}
                         onKeyDown={handleSearch}
-                        className="border px-4 py-2 rounded-xl w-[300px]"
+                        className="w-[350px] border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
                     />
+
                 </div>
 
-                {/* ================= BANNER ================= */}
+                {/* BANNER */}
                 <div className="px-6 md:px-10 mt-6">
                     <div
                         className="h-[400px] rounded-2xl overflow-hidden flex items-center"
@@ -86,11 +82,11 @@ function Dashboard() {
                     >
                         <div className="bg-black/40 w-full h-full flex items-center px-10 text-white">
                             <div>
-                                <h1 className="text-3xl font-bold">
+                                <h1 className="text-4xl font-bold">
                                     Koperasi Digital
                                 </h1>
 
-                                <p className="mt-2">
+                                <p className="mt-3 text-lg">
                                     Belanja cepat & mudah untuk semua kebutuhan
                                 </p>
                             </div>
@@ -98,10 +94,10 @@ function Dashboard() {
                     </div>
                 </div>
 
-                {/* ================= KATEGORI ================= */}
+                {/* KATEGORI */}
                 <div className="px-6 md:px-10 mt-10">
 
-                    <h2 className="text-xl font-bold mb-4">
+                    <h2 className="text-2xl font-bold mb-5">
                         Kategori Produk
                     </h2>
 
@@ -111,13 +107,13 @@ function Dashboard() {
                             <Link
                                 key={i}
                                 to={`/produk/${cat.title.toLowerCase()}`}
-                                className="bg-white p-5 rounded-2xl flex flex-col items-center shadow hover:-translate-y-2 hover:shadow-xl transition-all cursor-pointer"
+                                className="bg-white p-5 rounded-2xl flex flex-col items-center shadow hover:-translate-y-2 hover:shadow-xl transition-all"
                             >
-                                <div className="text-2xl text-blue-600">
+                                <div className="text-3xl text-blue-600">
                                     {cat.icon}
                                 </div>
 
-                                <p className="mt-2">
+                                <p className="mt-3 font-medium">
                                     {cat.title}
                                 </p>
                             </Link>
@@ -127,42 +123,68 @@ function Dashboard() {
 
                 </div>
 
-                {/* ================= PRODUK ================= */}
+                {/* PRODUK */}
                 <div className="px-6 md:px-10 mt-10">
 
-                    <h2 className="text-xl font-bold mb-4">
+                    <h2 className="text-2xl font-bold mb-5">
                         Produk Terbaru
                     </h2>
 
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-6">
+                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
 
-                        {products.map(item => (
+                        {products.map((item) => (
 
                             <div
                                 key={item.id_produk}
-                                className="bg-white p-4 rounded-2xl shadow hover:-translate-y-2 hover:shadow-xl transition-all cursor-pointer"
-                                onClick={() => navigate(`/detail-produk/${item.id_produk}`)}
+                                onClick={() =>
+                                    navigate(`/detail-produk/${item.id_produk}`)
+                                }
+                                className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
                             >
 
-                                <div className="h-32 flex items-center justify-center">
+                                <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
+
                                     <img
-                                        src="/img/default.png"
+                                        src={
+                                            item.gambar &&
+                                                item.gambar.length > 0
+                                                ? `http://127.0.0.1:8000/storage/${item.gambar[0].url_gambar}`
+                                                : "/img/default.png"
+                                        }
                                         alt={item.nama_produk}
-                                        className="h-24 object-contain"
+                                        className="h-28 object-contain mx-auto"
                                     />
+
                                 </div>
 
-                                <h3 className="font-semibold">
-                                    {item.nama_produk}
-                                </h3>
+                                <div className="mt-3 space-y-1">
 
-                                <p className="text-blue-600 font-bold">
-                                    Rp {Number(item.harga_jual).toLocaleString("id-ID")}
-                                </p>
+                                    <h3 className="text-sm font-semibold text-gray-800">
+                                        {item.nama_produk}
+                                    </h3>
 
-                                <p className="text-xs">
-                                    Stok: {item.stok}
-                                </p>
+                                    <p className="text-xs text-gray-500">
+                                        Produk Koperasi
+                                    </p>
+
+                                    <p className="text-base font-bold text-[#1297C9]">
+                                        Rp {Number(item.harga_jual).toLocaleString("id-ID")}
+                                    </p>
+
+                                    <p
+                                        className={`text-xs font-semibold ${item.stok === 0
+                                                ? "text-gray-400"
+                                                : item.stok < 5
+                                                    ? "text-red-500"
+                                                    : "text-green-600"
+                                            }`}
+                                    >
+                                        {item.stok === 0
+                                            ? "Stok: Habis"
+                                            : `Stok: ${item.stok} tersedia`}
+                                    </p>
+
+                                </div>
 
                                 <button
                                     onClick={(e) => {
@@ -173,13 +195,18 @@ function Dashboard() {
                                         item.stok === 0 ||
                                         loadingCart === item.id_produk
                                     }
-                                    className="mt-3 w-full py-2 rounded-xl bg-blue-600 text-white flex items-center justify-center gap-2 hover:scale-105 transition"
+                                    className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${item.stok === 0
+                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
+                                            : "bg-[#1766D3] text-white shadow-sm"
+                                        }`}
                                 >
                                     <FaShoppingCart size={12} />
 
                                     {loadingCart === item.id_produk
                                         ? "Loading..."
-                                        : "Tambah"}
+                                        : item.stok === 0
+                                            ? "Habis"
+                                            : "Tambah"}
                                 </button>
 
                             </div>
@@ -191,7 +218,6 @@ function Dashboard() {
                 </div>
 
             </div>
-
         </AppLayout>
     );
 }

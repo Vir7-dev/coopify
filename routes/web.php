@@ -2,7 +2,7 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ProdukController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PembayaranController;
 
@@ -16,7 +16,7 @@ Route::post('/login', [AuthController::class, 'login']);
 Route::post('/logout', [AuthController::class, 'logout']);
 
 // ================= PRODUCTS =================//
-Route::get('/products', [ProductController::class, 'index']);
+Route::get('/produk', [ProdukController::class, 'index']);
 
 
 // ================= PEMBAYARAN =================

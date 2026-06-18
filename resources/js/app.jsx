@@ -21,20 +21,24 @@ function App() {
             <Route path="/" element={<Dashboard />} />
             <Route path="/dashboard-pengguna" element={<Dashboard />} />
             <Route path="/login" element={<Login />} />
+
+            <Route path="/produk" element={<Produk />} />
             <Route path="/produk/:kategori" element={<Produk />} />
+
+            <Route path="/detail-produk/:id" element={<DetailProduk />} />
+            <Route path="/search" element={<Search />} />
+
             <Route path="/kelola-produk" element={<KelolaProduk />} />
             <Route path="/kelola-kategori" element={<KelolaKategori />} />
+
             <Route path="/keranjang" element={<Keranjang />} />
             <Route path="/pembayaran" element={<Pembayaran />} />
+
             <Route path="/profil-pengguna" element={<ProfilPengguna />} />
             <Route path="/profil-admin" element={<ProfilAdmin />} />
             <Route path="/edit-profil" element={<EditProfil />} />
-            <Route path="/produk" element={<Produk />} />
+
             <Route path="/dashboard-admin" element={<DashboardAdmin />} />
-
-
-
-
         </Routes>
     );
 }
