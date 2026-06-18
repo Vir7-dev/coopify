@@ -6,9 +6,11 @@ use App\Http\Controllers\PembayaranController;
 Route::post('/midtrans/notification', [PembayaranController::class, 'handleNotification']);
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\ProdukController;
+use App\Http\Controllers\UbahSandiController;
 
 Route::get('/kategori', [KategoriController::class, 'index']);
 Route::post('/kategori', [KategoriController::class, 'store']);
 Route::put('/kategori/{id}', [KategoriController::class, 'update']);
 Route::delete('/kategori/{id}', [KategoriController::class, 'destroy']);
 Route::resource('produk', ProdukController::class);
+Route::post('/ubah-sandi', [UbahSandiController::class, 'ubahPassword']);

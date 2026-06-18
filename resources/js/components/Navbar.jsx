@@ -72,7 +72,7 @@ function Navbar({ role }) {
 
         try {
             const response = await axios.post(
-                "http://127.0.0.1:8000/api/ganti-password",
+                "http://127.0.0.1:8000/api/ubah-sandi",
                 {
                     old_password: oldPassword,
                     new_password: newPassword,
