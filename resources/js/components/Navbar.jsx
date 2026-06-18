@@ -176,20 +176,22 @@ function Navbar({ role }) {
                 )}
 
                 {/* SEARCH BAR */}
-                <div className="hidden md:flex flex-1 justify-center">
-                    <div className="relative w-full max-w-xl">
-                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                {role !== "admin" && (
+                    <div className="hidden md:flex flex-1 justify-center">
+                        <div className="relative w-full max-w-xl">
+                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
-                        <input
-                            type="text"
-                            value={keyword}
-                            onChange={(e) => setKeyword(e.target.value)}
-                            onKeyDown={handleSearch}
-                            placeholder="Cari produk..."
-                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
-                        />
+                            <input
+                                type="text"
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                                onKeyDown={handleSearch}
+                                placeholder="Cari produk..."
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
+                            />
+                        </div>
                     </div>
-                </div>
+                )}
 
                 {/* ICON + PROFILE */}
                 <div className="hidden md:flex items-center gap-4 relative">
@@ -415,7 +417,7 @@ function Navbar({ role }) {
                                 onClick={() => setOpenPasswordModal(false)}
                                 className="absolute top-3 right-3 text-xl"
                             >
-                                  <FaTimes size={18} />
+                                <FaTimes size={18} />
                             </button>
 
                             <h2 className="text-xl font-bold mb-4 text-[#1766D3]">
