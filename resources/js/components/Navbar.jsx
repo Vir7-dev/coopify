@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
+import api from "../api";
 
 import {
     FaUserCircle,
@@ -8,7 +9,8 @@ import {
     FaShoppingCart,
     FaBars,
     FaTimes,
-    FaCheckCircle
+    FaCheckCircle,
+    FaSearch
 } from "react-icons/fa";
 
 function Navbar({ role }) {
@@ -22,6 +24,7 @@ function Navbar({ role }) {
     const [confirmPassword, setConfirmPassword] = useState("");
 
     const [openNotif, setOpenNotif] = useState(false);
+    const [keyword, setKeyword] = useState("");
 
     const notifications = [
         { code: "ORD12345", time: "5 menit lalu", pickup: "22 Apr 2026 - 09:15" },
@@ -59,6 +62,25 @@ function Navbar({ role }) {
 
     const profilePath = role === "admin" ? "/profil-admin" : "/profil-pengguna";
 
+    const handleSearch = (e) => {
+        if (e.key === "Enter" && keyword.trim()) {
+            navigate(`/search?q=${encodeURIComponent(keyword)}`);
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await api.post("/logout");
+        } catch (error) {
+            console.error("Logout request failed:", error);
+        } finally {
+            localStorage.removeItem("token");
+            localStorage.removeItem("user");
+            delete axios.defaults.headers.common.Authorization;
+            navigate("/login");
+        }
+    };
+
     const handleChangePassword = async () => {
         if (!oldPassword || !newPassword || !confirmPassword) {
             alert("Semua field harus diisi");
@@ -71,8 +93,13 @@ function Navbar({ role }) {
         }
 
         try {
+<<<<<<< HEAD
             const response = await axios.post(
                 "http://127.0.0.1:8000/api/ubah-sandi",
+=======
+            const response = await api.post(
+                "/ganti-password",
+>>>>>>> 6542abf70738f9fd6a1ff37abb05c22f5eea2168
                 {
                     old_password: oldPassword,
                     new_password: newPassword,
@@ -94,8 +121,7 @@ function Navbar({ role }) {
 
     return (
         <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3">
-            <div className="flex justify-between items-center">
-
+            <div className="flex items-center gap-6">
                 {/* LOGO */}
                 <div
                     onClick={() => navigate("/")}
@@ -114,21 +140,51 @@ function Navbar({ role }) {
                     )}
                 </div>
 
-                {/* MENU */}
-                <ul className="hidden md:flex gap-8">
-                    {role === "admin" ? (
-                        <>
-                            <li onClick={() => navigate("/dashboard-admin")} className="cursor-pointer">Dashboard</li>
-                            <li onClick={() => navigate("/kelola-produk")} className="cursor-pointer">Produk</li>
-                            <li onClick={() => navigate("/kelola-kategori")} className="cursor-pointer">Kategori</li>
-                        </>
-                    ) : (
-                        <>
-                            <li onClick={() => navigate("/")} className="cursor-pointer">Home</li>
-                            <li onClick={() => navigate("/kontak")} className="cursor-pointer">Kontak</li>
-                        </>
-                    )}
-                </ul>
+                {/* MENU ADMIN */}
+                {role === "admin" && (
+                    <ul className="hidden md:flex gap-8">
+                        <li
+                            onClick={() => navigate("/dashboard-admin")}
+                            className="cursor-pointer hover:text-blue-500"
+                        >
+                            Dashboard
+                        </li>
+
+                        <li
+                            onClick={() => navigate("/kelola-produk")}
+                            className="cursor-pointer hover:text-blue-500"
+                        >
+                            Produk
+                        </li>
+
+                        <li
+                            onClick={() => navigate("/kelola-kategori")}
+                            className="cursor-pointer hover:text-blue-500"
+                        >
+                            Kategori
+                        </li>
+                    </ul>
+                )}
+
+                {/* SEARCH BAR */}
+                <div className="hidden md:flex flex-1 justify-center">
+                    <div className="relative w-full max-w-xl">
+
+                        <FaSearch
+                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                        />
+
+                        <input
+                            type="text"
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            onKeyDown={handleSearch}
+                            placeholder="Cari produk..."
+                            className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
+                        />
+
+                    </div>
+                </div>
 
                 {/* ICON + PROFILE */}
                 <div className="hidden md:flex items-center gap-4 relative">
@@ -267,7 +323,7 @@ function Navbar({ role }) {
                                     </div>
 
                                     <div
-                                        onClick={() => navigate("/login")}
+                                        onClick={handleLogout}
                                         className="px-4 py-2 text-red-500 cursor-pointer"
                                     >
                                         Keluar

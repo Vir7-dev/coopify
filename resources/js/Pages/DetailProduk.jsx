@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import AppLayout from "../Layouts/AppLayout";
 import { FaShoppingCart } from "react-icons/fa";
+import { API_BASE_URL } from "../api";
 
 export default function DetailProduk() {
     const { id } = useParams();
@@ -12,7 +13,7 @@ export default function DetailProduk() {
     const [activeImage, setActiveImage] = useState(0);
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/api/produk")
+        fetch(`${API_BASE_URL}/api/produk`)
             .then((res) => res.json())
             .then((data) => {
                 const detail = data.find((item) => item.id_produk == id);
@@ -51,7 +52,7 @@ export default function DetailProduk() {
                         <div>
                             <div className="bg-gray-50 rounded-3xl  h-[500px] flex items-center justify-center">
                                 <img
-                                    src={`http://127.0.0.1:8000/storage/${produk.gambar?.[activeImage]?.url_gambar}`}
+                                    src={`${API_BASE_URL}/storage/${produk.gambar?.[activeImage]?.url_gambar}`}
                                     alt={produk.nama_produk}
                                     className="max-h-[400px] object-contain"
                                 />
@@ -69,7 +70,7 @@ export default function DetailProduk() {
                                         }`}
                                     >
                                         <img
-                                            src={`http://127.0.0.1:8000/storage/${img.url_gambar}`}
+                                            src={`${API_BASE_URL}/storage/${img.url_gambar}`}
                                             className="w-full h-full object-contain"
                                         />
                                     </button>
@@ -184,7 +185,7 @@ export default function DetailProduk() {
                                 className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-lg transition block"
                             >
                                 <img
-                                    src={`http://127.0.0.1:8000/storage/${item.gambar?.[0]?.url_gambar}`}
+                                    src={`${API_BASE_URL}/storage/${item.gambar?.[0]?.url_gambar}`}
                                     alt={item.nama_produk}
                                     className="h-40 w-full object-contain"
                                 />

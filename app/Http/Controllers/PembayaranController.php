@@ -2,146 +2,264 @@
 
 namespace App\Http\Controllers;
 
-use Illuminate\Http\Request;
-use Midtrans\Config;
-use Midtrans\Snap;
-use Midtrans\Notification;
 use App\Models\Pesanan;
-use Inertia\Inertia;
+use App\Models\Pembayaran;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
+use Midtrans\Config;
+use Midtrans\Notification;
+use Midtrans\Snap;
+use Throwable;
 
 class PembayaranController extends Controller
 {
     private function setupMidtrans(): void
     {
-        Config::$serverKey    = config('midtrans.server_key');
+        Config::$serverKey = config('midtrans.server_key');
         Config::$isProduction = config('midtrans.is_production');
-        Config::$isSanitized  = true;
-        Config::$is3ds        = true;
+        Config::$isSanitized = true;
+        Config::$is3ds = true;
     }
 
-    // ─────────────────────────────────────────
-    // Halaman pembayaran
-    // ─────────────────────────────────────────
-    public function show($id_pesanan)
+    private function expirePaymentIfNeeded(Pembayaran $pembayaran): bool
     {
-        $pesanan = Pesanan::with('detailPesanan.produk')->findOrFail($pesananId);
-
-        // FIX #1 — Validasi kepemilikan
-        if ($pesanan->id_pengguna !== auth()->id()) {
-            abort(403, 'Akses ditolak.');
+        if (
+            $pembayaran->status_pem !== 'menunggu' ||
+            !$pembayaran->batas_wkt_pem ||
+            !now()->greaterThan($pembayaran->batas_wkt_pem)
+        ) {
+            return false;
         }
 
-        return Inertia::render('Pembayaran', [
-            'total'      => $pesanan->total,
-            'metode'     => 'QRIS',
-            'pesanan_id' => $pesanan->id,
-            'snap_token' => $pesanan->snap_token,
+        $pembayaran->update([
+            'status_pem' => 'kadaluarsa',
+        ]);
+        $pembayaran->refresh();
+
+        return true;
+    }
+
+    private function terminalStatusMessage(string $status): ?string
+    {
+        return match ($status) {
+            'lunas' => 'Pesanan sudah dibayar',
+            'kadaluarsa' => 'Pembayaran sudah kadaluarsa',
+            'gagal' => 'Pembayaran gagal',
+            default => null,
+        };
+    }
+
+    private function rejectIfTerminalStatus(Pembayaran $pembayaran): ?JsonResponse
+    {
+        $message = $this->terminalStatusMessage($pembayaran->status_pem);
+
+        if (!$message) {
+            return null;
+        }
+
+        return response()->json([
+            'message' => $message,
+        ], 422);
+    }
+
+    public function show(int $id)
+    {
+        $pesanan = Pesanan::with('pembayaran')
+            ->findOrFail($id);
+
+        $user = Auth::user();
+
+        if ($pesanan->id_peng_fk_ps !== $user->id_pengguna) {
+            abort(403, 'Akses ditolak');
+        }
+
+        if (!$pesanan->pembayaran) {
+            abort(404, 'Data pembayaran tidak ditemukan');
+        }
+
+        $pembayaran = $pesanan->pembayaran;
+        $this->expirePaymentIfNeeded($pembayaran);
+
+        return response()->json([
+            'pesanan_id' => $pesanan->id_pesanan,
+            'kode_pesanan' => $pesanan->kode_pesanan,
+            'total' => $pesanan->total_harga,
+            'status_pembayaran' => $pembayaran->status_pem,
+            'snap_token' => $pembayaran->snap_token,
+            'batas_wkt_pem' => $pembayaran->batas_wkt_pem,
+            'server_time' => now()->toIso8601String(),
+            'metode' => 'QRIS',
         ]);
     }
 
-    // ─────────────────────────────────────────
-    // Buat snap token
-    // ─────────────────────────────────────────
     public function createTransaction(Request $request)
     {
-        $request->validate(['id_pesanan' => 'required|integer']);
+        $request->merge([
+            'id_pesanan' => $request->input(
+                'id_pesanan',
+                $request->input('pesanan_id')
+            ),
+        ]);
 
-        $pesanan = Pesanan::with('detailPesanan.produk')->findOrFail($request->id_pesanan);
+        $request->validate([
+            'id_pesanan' => 'required|integer',
+        ]);
 
-        // FIX #1 — Validasi kepemilikan
-        if ($pesanan->id_pengguna !== auth()->id()) {
-            abort(403, 'Akses ditolak.');
+        $pesanan = Pesanan::with('pembayaran')
+            ->findOrFail($request->id_pesanan);
+
+        $user = Auth::user();
+
+        if ($pesanan->id_peng_fk_ps !== $user->id_pengguna) {
+            abort(403, 'Akses ditolak');
         }
 
-        // FIX #3 — Cegah buat token kalau sudah paid/cancelled
-        if (in_array($pesanan->status, ['paid', 'cancelled'])) {
+        $pembayaran = $pesanan->pembayaran;
+
+        if (!$pembayaran) {
             return response()->json([
-                'message' => 'Pesanan sudah ' . $pesanan->status . ', tidak bisa membuat transaksi baru.',
-            ], 422);
+                'message' => 'Data pembayaran tidak ditemukan',
+            ], 404);
         }
 
-        // Kalau sudah ada snap_token (misal user refresh), reuse saja
-        if ($pesanan->snap_token) {
-            return response()->json(['snap_token' => $pesanan->snap_token]);
+        $this->expirePaymentIfNeeded($pembayaran);
+
+        if ($response = $this->rejectIfTerminalStatus($pembayaran)) {
+            return $response;
         }
 
-        // FIX #2 — Hitung ulang total dari detail item, bukan dari kolom total
-        $totalDihitung = $pesanan->detailPesanan->sum(function ($item) {
-            return $item->harga_saat_pesan * $item->jumlah;
-        });
-
-        // Kalau ada diskon di pesanan, kurangi
-        if ($pesanan->diskon_nominal) {
-            $totalDihitung -= $pesanan->diskon_nominal;
+        if ($pembayaran->snap_token) {
+            return response()->json([
+                'snap_token' => $pembayaran->snap_token,
+            ]);
         }
-
-        $totalDihitung = max(0, (int) $totalDihitung);
 
         $this->setupMidtrans();
 
         $params = [
             'transaction_details' => [
-                'order_id'    => $pesanan->kode_pesanan,
-                'gross_amount' => $totalDihitung,
+                'order_id' => $pesanan->kode_pesanan,
+                'gross_amount' => (int) round($pesanan->total_harga),
             ],
             'customer_details' => [
-                'first_name' => auth()->user()->nama,
-                'email'      => auth()->user()->email,
+                'first_name' => $user->nama,
+                'phone' => $user->no_hp,
             ],
-            'enabled_payments' => ['qris'],
+            'enabled_payments' => [
+                'qris',
+            ],
         ];
 
-        $snapToken = Snap::getSnapToken($params);
+        try {
+            $snapToken = Snap::getSnapToken($params);
+        } catch (Throwable $e) {
+            report($e);
 
-        $pesanan->update([
+            $message = config('app.debug')
+                ? 'Gagal membuat transaksi Midtrans: ' . $e->getMessage()
+                : 'Gagal membuat transaksi pembayaran';
+
+            return response()->json([
+                'message' => $message,
+            ], 500);
+        }
+
+        $pembayaran->update([
             'snap_token' => $snapToken,
-            'status'     => 'pending',
         ]);
 
-        return response()->json(['snap_token' => $snapToken]);
+        return response()->json([
+            'snap_token' => $snapToken,
+        ]);
     }
 
-    // ─────────────────────────────────────────
-    // Webhook Midtrans
-    // ─────────────────────────────────────────
     public function handleNotification(Request $request)
     {
         $this->setupMidtrans();
 
-        // FIX #4 — Verifikasi signature Midtrans
-        // Format: SHA512(order_id + status_code + gross_amount + server_key)
-        $orderId     = $request->input('order_id');
-        $statusCode  = $request->input('status_code');
+        $orderId = $request->input('order_id');
+        $statusCode = $request->input('status_code');
         $grossAmount = $request->input('gross_amount');
-        $serverKey   = config('midtrans.server_key');
+        $signatureKey = (string) $request->input('signature_key', '');
 
-        $signatureInput    = $orderId . $statusCode . $grossAmount . $serverKey;
-        $expectedSignature = hash('sha512', $signatureInput);
-        $receivedSignature = $request->input('signature_key');
+        $expectedSignature = hash(
+            'sha512',
+            $orderId .
+            $statusCode .
+            $grossAmount .
+            config('midtrans.server_key')
+        );
 
-        if (!hash_equals($expectedSignature, $receivedSignature)) {
-            return response()->json(['message' => 'Signature tidak valid.'], 403);
+        if (!hash_equals($expectedSignature, $signatureKey)) {
+            return response()->json([
+                'message' => 'Signature tidak valid',
+            ], 403);
         }
 
-        // Proses notifikasi
-        $notif  = new Notification();
-        $status = $notif->transaction_status;
-        $fraud  = $notif->fraud_status;
+        try {
+            $notif = new Notification();
 
-        $pesanan = Pesanan::where('kode_pesanan', $orderId)->firstOrFail();
+            $pesanan = Pesanan::where(
+                'kode_pesanan',
+                $notif->order_id
+            )->first();
 
-        if ($status === 'capture') {
-            $pesanan->update([
-                'status' => $fraud === 'challenge' ? 'challenge' : 'paid',
+            if (!$pesanan) {
+                return response()->json([
+                    'message' => 'Pesanan tidak ditemukan',
+                ], 404);
+            }
+
+            $pembayaran = Pembayaran::where(
+                'id_pes_fk_pb',
+                $pesanan->id_pesanan
+            )->first();
+
+            if (!$pembayaran) {
+                return response()->json([
+                    'message' => 'Pembayaran tidak ditemukan',
+                ], 404);
+            }
+
+            $statusTransaksi = match ($notif->transaction_status) {
+                'capture', 'settlement' => 'berhasil',
+                'pending' => 'menunggu',
+                default => 'gagal',
+            };
+
+            DB::statement(
+                "CALL konfirmasi_pembayaran(
+                    ?, ?, ?, ?, ?, @hasil
+                )",
+                [
+                    $pembayaran->id_pembayaran,
+                    $notif->transaction_id,
+                    $statusTransaksi,
+                    $notif->gross_amount,
+                    $signatureKey,
+                ]
+            );
+
+            $hasil = DB::selectOne(
+                "SELECT @hasil AS pesan"
+            );
+
+            return response()->json([
+                'status' => 'ok',
+                'message' => $hasil->pesan ?? 'Notifikasi diproses',
             ]);
-        } elseif ($status === 'settlement') {
-            $pesanan->update(['status' => 'paid']);
-        } elseif (in_array($status, ['cancel', 'deny', 'expire'])) {
-            $pesanan->update(['status' => 'cancelled']);
-        } elseif ($status === 'pending') {
-            $pesanan->update(['status' => 'pending']);
-        }
+        } catch (Throwable $e) {
+            report($e);
 
-        return response()->json(['status' => 'ok']);
+            $message = config('app.debug')
+                ? 'Gagal memproses notifikasi: ' . $e->getMessage()
+                : 'Gagal memproses notifikasi pembayaran';
+
+            return response()->json([
+                'message' => $message,
+            ], 500);
+        }
     }
 }

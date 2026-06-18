@@ -7,7 +7,7 @@ export default defineConfig({
     plugins: [
         react(), // 🔥 ini kuncinya
         laravel({
-            input: ['resources/js/app.jsx'], // 🔥 ganti ke React entry
+            input: ['resources/css/app.css', 'resources/js/main.jsx'],
             refresh: true,
         }),
         tailwindcss(),

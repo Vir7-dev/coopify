@@ -1,67 +1,13 @@
 import React, { useState, useEffect } from "react";
+import Swal from "sweetalert2";
 import AppLayout from "../Layouts/AppLayout";
+import api from "../api";
 import {
   FaSearch, FaEdit, FaTrash, FaPlus, FaBox, FaTags,
-  FaCalendarAlt, FaLayerGroup, FaTimes, FaChevronLeft,
-  FaChevronRight, FaUtensils, FaCoffee, FaPills, FaPencilAlt,
-  FaTshirt, FaAppleAlt, FaHamburger, FaBreadSlice, FaCookie,
-  FaIceCream, FaLeaf, FaCarrot, FaFish, FaDrumstickBite,
-  FaWineGlass, FaGlassWhiskey, FaMugHot,
-  FaCapsules, FaSyringe, FaHeartbeat, FaFirstAid, FaBandAid,
-  FaGlasses, FaPen, FaRuler, FaBook, FaBookOpen, FaClipboard,
-  FaStar, FaShoppingBag, FaTag, FaGift, FaStore,
+  FaCalendarAlt, FaLayerGroup, FaTimes, FaChevronLeft, FaChevronRight,
 } from "react-icons/fa";
+import { ICON_LIST, suggestIcon, DynIcon } from "../constants/categoryIcons.jsx";
 
-// ============================================================
-// ICON REGISTRY — nama string ↔ komponen
-// ============================================================
-const ICON_LIST = [
-  { name: "FaUtensils",     comp: FaUtensils,     label: "Alat Makan" },
-  { name: "FaHamburger",    comp: FaHamburger,    label: "Burger" },
-  { name: "FaDrumstickBite",comp: FaDrumstickBite,label: "Ayam" },
-  { name: "FaBreadSlice",   comp: FaBreadSlice,   label: "Roti" },
-  { name: "FaCookie",       comp: FaCookie,       label: "Snack" },
-  { name: "FaIceCream",     comp: FaIceCream,     label: "Dessert" },
-  { name: "FaAppleAlt",     comp: FaAppleAlt,     label: "Buah" },
-  { name: "FaCarrot",       comp: FaCarrot,       label: "Sayur" },
-  { name: "FaLeaf",         comp: FaLeaf,         label: "Organik" },
-  { name: "FaFish",         comp: FaFish,         label: "Seafood" },
-  { name: "FaCoffee",       comp: FaCoffee,       label: "Kopi" },
-  { name: "FaMugHot",       comp: FaMugHot,       label: "Teh" },
-  { name: "FaGlassWhiskey", comp: FaGlassWhiskey, label: "Minuman" },
-  { name: "FaWineGlass",    comp: FaWineGlass,    label: "Jus" },
-  { name: "FaPills",        comp: FaPills,        label: "Obat" },
-  { name: "FaCapsules",     comp: FaCapsules,     label: "Suplemen" },
-  { name: "FaSyringe",      comp: FaSyringe,      label: "Medis" },
-  { name: "FaHeartbeat",    comp: FaHeartbeat,    label: "Kesehatan" },
-  { name: "FaFirstAid",     comp: FaFirstAid,     label: "P3K" },
-  { name: "FaBandAid",      comp: FaBandAid,      label: "Perawatan" },
-  { name: "FaPencilAlt",    comp: FaPencilAlt,    label: "Pensil" },
-  { name: "FaPen",          comp: FaPen,          label: "Pena" },
-  { name: "FaRuler",        comp: FaRuler,        label: "Penggaris" },
-  { name: "FaBook",         comp: FaBook,         label: "Buku" },
-  { name: "FaBookOpen",     comp: FaBookOpen,     label: "Buku Buka" },
-  { name: "FaClipboard",    comp: FaClipboard,    label: "Clipboard" },
-  { name: "FaGlasses",      comp: FaGlasses,      label: "Kacamata" },
-  { name: "FaTshirt",       comp: FaTshirt,       label: "Almamater" },
-  { name: "FaTag",          comp: FaTag,          label: "Label" },
-  { name: "FaGift",         comp: FaGift,         label: "Hadiah" },
-  { name: "FaShoppingBag",  comp: FaShoppingBag,  label: "Belanja" },
-  { name: "FaStore",        comp: FaStore,        label: "Toko" },
-  { name: "FaStar",         comp: FaStar,         label: "Bintang" },
-  { name: "FaBox",          comp: FaBox,          label: "Kotak" },
-];
-
-// Render icon dari string nama — aman untuk null/undefined
-function DynIcon({ name, size = 14, className = "" }) {
-  if (!name || typeof name !== "string") return <FaBox size={size} className={className} />;
-  const found = ICON_LIST.find((i) => i.name === name);
-  if (!found) return <FaBox size={size} className={className} />;
-  const Comp = found.comp;
-  return <Comp size={size} className={className} />;
-}
-
-// Warna background icon per urutan (cycling)
 const ICON_COLORS = [
   "bg-blue-100 text-blue-600",
   "bg-green-100 text-green-600",
@@ -71,62 +17,30 @@ const ICON_COLORS = [
   "bg-teal-100 text-teal-600",
 ];
 
-// Auto-suggest icon berdasarkan keyword nama kategori
-function suggestIcon(nama) {
-  const n = nama.toLowerCase();
-  if (n.includes("makan") || n.includes("nasi") || n.includes("lauk"))  return "FaUtensils";
-  if (n.includes("minum") || n.includes("drink") || n.includes("air"))  return "FaGlassWhiskey";
-  if (n.includes("kopi") || n.includes("coffee"))                       return "FaCoffee";
-  if (n.includes("teh") || n.includes("tea"))                           return "FaMugHot";
-  if (n.includes("jus") || n.includes("juice"))                         return "FaWineGlass";
-  if (n.includes("snack") || n.includes("cemilan") || n.includes("kue")) return "FaCookie";
-  if (n.includes("dessert") || n.includes("es krim") || n.includes("manis")) return "FaIceCream";
-  if (n.includes("obat") || n.includes("medicine"))                     return "FaPills";
-  if (n.includes("kesehatan") || n.includes("health"))                  return "FaHeartbeat";
-  if (n.includes("suplemen") || n.includes("vitamin"))                  return "FaCapsules";
-  if (n.includes("alat tulis") || n.includes("stationery"))             return "FaPencilAlt";
-  if (n.includes("buku") || n.includes("book"))                         return "FaBook";
-  if (n.includes("almamater") || n.includes("baju") || n.includes("seragam")) return "FaTshirt";
-  if (n.includes("buah") || n.includes("fruit"))                        return "FaAppleAlt";
-  if (n.includes("sayur") || n.includes("vegetable"))                   return "FaCarrot";
-  if (n.includes("ayam") || n.includes("chicken"))                      return "FaDrumstickBite";
-  if (n.includes("ikan") || n.includes("fish"))                         return "FaFish";
-  if (n.includes("roti") || n.includes("bread"))                        return "FaBreadSlice";
-  if (n.includes("paket") || n.includes("bundle"))                      return "FaGift";
-  return "FaBox";
-}
-
 export default function KelolaKategori() {
-  const [products, setProducts]           = useState([]);
-  const [search, setSearch]               = useState("");
-  const [filterKat, setFilterKat]         = useState(null); // id kategori filter
-  const [currentPage, setCurrentPage]     = useState(1);
+  const [products, setProducts] = useState([]);
+  const [search, setSearch] = useState("");
+  const [filterKat, setFilterKat] = useState(null); // id kategori filter
+  const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 10;
 
-  const [showModal, setShowModal]         = useState(false);
-  const [isEdit, setIsEdit]               = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
-  const [selectedDelete, setSelectedDelete]   = useState(null);
 
   const [form, setForm] = useState({ nama: "", ikon: "FaBox" });
 
-  // ── Fetch data ──────────────────────────────────────────
   const fetchData = () => {
-    fetch("http://localhost:8000/api/kategori")
-      .then((r) => {
-        if (!r.ok) throw new Error(`HTTP error! status: ${r.status}`);
-        return r.json();
-      })
-      .then((d) => {
-        console.log("Data kategori diterima:", d); // debug log
-        // Normalisasi data — pastikan semua field ada
+    api.get("/kategori")
+      .then((res) => {
+        const d = res.data;
+        console.log("Data kategori diterima:", d);
         const normalized = d.map((item) => ({
-          id:   item?.id   ?? null,
+          id: item?.id ?? null,
           nama: item?.nama ?? "-",
           ikon: item?.ikon ?? "FaBox",
           stok: item?.stok ?? 0,
-          tgl:  item?.tgl  ?? null,
+          tgl: item?.tgl ?? null,
         }));
         setProducts(normalized);
       })
@@ -134,36 +48,32 @@ export default function KelolaKategori() {
   };
   useEffect(() => { fetchData(); }, []);
 
-  // ── Stats ────────────────────────────────────────────────
-  const totalKategori  = products.length;
-  const totalProduk    = products.reduce((s, p) => s + (p.stok || 0), 0);
+  const totalKategori = products.length;
+  const totalProduk = products.reduce((s, p) => s + (p.stok || 0), 0);
   const terakhirUpdate = products.length
     ? (() => {
-        const validDates = products.map((p) => new Date(p.tgl)).filter((d) => !isNaN(d));
-        if (!validDates.length) return "-";
-        return new Date(Math.max(...validDates))
-          .toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
-      })()
+      const validDates = products.map((p) => new Date(p.tgl)).filter((d) => !isNaN(d));
+      if (!validDates.length) return "-";
+      return new Date(Math.max(...validDates))
+        .toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
+    })()
     : "-";
   const terbanyak = products.length
     ? products.reduce((a, b) => (a.stok > b.stok ? a : b)).nama
     : "-";
 
-  // ── Filter + search ──────────────────────────────────────
   const filtered = products.filter((p) => {
     const matchSearch = p.nama.toLowerCase().includes(search.toLowerCase());
     const matchFilter = filterKat === null || p.id === filterKat;
     return matchSearch && matchFilter;
   });
 
-  const totalPages     = Math.ceil(filtered.length / itemsPerPage);
-  const indexOfFirst   = (currentPage - 1) * itemsPerPage;
-  const currentItems   = filtered.slice(indexOfFirst, indexOfFirst + itemsPerPage);
+  const totalPages = Math.ceil(filtered.length / itemsPerPage);
+  const indexOfFirst = (currentPage - 1) * itemsPerPage;
+  const currentItems = filtered.slice(indexOfFirst, indexOfFirst + itemsPerPage);
 
-  // Reset page kalau filter/search berubah
   useEffect(() => { setCurrentPage(1); }, [search, filterKat]);
 
-  // ── Auto-suggest icon saat nama berubah ──────────────────
   const handleNamaChange = (e) => {
     const val = e.target.value;
     setForm((f) => ({ ...f, nama: val, ikon: suggestIcon(val) }));
@@ -173,7 +83,7 @@ export default function KelolaKategori() {
     setForm((f) => ({ ...f, [e.target.name]: e.target.value }));
   };
 
-  // ── Modal handlers ───────────────────────────────────────
+  // Modal handlers
   const handleAdd = () => {
     setIsEdit(false);
     setSelectedProduct(null);
@@ -188,61 +98,92 @@ export default function KelolaKategori() {
     setShowModal(true);
   };
 
+  // Hapus
   const handleDeleteClick = (item) => {
-    setSelectedDelete(item);
-    setShowDeleteModal(true);
+    Swal.fire({
+      title: "Hapus Kategori?",
+      html: `Yakin mau hapus kategori <b>${item.nama}</b>?<br/><span style="font-size:13px;color:#6b7280">Produk di kategori ini tidak ikut terhapus.</span>`,
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#ef4444",
+      cancelButtonColor: "#6b7280",
+      confirmButtonText: "Ya, Hapus!",
+      cancelButtonText: "Batal",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        try {
+          await api.delete(`/kategori/${item.id}`);
+          setProducts((prev) => prev.filter((p) => p.id !== item.id));
+          if (filterKat === item.id) setFilterKat(null);
+          Swal.fire({
+            icon: "success",
+            title: "Terhapus!",
+            text: `Kategori "${item.nama}" berhasil dihapus.`,
+            timer: 2000,
+            showConfirmButton: false,
+          });
+        } catch (error) {
+          Swal.fire({
+            icon: "error",
+            title: "Gagal!",
+            text: "Terjadi kesalahan saat menghapus kategori",
+          });
+        }
+      }
+    });
   };
-
-  // ── Submit tambah / edit ─────────────────────────────────
-  const handleSubmit = () => {
-    if (!form.nama.trim()) { alert("Isi nama kategori!"); return; }
+  const handleSubmit = async () => {
+    if (!form.nama.trim()) {
+      Swal.fire({
+        icon: "warning",
+        title: "Perhatian!",
+        text: "Nama kategori tidak boleh kosong!",
+        confirmButtonColor: "#1D63D3",
+      });
+      return;
+    }
 
     const body = { nama_kategori: form.nama, ikon: form.ikon };
 
-    if (isEdit) {
-      fetch(`http://localhost:8000/api/kategori/${selectedProduct.id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
-        .then((r) => r.json())
-        .then((updated) => {
-          setProducts((prev) =>
-            prev.map((p) =>
-              p.id === selectedProduct.id
-                ? { ...p, nama: updated.nama, ikon: updated.ikon }
-                : p
-            )
-          );
-          setShowModal(false);
+    try {
+      if (isEdit) {
+        const r = await api.put(`/kategori/${selectedProduct.id}`, body);
+        const updated = r.data;
+        setProducts((prev) =>
+          prev.map((p) =>
+            p.id === selectedProduct.id
+              ? { ...p, nama: updated.nama, ikon: updated.ikon }
+              : p
+          )
+        );
+      } else {
+        const r = await api.post("/kategori", body);
+        const newItem = r.data;
+        setProducts((prev) => [...prev, newItem]);
+      }
+
+      setShowModal(false);
+      setTimeout(() => {
+        Swal.fire({
+          icon: "success",
+          title: "Berhasil!",
+          text: isEdit
+            ? "Kategori berhasil diupdate"
+            : "Kategori berhasil ditambahkan",
+          timer: 2000,
+          showConfirmButton: false,
         });
-    } else {
-      fetch("http://localhost:8000/api/kategori", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(body),
-      })
-        .then((r) => r.json())
-        .then((newItem) => {
-          setProducts((prev) => [...prev, newItem]);
-          setShowModal(false);
-        });
+      }, 300);
+    } catch (error) {
+      Swal.fire({
+        icon: "error",
+        title: "Gagal!",
+        text: error.response?.data?.message || "Terjadi kesalahan saat menyimpan kategori",
+      });
     }
   };
 
-  // ── Hapus ────────────────────────────────────────────────
-  const confirmDelete = () => {
-    fetch(`http://localhost:8000/api/kategori/${selectedDelete.id}`, {
-      method: "DELETE",
-    }).then(() => {
-      setProducts((prev) => prev.filter((p) => p.id !== selectedDelete.id));
-      if (filterKat === selectedDelete.id) setFilterKat(null);
-      setShowDeleteModal(false);
-      setSelectedDelete(null);
-    });
-  };
-
-  // ── Render ───────────────────────────────────────────────
+  // Render
   return (
     <AppLayout role="admin">
       <div className="w-full">
@@ -312,8 +253,6 @@ export default function KelolaKategori() {
           </div>
         </div>
 
-
-
         {/* TABLE */}
         <div className="bg-white rounded-xl shadow-sm text-left">
 
@@ -373,7 +312,7 @@ export default function KelolaKategori() {
                         </div>
                       </td>
                       <td className="border-b border-gray-100 px-4 py-3 text-center">
-                        <span className={`px-3 py-1 rounded-full text-xs font-medium ${item.stok <= 3 ? "bg-red-100 text-red-600" : "bg-green-100 text-green-600"}`}>
+                        <span className="px-3 py-1 rounded-full text-xs font-medium bg-gray-100 text-gray-600">
                           {item.stok} produk
                         </span>
                       </td>
@@ -475,7 +414,7 @@ export default function KelolaKategori() {
                   />
                   {form.nama && (
                     <p className="text-xs text-blue-500 mt-1">
-                      ✨ Icon otomatis dipilih berdasarkan nama
+                      Icon otomatis dipilih berdasarkan nama
                     </p>
                   )}
                 </div>
@@ -493,11 +432,10 @@ export default function KelolaKategori() {
                           key={ic.name}
                           title={ic.label}
                           onClick={() => setForm((f) => ({ ...f, ikon: ic.name }))}
-                          className={`w-full aspect-square flex flex-col items-center justify-center rounded-lg border-2 transition text-xs gap-0.5 ${
-                            isSelected
+                          className={`w-full aspect-square flex flex-col items-center justify-center rounded-lg border-2 transition text-xs gap-0.5 ${isSelected
                               ? "border-blue-500 bg-blue-50 text-blue-600"
                               : "border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-500"
-                          }`}
+                            }`}
                         >
                           <Comp size={16} />
                         </button>
@@ -535,33 +473,6 @@ export default function KelolaKategori() {
           </div>
         )}
 
-        {/* ── MODAL HAPUS ── */}
-        {showDeleteModal && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-            <div className="bg-white w-[350px] rounded-xl shadow-lg p-5">
-              <h2 className="text-lg font-semibold mb-2">Konfirmasi Hapus</h2>
-              <p className="text-sm text-gray-500 mb-4">
-                Yakin mau hapus kategori{" "}
-                <span className="font-semibold text-black">{selectedDelete?.nama}</span>?
-                {" "}Produk di kategori ini tidak ikut terhapus.
-              </p>
-              <div className="flex gap-3">
-                <button
-                  onClick={confirmDelete}
-                  className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm transition"
-                >
-                  Hapus
-                </button>
-                <button
-                  onClick={() => setShowDeleteModal(false)}
-                  className="flex-1 bg-gray-200 hover:bg-gray-300 text-gray-700 py-2 rounded-lg text-sm transition"
-                >
-                  Batal
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
 
       </div>
     </AppLayout>

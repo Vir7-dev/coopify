@@ -2,6 +2,7 @@ import React, { useState, useRef, useEffect } from "react";
 import AppLayout from "../Layouts/AppLayout";
 import axios from "axios";
 import Swal from "sweetalert2";
+import api, { API_BASE_URL } from "../api";
 import ProdukModal from "../components/ProdukModal";
 import HapusProdukModal from "../components/HapusProdukModal";
 import Pagination from "../components/Pagination";
@@ -30,10 +31,9 @@ export default function KelolaProduk() {
     const [products, setProducts] = useState([]);
 
     useEffect(() => {
-        fetch("http://127.0.0.1:8000/api/produk")
-            .then((res) => res.json())
-            .then((data) => {
-                setProducts(data);
+        api.get("/produk")
+            .then((res) => {
+                setProducts(res.data);
             })
             .catch((err) => console.log(err));
     }, []);
@@ -153,18 +153,18 @@ export default function KelolaProduk() {
 
             if (isEdit) {
                 formData.append("_method", "PUT");
-                await axios.post(
-                    `http://127.0.0.1:8000/api/produk/${selectedProduct.id_produk}`,
+                await api.post(
+                    `/produk/${selectedProduct.id_produk}`,
                     formData,
                     { headers: { "Content-Type": "multipart/form-data" } },
                 );
             } else {
-                await axios.post("http://127.0.0.1:8000/api/produk", formData, {
+                await api.post("/produk", formData, {
                     headers: { "Content-Type": "multipart/form-data" },
                 });
             }
 
-            const res = await axios.get("http://127.0.0.1:8000/api/produk");
+            const res = await api.get("/produk");
             setProducts(res.data);
 
             setShowModal(false);
@@ -201,13 +201,12 @@ export default function KelolaProduk() {
     };
     const confirmDelete = async () => {
         try {
-            await axios.delete(
-                `http://127.0.0.1:8000/api/produk/${selectedDelete.id_produk}`,
+            await api.delete(
+                `/produk/${selectedDelete.id_produk}`,
             );
 
-            const res = await fetch("http://127.0.0.1:8000/api/produk");
-            const data = await res.json();
-            setProducts(data);
+            const res = await api.get("/produk");
+            setProducts(res.data);
 
             setShowDeleteModal(false);
             setSelectedDelete(null);
@@ -424,7 +423,7 @@ export default function KelolaProduk() {
                                                 <div className=" ">
                                                     {item.gambar?.length > 0 ? (
                                                         <img
-                                                            src={`http://127.0.0.1:8000/storage/${item.gambar[0].url_gambar}`}
+                                                            src={`${API_BASE_URL}/storage/${item.gambar[0].url_gambar}`}
                                                             alt={
                                                                 item.nama_produk
                                                             }
