@@ -10,7 +10,9 @@ import {
     FaBars,
     FaTimes,
     FaCheckCircle,
-    FaSearch
+    FaSearch,
+    FaChevronDown,
+    FaChevronUp,
 } from "react-icons/fa";
 
 function Navbar({ role }) {
@@ -22,6 +24,7 @@ function Navbar({ role }) {
     const [oldPassword, setOldPassword] = useState("");
     const [newPassword, setNewPassword] = useState("");
     const [confirmPassword, setConfirmPassword] = useState("");
+    const [openMobileDropdown, setOpenMobileDropdown] = useState(false);
 
     const userString = localStorage.getItem("user");
     let user = null;
@@ -35,8 +38,16 @@ function Navbar({ role }) {
     const [keyword, setKeyword] = useState("");
 
     const notifications = [
-        { code: "ORD12345", time: "5 menit lalu", pickup: "22 Apr 2026 - 09:15" },
-        { code: "ORD12346", time: "6 menit lalu", pickup: "22 Apr 2026 - 09:20" },
+        {
+            code: "ORD12345",
+            time: "5 menit lalu",
+            pickup: "22 Apr 2026 - 09:15",
+        },
+        {
+            code: "ORD12346",
+            time: "6 menit lalu",
+            pickup: "22 Apr 2026 - 09:20",
+        },
     ];
 
     const [openOrders, setOpenOrders] = useState(false);
@@ -48,22 +59,22 @@ function Navbar({ role }) {
             user: "Falazri",
             pickup: "22 Apr 2026 - 09:15",
             items: ["Nasi Goreng", "Es Teh"],
-            status: "Menunggu"
+            status: "Menunggu",
         },
         {
             code: "ORD12346",
             user: "Budi",
             pickup: "22 Apr 2026 - 09:30",
             items: ["Indomie", "Kopi"],
-            status: "Menunggu"
-        }
+            status: "Menunggu",
+        },
     ];
 
     const [orderList, setOrderList] = useState(orders);
 
     const selesaiPesanan = (code) => {
         const update = orderList.map((o) =>
-            o.code === code ? { ...o, status: "Selesai" } : o
+            o.code === code ? { ...o, status: "Selesai" } : o,
         );
         setOrderList(update);
     };
@@ -101,14 +112,11 @@ function Navbar({ role }) {
         }
 
         try {
-            const response = await api.post(
-                "/ganti-password",
-                {
-                    old_password: oldPassword,
-                    new_password: newPassword,
-                    new_password_confirmation: confirmPassword
-                }
-            );
+            const response = await api.post("/ganti-password", {
+                old_password: oldPassword,
+                new_password: newPassword,
+                new_password_confirmation: confirmPassword,
+            });
 
             alert(response.data.message);
 
@@ -116,15 +124,14 @@ function Navbar({ role }) {
             setNewPassword("");
             setConfirmPassword("");
             setOpenPasswordModal(false);
-
         } catch (error) {
             alert(error.response?.data?.message || "Gagal ubah password");
         }
     };
 
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3">
-            <div className="flex items-center gap-6">
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3 relative">
+            <div className="flex items-center justify-between w-full md:w-auto">
                 {/* LOGO */}
                 <div
                     onClick={() => navigate("/")}
@@ -134,14 +141,13 @@ function Navbar({ role }) {
                     <span className="text-xl font-bold">Coopify</span>
                 </div>
 
-                {/* MOBILE MENU */}
-                <div className="md:hidden">
-                    {openMenu ? (
-                        <FaTimes size={22} onClick={() => setOpenMenu(false)} />
-                    ) : (
-                        <FaBars size={22} onClick={() => setOpenMenu(true)} />
-                    )}
-                </div>
+                {/* HAMBURGER MENU */}
+                <button
+                    className="md:hidden"
+                    onClick={() => setOpenMenu(!openMenu)}
+                >
+                    {openMenu ? <FaTimes size={22} /> : <FaBars size={22} />}
+                </button>
 
                 {/* MENU ADMIN */}
                 {role === "admin" && (
@@ -172,10 +178,7 @@ function Navbar({ role }) {
                 {/* SEARCH BAR */}
                 <div className="hidden md:flex flex-1 justify-center">
                     <div className="relative w-full max-w-xl">
-
-                        <FaSearch
-                            className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
-                        />
+                        <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
 
                         <input
                             type="text"
@@ -185,17 +188,16 @@ function Navbar({ role }) {
                             placeholder="Cari produk..."
                             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
                         />
-
                     </div>
                 </div>
 
                 {/* ICON + PROFILE */}
                 <div className="hidden md:flex items-center gap-4 relative">
-
                     {role === "admin" ? (
                         <div className="relative">
                             <FaCheckCircle
                                 className="cursor-pointer"
+                                size={22}
                                 onClick={() => setOpenOrders(!openOrders)}
                             />
 
@@ -205,9 +207,11 @@ function Navbar({ role }) {
                                 </span>
                             )}
 
-                            <div className={`absolute right-0 mt-3 w-[340px] bg-white rounded-2xl shadow-xl border z-50 transition-all duration-300 origin-top
-                                ${openOrders ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}>
-
+                            <div
+                                onMouseLeave={() => setOpenOrders(false)}
+                                className={`absolute right-0 mt-3 w-[340px] bg-white rounded-2xl shadow-xl border z-50 transition-all duration-300 origin-top
+                                ${openOrders ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
+                            >
                                 <div className="bg-[#1766D3] text-white px-4 py-3 rounded-t-2xl">
                                     Pesanan Masuk
                                 </div>
@@ -216,12 +220,22 @@ function Navbar({ role }) {
                                     {orderList.map((order, index) => (
                                         <div key={index} className="border-b">
                                             <div
-                                                onClick={() => setOpenDetail(openDetail === index ? null : index)}
+                                                onClick={() =>
+                                                    setOpenDetail(
+                                                        openDetail === index
+                                                            ? null
+                                                            : index,
+                                                    )
+                                                }
                                                 className="px-4 py-3 flex justify-between cursor-pointer hover:bg-gray-50"
                                             >
                                                 <div>
-                                                    <p className="text-sm font-semibold">{order.code}</p>
-                                                    <p className="text-xs text-gray-500">{order.user}</p>
+                                                    <p className="text-sm font-semibold">
+                                                        {order.code}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {order.user}
+                                                    </p>
                                                 </div>
 
                                                 <span className="text-xs text-orange-500">
@@ -229,20 +243,33 @@ function Navbar({ role }) {
                                                 </span>
                                             </div>
 
-                                            <div className={`transition-all duration-300 overflow-hidden
-                                                ${openDetail === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}>
+                                            <div
+                                                className={`transition-all duration-300 overflow-hidden
+                                                ${openDetail === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
+                                            >
                                                 <div className="px-4 pb-3 bg-gray-50">
-                                                    <p className="text-xs mb-1">{order.pickup}</p>
+                                                    <p className="text-xs mb-1">
+                                                        {order.pickup}
+                                                    </p>
 
                                                     <ul className="list-disc ml-4 text-sm mb-2">
-                                                        {order.items.map((item, i) => (
-                                                            <li key={i}>{item}</li>
-                                                        ))}
+                                                        {order.items.map(
+                                                            (item, i) => (
+                                                                <li key={i}>
+                                                                    {item}
+                                                                </li>
+                                                            ),
+                                                        )}
                                                     </ul>
 
-                                                    {order.status !== "Selesai" && (
+                                                    {order.status !==
+                                                        "Selesai" && (
                                                         <button
-                                                            onClick={() => selesaiPesanan(order.code)}
+                                                            onClick={() =>
+                                                                selesaiPesanan(
+                                                                    order.code,
+                                                                )
+                                                            }
                                                             className="bg-green-500 text-white text-xs px-3 py-1 rounded"
                                                         >
                                                             Tandai Selesai
@@ -263,15 +290,20 @@ function Navbar({ role }) {
                                     className="cursor-pointer"
                                 />
 
-                                <div className={`absolute right-0 mt-3 w-[320px] bg-white rounded-xl shadow-xl transition
-                                    ${openNotif ? "opacity-100" : "opacity-0 pointer-events-none"}`}>
-
+                                <div
+                                    className={`absolute right-0 mt-3 w-[320px] bg-white rounded-xl shadow-xl transition
+                                    ${openNotif ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                                    onMouseLeave={() => setOpenNotif(false)}
+                                >
                                     <div className="bg-[#1766D3] text-white p-3 rounded-t-xl">
                                         Notifikasi
                                     </div>
 
                                     {notifications.map((n, i) => (
-                                        <div key={i} className="p-3 border-b text-sm">
+                                        <div
+                                            key={i}
+                                            className="p-3 border-b text-sm"
+                                        >
                                             Pesanan <b>{n.code}</b> siap diambil
                                         </div>
                                     ))}
@@ -310,22 +342,36 @@ function Navbar({ role }) {
                                     <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
                                         <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] overflow-hidden flex items-center justify-center font-bold">
                                             {user?.foto_profil ? (
-                                                <img src={user.foto_profil} alt="Profile" className="w-full h-full object-cover" />
+                                                <img
+                                                    src={user.foto_profil}
+                                                    alt="Profile"
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            ) : user?.nama || user?.name ? (
+                                                (user?.nama || user?.name)
+                                                    .charAt(0)
+                                                    .toUpperCase()
                                             ) : (
-                                                (user?.nama || user?.name) ? (user?.nama || user?.name).charAt(0).toUpperCase() : <FaUserCircle size={28} />
+                                                <FaUserCircle size={28} />
                                             )}
                                         </div>
 
                                         <div>
                                             <p className="font-semibold text-sm">
-                                                {user?.nama || user?.name || (role === "admin" ? "Admin Koperasi" : "Pengguna")}
+                                                {user?.nama ||
+                                                    user?.name ||
+                                                    (role === "admin"
+                                                        ? "Admin Koperasi"
+                                                        : "Pengguna")}
                                             </p>
                                         </div>
                                     </div>
 
                                     <div className="py-2 text-sm text-black">
                                         <div
-                                            onClick={() => navigate(profilePath)}
+                                            onClick={() =>
+                                                navigate(profilePath)
+                                            }
                                             className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
                                         >
                                             Lihat Profil
@@ -352,8 +398,8 @@ function Navbar({ role }) {
                             )}
                         </div>
                     ) : (
-                        <div 
-                            onClick={() => navigate('/login')}
+                        <div
+                            onClick={() => navigate("/login")}
                             className="cursor-pointer font-bold text-white bg-[#1766D3] hover:bg-[#3D8FFF] px-4 py-2 rounded-lg shadow-sm transition active:scale-95"
                         >
                             Log in
@@ -369,7 +415,7 @@ function Navbar({ role }) {
                                 onClick={() => setOpenPasswordModal(false)}
                                 className="absolute top-3 right-3 text-xl"
                             >
-                                ✕
+                                  <FaTimes size={18} />
                             </button>
 
                             <h2 className="text-xl font-bold mb-4 text-[#1766D3]">
@@ -396,7 +442,9 @@ function Navbar({ role }) {
                                 type="password"
                                 placeholder="Konfirmasi Password Baru"
                                 value={confirmPassword}
-                                onChange={(e) => setConfirmPassword(e.target.value)}
+                                onChange={(e) =>
+                                    setConfirmPassword(e.target.value)
+                                }
                                 className="w-full border p-2 rounded mb-4"
                             />
 
@@ -419,6 +467,178 @@ function Navbar({ role }) {
                     </div>
                 )}
             </div>
+            {openMenu && (
+                <div className="absolute top-full left-0 w-full bg-white shadow-lg border-t md:hidden z-50">
+                    <div className="flex flex-col">
+                        {role === "admin" ? (
+                            <>
+                                <button
+                                    onClick={() => {
+                                        navigate("/dashboard-admin");
+                                        setOpenMenu(false);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Dashboard
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        navigate("/kelola-produk");
+                                        setOpenMenu(false);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Produk
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        navigate("/kelola-kategori");
+                                        setOpenMenu(false);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Kategori
+                                </button>
+
+                                <button
+                                    onClick={() =>
+                                        setOpenMobileDropdown(
+                                            !openMobileDropdown,
+                                        )
+                                    }
+                                    className="px-6 py-3 text-left hover:bg-gray-100 flex justify-between items-center"
+                                >
+                                    <span>
+                                        Pesanan Masuk ({orderList.length})
+                                    </span>
+                                    <span>
+                                        {openMobileDropdown ? (
+                                            <FaChevronUp size={12} />
+                                        ) : (
+                                            <FaChevronDown size={12} />
+                                        )}
+                                    </span>
+                                </button>
+
+                                {openMobileDropdown && (
+                                    <div className="bg-gray-50 border-b">
+                                        {orderList.map((order, index) => (
+                                            <div
+                                                key={index}
+                                                className="px-8 py-2 text-sm"
+                                            >
+                                                <p className="font-semibold">
+                                                    {order.code}
+                                                </p>
+                                                <p>{order.user}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={() => {
+                                        navigate(profilePath);
+                                        setOpenMenu(false);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Lihat Profil
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setOpenMenu(false);
+                                        setOpenPasswordModal(true);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Ubah Kata Sandi
+                                </button>
+                            </>
+                        ) : (
+                            <>
+                                <button
+                                    onClick={() => navigate("/")}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Beranda
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        navigate("/keranjang");
+                                        setOpenMenu(false);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Keranjang
+                                </button>
+
+                                <button
+                                    onClick={() =>
+                                        setOpenMobileDropdown(
+                                            !openMobileDropdown,
+                                        )
+                                    }
+                                    className="px-6 py-3 text-left hover:bg-gray-100 flex justify-between items-center"
+                                >
+                                    <span>Notifikasi</span>
+                                    <span>
+                                        {openMobileDropdown ? "▲" : "▼"}
+                                    </span>
+                                </button>
+
+                                {openMobileDropdown && (
+                                    <div className="bg-gray-50 border-b">
+                                        {notifications.map((n, i) => (
+                                            <div
+                                                key={i}
+                                                className="px-8 py-2 text-sm"
+                                            >
+                                                Pesanan <b>{n.code}</b> siap
+                                                diambil
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
+
+                                <button
+                                    onClick={() => {
+                                        navigate(profilePath);
+                                        setOpenMenu(false);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Lihat Profil
+                                </button>
+
+                                <button
+                                    onClick={() => {
+                                        setOpenMenu(false);
+                                        setOpenPasswordModal(true);
+                                    }}
+                                    className="px-6 py-3 text-left hover:bg-gray-100"
+                                >
+                                    Ubah Kata Sandi
+                                </button>
+                            </>
+                        )}
+
+                        <button
+                            onClick={() => {
+                                setOpenMenu(false);
+                                handleLogout();
+                            }}
+                            className="px-6 py-3 text-left text-red-500 hover:bg-red-50"
+                        >
+                            Keluar
+                        </button>
+                    </div>
+                </div>
+            )}
         </nav>
     );
 }
