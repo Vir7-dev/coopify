@@ -28,4 +28,22 @@ class Produk extends Model
     {
         return $this->hasMany(Gambar::class, 'id_prod_fk_g');
     }
+
+    public function detailPesanan()
+    {
+        return $this->hasMany(
+            DetailPesanan::class,
+            'id_prod_fk_dp',
+            'id_produk'
+        );
+    }
+
+    public function keranjang()
+    {
+        return $this->hasMany(
+            Keranjang::class,
+            'id_prod_fk_k',
+            'id_produk'
+        );
+    }
 }

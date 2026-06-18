@@ -11,7 +11,7 @@ class Kategori extends Model
     protected $primaryKey = 'id_kategori';
     public $timestamps = true;
     const CREATED_AT = 'tgl_dibuat';
-    const UPDATED_AT = null;  // tidak ada updated_at
+    const UPDATED_AT = null;   
 
     protected $fillable = [
         'nama_kategori',
