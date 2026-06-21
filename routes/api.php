@@ -53,6 +53,7 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/produk', [ProdukController::class, 'store']);
     Route::put('/produk/{produk}', [ProdukController::class, 'update']);
     Route::delete('/produk/{produk}', [ProdukController::class, 'destroy']);
+    Route::post('/produk/tambah-stok', [ProdukController::class, 'tambahStok']);
 
     // Keranjang
     Route::get('/keranjang', [KeranjangController::class, 'index']);
@@ -68,4 +69,6 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profil Admin
     Route::get('/admin/profil', [AdminProfilController::class, 'index']);
     Route::post('/admin/profil', [AdminProfilController::class, 'update']);
+
+
 });

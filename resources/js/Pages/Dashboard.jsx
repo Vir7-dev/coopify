@@ -19,9 +19,10 @@ function Dashboard() {
     const navigate = useNavigate();
 
     useEffect(() => {
-        axios.get("/api/produk")
-            .then(res => setProducts(res.data))
-            .catch(err => console.log(err));
+        axios
+            .get("/api/produk")
+            .then((res) => setProducts(res.data))
+            .catch((err) => console.log(err));
     }, []);
 
     const handleSearch = (e) => {
@@ -33,13 +34,14 @@ function Dashboard() {
     const addToCart = (item) => {
         setLoadingCart(item.id_produk);
 
-        axios.post("/api/keranjang", {
-            id_produk: item.id_produk,
-            jumlah: 1
-        })
-        .then(res => alert(res.data.message))
-        .catch(() => alert("Gagal menambah keranjang"))
-        .finally(() => setLoadingCart(null));
+        axios
+            .post("/api/keranjang", {
+                id_produk: item.id_produk,
+                jumlah: 1,
+            })
+            .then((res) => alert(res.data.message))
+            .catch(() => alert("Gagal menambah keranjang"))
+            .finally(() => setLoadingCart(null));
     };
 
     const categories = [
@@ -53,23 +55,8 @@ function Dashboard() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-gray-100 min-h-screen pb-20">
-
-                {/* HEADER */}
-                <div className="px-6 md:px-10 pt-6 flex justify-end">
-
-                    <input
-                        type="text"
-                        placeholder="Cari produk..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={handleSearch}
-                        className="w-[350px] border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-
-                </div>
-
                 {/* BANNER */}
-                <div className="px-6 md:px-10 mt-6">
+                <div className="px-6 md:px-10">
                     <div
                         className="h-[400px] rounded-2xl overflow-hidden flex items-center"
                         style={{
@@ -78,7 +65,7 @@ function Dashboard() {
                             backgroundPosition: "center",
                         }}
                     >
-                        <div className="bg-black/40 w-full h-full flex items-center px-10 text-white">
+                        <div className="bg-black/20 w-full h-full flex items-center px-10 text-white">
                             <div>
                                 <h1 className="text-4xl font-bold">
                                     Koperasi Digital
@@ -94,13 +81,9 @@ function Dashboard() {
 
                 {/* KATEGORI */}
                 <div className="px-6 md:px-10 mt-10">
-
-                    <h2 className="text-2xl font-bold mb-5">
-                        Kategori Produk
-                    </h2>
+                    <h2 className="text-2xl font-bold mb-5">Kategori Produk</h2>
 
                     <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
-
                         {categories.map((cat, i) => (
                             <Link
                                 key={i}
@@ -111,27 +94,18 @@ function Dashboard() {
                                     {cat.icon}
                                 </div>
 
-                                <p className="mt-3 font-medium">
-                                    {cat.title}
-                                </p>
+                                <p className="mt-3 font-medium">{cat.title}</p>
                             </Link>
                         ))}
-
                     </div>
-
                 </div>
 
                 {/* PRODUK */}
                 <div className="px-6 md:px-10 mt-10">
-
-                    <h2 className="text-2xl font-bold mb-5">
-                        Produk Terbaru
-                    </h2>
+                    <h2 className="text-2xl font-bold mb-5">Produk Terbaru</h2>
 
                     <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
-
                         {products.map((item) => (
-
                             <div
                                 key={item.id_produk}
                                 onClick={() =>
@@ -139,24 +113,20 @@ function Dashboard() {
                                 }
                                 className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
                             >
-
                                 <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
-
                                     <img
                                         src={
                                             item.gambar &&
-                                                item.gambar.length > 0
+                                            item.gambar.length > 0
                                                 ? `http://127.0.0.1:8000/storage/${item.gambar[0].url_gambar}`
                                                 : "/img/default.png"
                                         }
                                         alt={item.nama_produk}
                                         className="h-28 object-contain mx-auto"
                                     />
-
                                 </div>
 
                                 <div className="mt-3 space-y-1">
-
                                     <h3 className="text-sm font-semibold text-gray-800">
                                         {item.nama_produk}
                                     </h3>
@@ -165,23 +135,44 @@ function Dashboard() {
                                         Produk Koperasi
                                     </p>
 
-                                    <p className="text-base font-bold text-[#1297C9]">
-                                        Rp {Number(item.harga_jual).toLocaleString("id-ID")}
-                                    </p>
+                                    {item.diskon ? (
+                                        <>
+                                            <p className="text-xs text-gray-400 line-through">
+                                                Rp{" "}
+                                                {Number(
+                                                    item.harga_jual,
+                                                ).toLocaleString("id-ID")}
+                                            </p>
+
+                                            <p className="text-base font-bold text-[#1297C9]">
+                                                Rp{" "}
+                                                {Number(
+                                                    item.harga_setelah_diskon,
+                                                ).toLocaleString("id-ID")}
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <p className="text-base font-bold text-[#1297C9]">
+                                            Rp{" "}
+                                            {Number(
+                                                item.harga_jual,
+                                            ).toLocaleString("id-ID")}
+                                        </p>
+                                    )}
 
                                     <p
-                                        className={`text-xs font-semibold ${item.stok === 0
+                                        className={`text-xs font-semibold ${
+                                            item.stok === 0
                                                 ? "text-gray-400"
                                                 : item.stok < 5
-                                                    ? "text-red-500"
-                                                    : "text-green-600"
-                                            }`}
+                                                  ? "text-red-500"
+                                                  : "text-green-600"
+                                        }`}
                                     >
                                         {item.stok === 0
                                             ? "Stok: Habis"
                                             : `Stok: ${item.stok} tersedia`}
                                     </p>
-
                                 </div>
 
                                 <button
@@ -193,28 +184,24 @@ function Dashboard() {
                                         item.stok === 0 ||
                                         loadingCart === item.id_produk
                                     }
-                                    className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${item.stok === 0
+                                    className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
+                                        item.stok === 0
                                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                             : "bg-[#1766D3] text-white shadow-sm"
-                                        }`}
+                                    }`}
                                 >
                                     <FaShoppingCart size={12} />
 
                                     {loadingCart === item.id_produk
                                         ? "Loading..."
                                         : item.stok === 0
-                                            ? "Habis"
-                                            : "Tambah"}
+                                          ? "Habis"
+                                          : "Tambah"}
                                 </button>
-
                             </div>
-
                         ))}
-
                     </div>
-
                 </div>
-
             </div>
         </AppLayout>
     );
