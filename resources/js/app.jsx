@@ -13,7 +13,8 @@ import Login from "./Pages/Login";
 import DetailProduk from "./Pages/DetailProduk";
 import DashboardAdmin from "./Pages/DashboardAdmin";
 import Dashboard from "./Pages/Dashboard";
-import Search from "./Pages/Search"; // pastikan file Search.jsx ada
+import Search from "./Pages/Search";
+import PesananMasuk from "./Pages/PesananMasuk";
 
 function App() {
     return (
@@ -33,6 +34,7 @@ function App() {
             <Route path="/search" element={<Search />} />
 
             {/* Admin */}
+            <Route path="/pesanan-masuk" element={<PesananMasuk />}/>
             <Route path="/kelola-produk" element={<KelolaProduk />} />
             <Route path="/kelola-kategori" element={<KelolaKategori />} />
 

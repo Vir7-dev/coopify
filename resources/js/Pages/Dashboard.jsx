@@ -12,7 +12,6 @@ import {
 } from "react-icons/fa";
 
 function Dashboard() {
-    const [search, setSearch] = useState("");
     const [products, setProducts] = useState([]);
     const [loadingCart, setLoadingCart] = useState(null);
 
@@ -24,11 +23,6 @@ function Dashboard() {
             .catch(err => console.log(err));
     }, []);
 
-    const handleSearch = (e) => {
-        if (e.key === "Enter") {
-            navigate(`/search?q=${search}`);
-        }
-    };
 
     const addToCart = (item) => {
         setLoadingCart(item.id_produk);
@@ -53,20 +47,6 @@ function Dashboard() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-gray-100 min-h-screen pb-20">
-
-                {/* HEADER */}
-                <div className="px-6 md:px-10 pt-6 flex justify-end">
-
-                    <input
-                        type="text"
-                        placeholder="Cari produk..."
-                        value={search}
-                        onChange={(e) => setSearch(e.target.value)}
-                        onKeyDown={handleSearch}
-                        className="w-[350px] border border-gray-300 px-4 py-3 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    />
-
-                </div>
 
                 {/* BANNER */}
                 <div className="px-6 md:px-10 mt-6">
