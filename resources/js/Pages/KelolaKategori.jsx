@@ -1,12 +1,13 @@
 import React, { useState, useEffect } from "react";
 import Swal from "sweetalert2";
 import AppLayout from "../Layouts/AppLayout";
+import Pagination from "../components/Pagination";
 import api from "../api";
 import {
   FaSearch, FaEdit, FaTrash, FaPlus, FaBox, FaTags,
-  FaCalendarAlt, FaLayerGroup, FaTimes, FaChevronLeft, FaChevronRight,
-} from "react-icons/fa";
-import { ICON_LIST, suggestIcon, DynIcon } from "../constants/categoryIcons.jsx";
+  FaCalendarAlt, FaLayerGroup, FaTimes,
+  ICON_LIST, suggestIcon, DynIcon
+} from "../constants/icons.jsx";
 
 const ICON_COLORS = [
   "bg-blue-100 text-blue-600",
@@ -350,130 +351,108 @@ export default function KelolaKategori() {
           </div>
 
           {/* PAGINATION */}
-          <div className="flex justify-between items-center p-4 text-sm text-gray-500">
-            <p>Menampilkan {currentItems.length} dari {filtered.length} kategori</p>
-            <div className="flex items-center gap-1">
-              <button
-                onClick={() => setCurrentPage((p) => p - 1)}
-                disabled={currentPage === 1}
-                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition ${currentPage === 1 ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50" : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"}`}
-              >
-                <FaChevronLeft size={10} /> Previous
-              </button>
-              {[...Array(totalPages)].map((_, i) => (
-                <button
-                  key={i}
-                  onClick={() => setCurrentPage(i + 1)}
-                  className={`px-2 py-1 text-xs rounded-md border transition ${currentPage === i + 1 ? "bg-blue-500 text-white border-blue-500" : "bg-gray-100 hover:bg-gray-200"}`}
-                >
-                  {i + 1}
-                </button>
-              ))}
-              <button
-                onClick={() => setCurrentPage((p) => p + 1)}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className={`flex items-center gap-1 px-3 py-1 text-xs rounded-md border font-medium transition ${currentPage === totalPages || totalPages === 0 ? "bg-gray-100 text-gray-400 border-gray-200 cursor-not-allowed opacity-50" : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"}`}
-              >
-                Next <FaChevronRight size={10} />
-              </button>
-            </div>
-          </div>
-        </div>
+          <Pagination
+            currentItems={currentItems.length}
+            totalItems={filtered.length}
+            currentPage={currentPage}
+            totalPages={totalPages}
+            setCurrentPage={setCurrentPage}
+          />
 
-        {/* ── MODAL TAMBAH & EDIT ── */}
-        {showModal && (
-          <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
-            <div className="bg-white w-full max-w-[480px] rounded-2xl shadow-lg overflow-hidden">
+          {/* ── MODAL TAMBAH & EDIT ── */}
+          {showModal && (
+            <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
+              <div className="bg-white w-full max-w-[480px] rounded-2xl shadow-lg overflow-hidden">
 
-              {/* Header */}
-              <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-5 py-4 flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <FaLayerGroup size={18} />
-                  <h2 className="text-lg font-semibold">
-                    {isEdit ? "Edit Kategori" : "Tambah Kategori"}
-                  </h2>
-                </div>
-                <button onClick={() => setShowModal(false)} className="hover:opacity-75 transition">
-                  <FaTimes />
-                </button>
-              </div>
-
-              {/* Body */}
-              <div className="p-5 space-y-4">
-
-                {/* Input nama */}
-                <div>
-                  <label className="text-xs font-medium text-gray-600">Nama Kategori</label>
-                  <input
-                    type="text"
-                    name="nama"
-                    placeholder="Contoh: Makanan"
-                    value={form.nama}
-                    onChange={handleNamaChange}
-                    className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
-                  />
-                  {form.nama && (
-                    <p className="text-xs text-blue-500 mt-1">
-                      Icon otomatis dipilih berdasarkan nama
-                    </p>
-                  )}
+                {/* Header */}
+                <div className="bg-gradient-to-r from-cyan-500 to-blue-500 text-white px-5 py-4 flex justify-between items-center">
+                  <div className="flex items-center gap-2">
+                    <FaLayerGroup size={18} />
+                    <h2 className="text-lg font-semibold">
+                      {isEdit ? "Edit Kategori" : "Tambah Kategori"}
+                    </h2>
+                  </div>
+                  <button onClick={() => setShowModal(false)} className="hover:opacity-75 transition">
+                    <FaTimes />
+                  </button>
                 </div>
 
-                {/* Grid pilih icon */}
-                <div>
-                  <label className="text-xs font-medium text-gray-600">Pilih Icon</label>
-                  <p className="text-xs text-gray-400 mb-2">Klik untuk ganti icon secara manual</p>
-                  <div className="grid grid-cols-8 gap-1.5 max-h-48 overflow-y-auto pr-1">
-                    {ICON_LIST.map((ic) => {
-                      const Comp = ic.comp;
-                      const isSelected = form.ikon === ic.name;
-                      return (
-                        <button
-                          key={ic.name}
-                          title={ic.label}
-                          onClick={() => setForm((f) => ({ ...f, ikon: ic.name }))}
-                          className={`w-full aspect-square flex flex-col items-center justify-center rounded-lg border-2 transition text-xs gap-0.5 ${isSelected
+                {/* Body */}
+                <div className="p-5 space-y-4">
+
+                  {/* Input nama */}
+                  <div>
+                    <label className="text-xs font-medium text-gray-600">Nama Kategori</label>
+                    <input
+                      type="text"
+                      name="nama"
+                      placeholder="Contoh: Makanan"
+                      value={form.nama}
+                      onChange={handleNamaChange}
+                      className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
+                    />
+                    {form.nama && (
+                      <p className="text-xs text-blue-500 mt-1">
+                        Icon otomatis dipilih berdasarkan nama
+                      </p>
+                    )}
+                  </div>
+
+                  {/* Grid pilih icon */}
+                  <div>
+                    <label className="text-xs font-medium text-gray-600">Pilih Icon</label>
+                    <p className="text-xs text-gray-400 mb-2">Klik untuk ganti icon secara manual</p>
+                    <div className="grid grid-cols-8 gap-1.5 max-h-48 overflow-y-auto pr-1">
+                      {ICON_LIST.map((ic) => {
+                        const Comp = ic.comp;
+                        const isSelected = form.ikon === ic.name;
+                        return (
+                          <button
+                            key={ic.name}
+                            title={ic.label}
+                            onClick={() => setForm((f) => ({ ...f, ikon: ic.name }))}
+                            className={`w-full aspect-square flex flex-col items-center justify-center rounded-lg border-2 transition text-xs gap-0.5 ${isSelected
                               ? "border-blue-500 bg-blue-50 text-blue-600"
                               : "border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-gray-500"
-                            }`}
-                        >
-                          <Comp size={16} />
-                        </button>
-                      );
-                    })}
-                  </div>
-                  {/* Preview icon terpilih */}
-                  <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
-                    <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
-                      <DynIcon name={form.ikon} size={14} />
+                              }`}
+                          >
+                            <Comp size={16} />
+                          </button>
+                        );
+                      })}
                     </div>
-                    <span className="text-xs">
-                      {ICON_LIST.find((i) => i.name === form.ikon)?.label ?? "Icon"}
-                    </span>
+                    {/* Preview icon terpilih */}
+                    <div className="mt-3 flex items-center gap-2 text-sm text-gray-600">
+                      <div className="w-8 h-8 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center">
+                        <DynIcon name={form.ikon} size={14} />
+                      </div>
+                      <span className="text-xs">
+                        {ICON_LIST.find((i) => i.name === form.ikon)?.label ?? "Icon"}
+                      </span>
+                    </div>
                   </div>
-                </div>
 
-                {/* Tombol aksi */}
-                <div className="flex gap-3 pt-2">
-                  <button
-                    onClick={handleSubmit}
-                    className="flex-1 bg-[#1D63D3] hover:bg-blue-700 transition text-white py-2 rounded-lg text-sm font-bold active:scale-95"
-                  >
-                    {isEdit ? "Update" : "Simpan"}
-                  </button>
-                  <button
-                    onClick={() => setShowModal(false)}
-                    className="flex-1 bg-gray-200 hover:bg-gray-300 transition text-gray-700 py-2 rounded-lg text-sm font-bold active:scale-95"
-                  >
-                    Batal
-                  </button>
+                  {/* Tombol aksi */}
+                  <div className="flex gap-3 pt-2">
+                    <button
+                      onClick={handleSubmit}
+                      className="flex-1 bg-[#1D63D3] hover:bg-blue-700 transition text-white py-2 rounded-lg text-sm font-bold active:scale-95"
+                    >
+                      {isEdit ? "Update" : "Simpan"}
+                    </button>
+                    <button
+                      onClick={() => setShowModal(false)}
+                      className="flex-1 bg-gray-200 hover:bg-gray-300 transition text-gray-700 py-2 rounded-lg text-sm font-bold active:scale-95"
+                    >
+                      Batal
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
-          </div>
-        )}
+          )}
 
-
+        </div>
       </div>
     </AppLayout>
   );

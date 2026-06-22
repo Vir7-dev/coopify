@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import api from "../api";
@@ -15,7 +15,6 @@ import {
     FaChevronDown,
     FaChevronUp,
 } from "react-icons/fa";
-import { Check } from "lucide-react";
 
 function Navbar({ role }) {
     const navigate = useNavigate();
@@ -53,53 +52,33 @@ function Navbar({ role }) {
         },
     ];
 
-    // State untuk Pesanan Masuk (dari database)
     const [openOrders, setOpenOrders] = useState(false);
     const [openDetail, setOpenDetail] = useState(null);
-    const [orderList, setOrderList] = useState([]);
-    const [loadingOrders, setLoadingOrders] = useState(false);
 
-    // Fetch pesanan menunggu saat mount
-    useEffect(() => {
-        if (role === "admin") {
-            fetchPesananMenunggu();
-        }
-    }, [role]);
+    const orders = [
+        {
+            code: "ORD12345",
+            user: "Falazri",
+            pickup: "22 Apr 2026 - 09:15",
+            items: ["Nasi Goreng", "Es Teh"],
+            status: "Menunggu",
+        },
+        {
+            code: "ORD12346",
+            user: "Budi",
+            pickup: "22 Apr 2026 - 09:30",
+            items: ["Indomie", "Kopi"],
+            status: "Menunggu",
+        },
+    ];
 
-    const fetchPesananMenunggu = async () => {
-        setLoadingOrders(true);
-        try {
-            const res = await api.get('/admin/pesanan?status=menunggu');
-            setOrderList(res.data || []);
-        } catch (err) {
-            console.error('Error fetch pesanan:', err);
-        } finally {
-            setLoadingOrders(false);
-        }
-    };
+    const [orderList, setOrderList] = useState(orders);
 
-    const selesaiPesanan = async (id) => {
-        try {
-            await api.put(`/admin/pesanan/${id}/status`, { status: 'selesai' });
-            // Refresh list
-            fetchPesananMenunggu();
-        } catch (err) {
-            console.error('Error update status:', err);
-            alert('Gagal menyelesaikan pesanan');
-        }
-    };
-
-    const batalkanPesanan = async (id) => {
-        if (!confirm('Yakin ingin membatalkan pesanan ini?')) return;
-
-        try {
-            await api.put(`/admin/pesanan/${id}/status`, { status: 'dibatalkan' });
-            // Refresh list
-            fetchPesananMenunggu();
-        } catch (err) {
-            console.error('Error batalkan pesanan:', err);
-            alert('Gagal membatalkan pesanan');
-        }
+    const selesaiPesanan = (code) => {
+        const update = orderList.map((o) =>
+            o.code === code ? { ...o, status: "Selesai" } : o,
+        );
+        setOrderList(update);
     };
 
     const profilePath = role === "admin" ? "/profil-admin" : "/profil-pengguna";
@@ -152,21 +131,10 @@ function Navbar({ role }) {
         }
     };
 
-    const formatTanggal = (tanggal) => {
-        if (!tanggal) return '-';
-        const date = new Date(tanggal);
-        return date.toLocaleDateString('id-ID', {
-            day: '2-digit',
-            month: 'short',
-            year: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
-    };
-
-    return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3 relative">
-            <div className="flex items-center justify-between w-full md:w-auto">
+   return (
+    <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3 relative">
+        <div className="flex items-center justify-between w-full">
+            
                 {/* LOGO */}
                 <div
                     onClick={() => navigate("/")}
@@ -259,136 +227,90 @@ function Navbar({ role }) {
                     {role === "admin" ? (
                         <div className="relative">
                             <FaCheckCircle
-                                className="cursor-pointer hover:text-blue-600 transition"
+                                className="cursor-pointer"
                                 size={22}
-                                onClick={() => {
-                                    setOpenOrders(!openOrders);
-                                    if (!openOrders) fetchPesananMenunggu();
-                                }}
+                                onClick={() => setOpenOrders(!openOrders)}
                             />
 
                             {orderList.length > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center leading-none">
-                                    {orderList.length > 99 ? '99+' : orderList.length}
+                                <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs px-1 rounded-full">
+                                    {orderList.length}
                                 </span>
                             )}
 
                             <div
                                 onMouseLeave={() => setOpenOrders(false)}
-                                className={`absolute right-0 mt-3 w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 transition-all duration-300 origin-top
+                                className={`absolute right-0 mt-3 w-[340px] bg-white rounded-2xl shadow-xl border z-50 transition-all duration-300 origin-top
                                 ${openOrders ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
                             >
-                                {/* Header */}
-                                <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] text-white px-4 py-3 rounded-t-2xl flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <FaCheckCircle size={18} />
-                                        <span className="font-semibold">Pesanan Masuk</span>
-                                    </div>
-                                    {orderList.length > 0 && (
-                                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                                            {orderList.length} baru
-                                        </span>
-                                    )}
+                                <div className="bg-[#1766D3] text-white px-4 py-3 rounded-t-2xl">
+                                    Pesanan Masuk
                                 </div>
 
-                                {/* List */}
-                                <div className="max-h-[400px] overflow-y-auto">
-                                    {loadingOrders ? (
-                                        <div className="p-8 text-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1766D3] mx-auto"></div>
-                                            <p className="mt-2 text-sm text-gray-500">Memuat pesanan...</p>
-                                        </div>
-                                    ) : orderList.length === 0 ? (
-                                        <div className="p-8 text-center">
-                                            <div className="text-gray-300 mb-2">
-                                                <FaCheckCircle size={40} className="mx-auto" />
-                                            </div>
-                                            <p className="text-sm text-gray-500">Tidak ada pesanan masuk</p>
-                                        </div>
-                                    ) : (
-                                        orderList.map((order, index) => (
-                                            <div key={order.id_pesanan} className="border-b border-gray-100 last:border-b-0">
-                                                {/* Header */}
-                                                <div
-                                                    onClick={() =>
-                                                        setOpenDetail(
-                                                            openDetail === index
-                                                                ? null
-                                                                : index,
-                                                        )
-                                                    }
-                                                    className="px-4 py-3 flex justify-between items-start cursor-pointer hover:bg-blue-50/50 transition"
-                                                >
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-sm font-bold text-gray-800">
-                                                                {order.kode_pesanan}
-                                                            </p>
-                                                            <span className="bg-yellow-100 text-yellow-700 text-[10px] font-medium px-2 py-0.5 rounded-full">
-                                                                {order.status_pesanan}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-xs text-gray-600 mt-0.5">
-                                                            {order.pengguna?.nama || 'Pengguna'}
-                                                        </p>
-                                                        <p className="text-[11px] text-gray-400">
-                                                            {formatTanggal(order.tgl_pesanan)}
-                                                        </p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-sm font-bold text-[#1766D3]">
-                                                            Rp {Number(order.total_harga || 0).toLocaleString('id-ID')}
-                                                        </p>
-                                                        <p className="text-[10px] text-gray-400 mt-0.5">
-                                                            {order.detail_pesanan?.length || 0} item
-                                                        </p>
-                                                    </div>
+                                <div className="max-h-[320px] overflow-y-auto">
+                                    {orderList.map((order, index) => (
+                                        <div key={index} className="border-b">
+                                            <div
+                                                onClick={() =>
+                                                    setOpenDetail(
+                                                        openDetail === index
+                                                            ? null
+                                                            : index,
+                                                    )
+                                                }
+                                                className="px-4 py-3 flex justify-between cursor-pointer hover:bg-gray-50"
+                                            >
+                                                <div>
+                                                    <p className="text-sm font-semibold">
+                                                        {order.code}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500">
+                                                        {order.user}
+                                                    </p>
                                                 </div>
 
-                                                {/* Detail */}
-                                                <div
-                                                    className={`transition-all duration-300 overflow-hidden
-                                                    ${openDetail === index ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}
-                                                >
-                                                    <div className="px-4 pb-4 bg-gray-50/70">
-                                                        {/* Items */}
-                                                        <div className="bg-white rounded-lg p-3 mb-3">
-                                                            <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-2">Item Pesanan</p>
-                                                            <ul className="space-y-1.5">
-                                                                {order.detail_pesanan?.map((item, i) => (
-                                                                    <li key={i} className="flex justify-between text-xs">
-                                                                        <span className="text-gray-700">
-                                                                            {item.produk?.nama_produk || 'Produk'} <span className="text-gray-400">x{item.jml_peritem}</span>
-                                                                        </span>
-                                                                        <span className="text-gray-600 font-medium">
-                                                                            Rp {Number(item.subtotal_dp || 0).toLocaleString('id-ID')}
-                                                                        </span>
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
+                                                <span className="text-xs text-orange-500">
+                                                    {order.status}
+                                                </span>
+                                            </div>
 
-                                                        {/* Action Buttons */}
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => selesaiPesanan(order.id_pesanan)}
-                                                                className="flex-1 bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white text-xs font-medium px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5"
-                                                            >
-                                                                <Check size={14} />
-                                                                Tandai Selesai
-                                                            </button>
-                                                            <button
-                                                                onClick={() => batalkanPesanan(order.id_pesanan)}
-                                                                className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition"
-                                                            >
-                                                                Batalkan
-                                                            </button>
-                                                        </div>
-                                                    </div>
+                                            <div
+                                                className={`transition-all duration-300 overflow-hidden
+                                                ${openDetail === index ? "max-h-40 opacity-100" : "max-h-0 opacity-0"}`}
+                                            >
+                                                <div className="px-4 pb-3 bg-gray-50">
+                                                    <p className="text-xs mb-1">
+                                                        {order.pickup}
+                                                    </p>
+
+                                                    <ul className="list-disc ml-4 text-sm mb-2">
+                                                        {order.items.map(
+                                                            (item, i) => (
+                                                                <li key={i}>
+                                                                    {item}
+                                                                </li>
+                                                            ),
+                                                        )}
+                                                    </ul>
+
+                                                    {order.status !==
+                                                        "Selesai" && (
+                                                        <button
+                                                            onClick={() =>
+                                                                selesaiPesanan(
+                                                                    order.code,
+                                                                )
+                                                            }
+                                                            className="bg-green-500 text-white text-xs px-3 py-1 rounded"
+                                                        >
+                                                            Tandai Selesai
+                                                        </button>
+                                                    )}
+                                                    
                                                 </div>
                                             </div>
-                                        ))
-                                    )}
+                                        </div>
+                                    ))}
                                 </div>
                                 
                             </div>
@@ -480,7 +402,7 @@ function Navbar({ role }) {
                                                 {user?.nama ||
                                                     user?.name ||
                                                     (role === "admin"
-                                                        ? "Admin Kopi"
+                                                        ? "Admin Koperasi"
                                                         : "Pengguna")}
                                             </p>
                                         </div>
@@ -643,28 +565,17 @@ function Navbar({ role }) {
 
                                 {openMobileDropdown && (
                                     <div className="bg-gray-50 border-b">
-                                        {orderList.length === 0 ? (
-                                            <div className="px-8 py-3 text-sm text-gray-500">
-                                                Tidak ada pesanan
+                                        {orderList.map((order, index) => (
+                                            <div
+                                                key={index}
+                                                className="px-8 py-2 text-sm"
+                                            >
+                                                <p className="font-semibold">
+                                                    {order.code}
+                                                </p>
+                                                <p>{order.user}</p>
                                             </div>
-                                        ) : (
-                                            orderList.map((order) => (
-                                                <div
-                                                    key={order.id_pesanan}
-                                                    className="px-8 py-3 text-sm border-b last:border-b-0"
-                                                >
-                                                    <p className="font-semibold">
-                                                        {order.kode_pesanan}
-                                                    </p>
-                                                    <p className="text-gray-600">
-                                                        {order.pengguna?.nama || 'Pengguna'}
-                                                    </p>
-                                                    <span className="text-xs text-yellow-600">
-                                                        {order.status_pesanan}
-                                                    </span>
-                                                </div>
-                                            ))
-                                        )}
+                                        ))}
                                     </div>
                                 )}
 
@@ -769,6 +680,7 @@ function Navbar({ role }) {
                     </div>
                 </div>
             )}
+        </div>
         </nav>
     );
 }
