@@ -92,6 +92,21 @@ function SearchPage() {
         }
     };
 
+    const addToCart = (item) => {
+    setLoadingCart(item.id_produk);
+
+    axios.post("/api/keranjang", {
+        id_produk: item.id_produk,
+        jumlah: 1
+    })
+    .then((res) => alert(res.data.message))
+    .catch((err) => {
+        console.log(err);
+        alert("Gagal menambah keranjang");
+    })
+    .finally(() => setLoadingCart(null));
+};
+
     const handleAddToCart = (e, item) => {
         if (item.stok === 0) return;
         setLoadingCart(item.id_produk);
@@ -193,9 +208,14 @@ function SearchPage() {
 
                                 <input
                                     type="number"
-                                    placeholder="Min"
+                                    min="0"
                                     value={minHarga}
                                     onChange={(e) => setMinHarga(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "-" || e.key === "+" || e.key === "e") {
+                                            e.preventDefault();
+                                        }
+                                    }}
                                     className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
                                 />
 
@@ -203,9 +223,14 @@ function SearchPage() {
 
                                 <input
                                     type="number"
-                                    placeholder="Max"
+                                    min="0"
                                     value={maxHarga}
                                     onChange={(e) => setMaxHarga(e.target.value)}
+                                    onKeyDown={(e) => {
+                                        if (e.key === "-" || e.key === "+" || e.key === "e") {
+                                            e.preventDefault();
+                                        }
+                                    }}
                                     className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
                                 />
 
@@ -305,10 +330,10 @@ function SearchPage() {
 
                                     <p
                                         className={`text-xs font-semibold ${item.stok === 0
-                                                ? "text-gray-400"
-                                                : item.stok < 5
-                                                    ? "text-red-500"
-                                                    : "text-green-600"
+                                            ? "text-gray-400"
+                                            : item.stok < 5
+                                                ? "text-red-500"
+                                                : "text-green-600"
                                             }`}
                                     >
                                         {item.stok > 0

@@ -16,6 +16,7 @@ import DetailProduk from "./Pages/DetailProduk";
 import DashboardAdmin from "./Pages/DashboardAdmin";
 import Dashboard from "./Pages/Dashboard";
 import Search from "./Pages/Search";
+import PesananMasuk from "./Pages/PesananMasuk";
 
 function App() {
     return (
@@ -35,6 +36,11 @@ function App() {
                     <Route path="/produk/:kategori" element={<Produk />} />
                     <Route path="/detail-produk/:id" element={<DetailProduk />} />
                     <Route path="/search" element={<Search />} />
+
+            {/* Admin */}
+            <Route path="/pesanan-masuk" element={<PesananMasuk />}/>
+            <Route path="/kelola-produk" element={<KelolaProduk />} />
+            <Route path="/kelola-kategori" element={<KelolaKategori />} />
 
                     {/* Admin */}
                     <Route path="/kelola-produk" element={<KelolaProduk />} />

@@ -34,7 +34,6 @@ const getCategoryIcon = (namaKategori) => {
 };
 
 function Dashboard() {
-    const [search, setSearch] = useState("");
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loadingCart, setLoadingCart] = useState(null);
@@ -70,6 +69,7 @@ function Dashboard() {
         // Fetch produk dengan pagination
         fetchProducts(1);
     }, []);
+
 
     const handlePageChange = (page) => {
         if (page >= 1 && page <= lastPage) {
@@ -109,6 +109,8 @@ function Dashboard() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-gray-100 min-h-screen pb-20">
+
+
                 {/* BANNER */}
                 <div className="px-6 md:px-10">
                     <div

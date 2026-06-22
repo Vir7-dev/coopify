@@ -186,29 +186,55 @@ function Navbar({ role }) {
 
                 {/* MENU ADMIN */}
                 {role === "admin" && (
-                    <ul className="hidden md:flex gap-8">
-                        <li
-                            onClick={() => navigate("/dashboard-admin")}
-                            className="cursor-pointer hover:text-blue-500"
-                        >
-                            Dashboard
-                        </li>
+                    <div className="flex-1 flex justify-center">
+                        <ul className="hidden md:flex gap-8">
+                            <li
+                                onClick={() => navigate("/dashboard-admin")}
+                                className="cursor-pointer hover:text-blue-500"
+                            >
+                                Dashboard
+                            </li>
 
-                        <li
-                            onClick={() => navigate("/kelola-produk")}
-                            className="cursor-pointer hover:text-blue-500"
-                        >
-                            Produk
-                        </li>
+                            <li
+                                onClick={() => navigate("/kelola-produk")}
+                                className="cursor-pointer hover:text-blue-500"
+                            >
+                                Produk
+                            </li>
 
-                        <li
-                            onClick={() => navigate("/kelola-kategori")}
-                            className="cursor-pointer hover:text-blue-500"
-                        >
-                            Kategori
-                        </li>
-                    </ul>
+                            <li
+                                onClick={() => navigate("/kelola-kategori")}
+                                className="cursor-pointer hover:text-blue-500"
+                            >
+                                Kategori
+                            </li>
+                        </ul>
+                    </div>
                 )}
+                {/* SEARCH BAR */}
+                {role !== "admin" && (
+                    <div className="hidden md:flex flex-1 justify-center">
+                        <div className="relative w-full max-w-xl">
+
+                            <FaSearch
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
+                            />
+
+                            <input
+                                type="text"
+                                value={keyword}
+                                onChange={(e) => setKeyword(e.target.value)}
+                                onKeyDown={handleSearch}
+                                placeholder="Cari produk..."
+                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
+                            />
+
+                        </div>
+                    </div>
+                )}
+
+                {/* ICON + PROFILE */}
+                <div className="hidden md:flex items-center gap-4 relative ml-auto">
 
                 {/* SEARCH BAR */}
                 {role !== "admin" && (
@@ -364,6 +390,7 @@ function Navbar({ role }) {
                                         ))
                                     )}
                                 </div>
+                                
                             </div>
                         </div>
                     ) : user ? (
