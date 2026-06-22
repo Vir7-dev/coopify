@@ -87,42 +87,36 @@ export default function Produk() {
         setMinHarga("");
         setMaxHarga("");
     };
+// Fetch Produk
+   useEffect(() => {
+    setLoading(true);
+    setError(null);
 
-    // ── Fetch produk ──────────────────────────────────────────────
-    useEffect(() => {
-        setLoading(true);
-        setError(null);
+    fetch(`${API_BASE_URL}/api/produk`)
+        .then((res) => {
+            if (!res.ok) throw new Error("Gagal memuat produk");
+            return res.json();
+        })
+        .then((res) => {
+            const produk = res.data || [];
 
-        fetch(`${API_BASE_URL}/api/produk`)
-            .then((res) => {
-                if (!res.ok) throw new Error("Gagal memuat produk");
-                return res.json();
-            })
-            .then((data) => {
-                const kategoriMap = {
-                    makanan: "makanan",
-                    minuman: "minuman",
-                    obat: "obat",
-                    "alat-tulis": "alat",
-                    almamater: "almamater",
-                };
-
-                const keyword = kategoriMap[kategori];
-                const filteredKategori = keyword
-                    ? data.filter((item) =>
+            const filteredKategori = kategori
+                ? produk.filter(
+                      (item) =>
                           item.kategori?.nama_kategori
                               ?.toLowerCase()
-                              .includes(keyword),
-                      )
-                    : data;
+                              .replace(/\s+/g, "-") ===
+                          kategori.toLowerCase()
+                  )
+                : produk;
 
-                setProducts(filteredKategori);
-            })
-            .catch((err) => setError(err.message))
-            .finally(() => setLoading(false));
-    }, [kategori]);
+            setProducts(filteredKategori);
+        })
+        .catch((err) => setError(err.message))
+        .finally(() => setLoading(false));
+}, [kategori]);
 
-    // ── Tambah ke keranjang ───────────────────────────────────────
+    // Tambah ke Keranjang
     const handleTambahKeranjang = async (e, idProduk, productItem) => {
         e.stopPropagation();
         if (productItem.stok === 0) return;
@@ -140,7 +134,6 @@ export default function Produk() {
         setLoadingKeranjang(null);
     };
 
-    // ── Toggle wishlist (local state) ─────────────────────────────
     const toggleWishlist = (e, idProduk) => {
         e.stopPropagation();
         setWishlist((prev) =>
@@ -150,7 +143,6 @@ export default function Produk() {
         );
     };
 
-    // ── Filter & sort ─────────────────────────────────────────────
     let filtered = products.filter((item) =>
         item.nama_produk?.toLowerCase().includes(search.toLowerCase()),
     );
@@ -167,7 +159,6 @@ export default function Produk() {
         filtered.sort((a, b) => b.id_produk - a.id_produk);
     }
 
-    // ── Render ────────────────────────────────────────────────────
     return (
         <AppLayout role="pengguna">
             {/* Header */}
