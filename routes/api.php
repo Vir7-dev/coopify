@@ -70,6 +70,7 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/produk', [ProdukController::class, 'store']);
         Route::put('/produk/{produk}', [ProdukController::class, 'update']);
         Route::delete('/produk/{produk}', [ProdukController::class, 'destroy']);
+        Route::post('/produk/tambah-stok', [ProdukController::class, 'tambahStok']);
 
         // Admin Dashboard
         Route::get('/admin/profil', [AdminProfilController::class, 'index']);

@@ -54,7 +54,9 @@ function ProductImageSlider({ images }) {
                         <span
                             key={i}
                             className={`h-2 rounded-full transition-all ${
-                                current === i ? "bg-[#1297C9] w-4" : "bg-gray-300 w-2"
+                                current === i
+                                    ? "bg-[#1297C9] w-4"
+                                    : "bg-gray-300 w-2"
                             }`}
                         />
                     ))}
@@ -110,7 +112,7 @@ export default function Produk() {
                     ? data.filter((item) =>
                           item.kategori?.nama_kategori
                               ?.toLowerCase()
-                              .includes(keyword)
+                              .includes(keyword),
                       )
                     : data;
 
@@ -123,7 +125,7 @@ export default function Produk() {
     // ── Tambah ke keranjang ───────────────────────────────────────
     const handleTambahKeranjang = async (e, idProduk, productItem) => {
         e.stopPropagation();
-        if (item.stok === 0) return;
+        if (productItem.stok === 0) return;
 
         setLoadingKeranjang(idProduk);
 
@@ -133,7 +135,7 @@ export default function Produk() {
             y: rect.top + rect.height / 2,
         };
 
-        const result = await addToCart(idProduk, 1, startPosition, productItem);
+        await addToCart(idProduk, 1, startPosition, productItem);
 
         setLoadingKeranjang(null);
     };
@@ -144,13 +146,13 @@ export default function Produk() {
         setWishlist((prev) =>
             prev.includes(idProduk)
                 ? prev.filter((id) => id !== idProduk)
-                : [...prev, idProduk]
+                : [...prev, idProduk],
         );
     };
 
     // ── Filter & sort ─────────────────────────────────────────────
     let filtered = products.filter((item) =>
-        item.nama_produk?.toLowerCase().includes(search.toLowerCase())
+        item.nama_produk?.toLowerCase().includes(search.toLowerCase()),
     );
 
     filtered = filtered.filter((item) => {
@@ -272,7 +274,9 @@ export default function Produk() {
             {!loading && !error && filtered.length === 0 && (
                 <div className="flex flex-col items-center justify-center py-20 text-gray-400">
                     <FaBoxOpen size={48} className="mb-3 opacity-40" />
-                    <p className="text-sm font-medium">Produk tidak ditemukan</p>
+                    <p className="text-sm font-medium">
+                        Produk tidak ditemukan
+                    </p>
                     <p className="text-xs mt-1">
                         Coba ubah filter atau kata kunci pencarian
                     </p>
@@ -316,10 +320,30 @@ export default function Produk() {
                                 <p className="text-xs text-gray-500">
                                     {item.terjual} terjual
                                 </p>
-                                <p className="text-base font-bold text-[#1297C9]">
-                                    Rp{" "}
-                                    {item.harga_jual.toLocaleString("id-ID")}
-                                </p>
+                                {item.diskon ? (
+                                    <>
+                                        <p className="text-xs text-gray-400 line-through">
+                                            Rp{" "}
+                                            {Number(
+                                                item.harga_jual,
+                                            ).toLocaleString("id-ID")}
+                                        </p>
+
+                                        <p className="text-base font-bold text-[#1297C9]">
+                                            Rp{" "}
+                                            {Number(
+                                                item.harga_setelah_diskon,
+                                            ).toLocaleString("id-ID")}
+                                        </p>
+                                    </>
+                                ) : (
+                                    <p className="text-base font-bold text-[#1297C9]">
+                                        Rp{" "}
+                                        {Number(item.harga_jual).toLocaleString(
+                                            "id-ID",
+                                        )}
+                                    </p>
+                                )}
                                 <p
                                     className={`text-xs font-semibold ${
                                         item.stok === 0

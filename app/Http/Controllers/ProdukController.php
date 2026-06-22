@@ -6,6 +6,7 @@ use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Gambar;
+use App\Models\Diskon;
 
 class ProdukController extends Controller
 {
@@ -14,7 +15,7 @@ class ProdukController extends Controller
         $perPage = $request->input('per_page', 12);
         $perPage = min(max((int)$perPage, 1), 50); // 1-50 item per halaman
 
-        $produk = Produk::with(['kategori', 'gambar'])
+        $produk = Produk::with(['kategori', 'gambar', 'diskon'])
             ->orderBy('created_at', 'desc')
             ->paginate($perPage);
 
@@ -28,7 +29,7 @@ class ProdukController extends Controller
         $perPage = $request->input('per_page', 12);
         $perPage = min(max((int)$perPage, 1), 50);
 
-        $query = Produk::with(['kategori', 'gambar'])
+        $query = Produk::with(['kategori', 'gambar', 'diskon'])
             ->where('nama_produk', 'like', '%' . addcslashes($keyword, '%_') . '%');
 
         // Filter kategori jika ada
@@ -47,8 +48,7 @@ class ProdukController extends Controller
         $request->validate([
             'nama_produk' => 'required',
             'harga_jual' => 'required',
-            'stok' => 'required|integer|min:0',
-            'tgl_kadaluarsa' => 'required',
+            'persen_diskon' => 'nullable|integer|min:0|max:100',
             'id_kat_fk_p' => 'required',
             'deskripsi' => 'required',
             'url_gambar.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
@@ -59,11 +59,20 @@ class ProdukController extends Controller
             'url_gambar.max' => 'Ukuran gambar maksimal 2 MB.'
         ]);
 
+        $diskon = null;
+
+        if ($request->persen_diskon > 0) {
+
+            $diskon = Diskon::firstOrCreate([
+                'persen_diskon' => $request->persen_diskon
+            ]);
+        }
+
         $data = [
             'nama_produk' => $request->nama_produk,
             'harga_jual' => $request->harga_jual,
-            'stok' => $request->stok,
-            'tgl_kadaluarsa' => $request->tgl_kadaluarsa,
+            'stok' => $request->stok ?? 0,
+            'id_disk_fk_p' => $diskon?->id_diskon,
             'id_kat_fk_p' => $request->id_kat_fk_p,
             'deskripsi' => $request->deskripsi
         ];
@@ -89,7 +98,7 @@ class ProdukController extends Controller
 
     public function show($produk)
     {
-        $produk = Produk::with(['kategori', 'gambar'])
+        $produk = Produk::with(['kategori', 'gambar', 'diskon'])
             ->findOrFail($produk);
 
         return response()->json($produk);
@@ -100,8 +109,8 @@ class ProdukController extends Controller
         $request->validate([
             'nama_produk' => 'required',
             'harga_jual' => 'required',
-            'stok' => 'required|integer|min:0',
-            'tgl_kadaluarsa' => 'required',
+            'stok' => 'nullable|integer|min:0',
+            'persen_diskon' => 'nullable|integer|min:0|max:100',
             'id_kat_fk_p' => 'required',
             'deskripsi' => 'required',
             'url_gambar.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
@@ -109,11 +118,20 @@ class ProdukController extends Controller
 
         $produk = Produk::findOrFail($produk);
 
+        $diskon = null;
+
+        if ($request->persen_diskon > 0) {
+
+            $diskon = Diskon::firstOrCreate([
+                'persen_diskon' => $request->persen_diskon
+            ]);
+        }
+
         $data = [
             'nama_produk' => $request->nama_produk,
             'harga_jual' => $request->harga_jual,
-            'stok' => $request->stok,
-            'tgl_kadaluarsa' => $request->tgl_kadaluarsa,
+            'stok' => $request->stok ?? 0,
+            'id_disk_fk_p' => $diskon?->id_diskon,
             'id_kat_fk_p' => $request->id_kat_fk_p,
             'deskripsi' => $request->deskripsi
         ];
@@ -133,6 +151,29 @@ class ProdukController extends Controller
 
         return response()->json([
             'message' => 'Produk berhasil dihapus'
+        ]);
+    }
+
+    public function tambahStok(Request $request)
+    {
+        $this->authorizeAdmin();
+
+        $request->validate([
+            'id_produk' => 'required|exists:produk,id_produk',
+            'jumlah_tambah' => 'required|integer|min:1',
+        ], [
+            'jumlah_tambah.min' => 'Jumlah tambah stok minimal 1.',
+        ]);
+
+        $produk = Produk::findOrFail($request->id_produk);
+
+        $produk->stok += $request->jumlah_tambah;
+
+        $produk->save();
+
+        return response()->json([
+            'message' => 'Stok berhasil ditambahkan',
+            'data' => $produk
         ]);
     }
 }

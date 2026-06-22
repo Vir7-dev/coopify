@@ -169,32 +169,19 @@ const DashboardAdmin = () => {
 
   return (
     <AppLayout role="admin">
-      <div className="bg-gray-100 min-h-screen pb-20 space-y-12">
-
-        {/* HEADER */}
-        <div className="px-6 md:px-10 pt-6 flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-            Dashboard Admin
-          </h1>
-
-          <input
-            type="text"
-            placeholder="Cari produk..."
-            className="border border-gray-200 rounded-xl px-4 py-2 w-[250px] md:w-[320px] focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+      <div className="bg-gray-100 min-h-screen space-y-12">
 
         {/* BANNER */}
         <div className="px-6 md:px-10">
           <div
             className="w-full h-[400px] md:h-[500px] flex items-center rounded-2xl overflow-hidden"
             style={{
-              backgroundImage: "url('/img/banner.admin.png')",
+              backgroundImage: "url('/img/bn.admin.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           >
-            <div className="w-full h-full bg-black/30 flex items-center px-6 md:px-12 text-white">
+            <div className="w-full h-full bg-black/20 flex items-center px-6 md:px-12 text-white">
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold">
                   Dashboard Admin
