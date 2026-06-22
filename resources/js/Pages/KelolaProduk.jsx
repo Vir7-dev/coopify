@@ -7,6 +7,7 @@ import ProdukModal from "../components/ProdukModal";
 import OpnameStokModal from "../components/OpnameStokModal";
 import HapusProdukModal from "../components/HapusProdukModal";
 import Pagination from "../components/Pagination";
+import { DynIcon } from "../constants/icons";
 import {
     FaSearch,
     FaEdit,
@@ -20,6 +21,7 @@ import {
     FaCheck,
     FaExclamationTriangle,
     FaClipboardCheck,
+    FaChevronDown,
 } from "react-icons/fa";
 
 export default function KelolaProduk() {
@@ -37,7 +39,7 @@ export default function KelolaProduk() {
     useEffect(() => {
         api.get("/produk")
             .then((res) => {
-                setProducts(res.data);
+                setProducts(res.data.data);
             })
             .catch((err) => console.log(err));
 
@@ -94,7 +96,7 @@ export default function KelolaProduk() {
             });
 
             const res = await api.get("/produk");
-            setProducts(res.data);
+            setProducts(res.data.data);
 
             setShowOpnameModal(false);
 
@@ -202,7 +204,7 @@ export default function KelolaProduk() {
             }
 
             const res = await api.get("/produk");
-            setProducts(res.data);
+            setProducts(res.data.data);
 
             setShowModal(false);
             setFileName("");
@@ -241,7 +243,7 @@ export default function KelolaProduk() {
             await api.delete(`/produk/${selectedDelete.id_produk}`);
 
             const res = await api.get("/produk");
-            setProducts(res.data);
+            setProducts(res.data.data);
 
             setShowDeleteModal(false);
             setSelectedDelete(null);
@@ -292,6 +294,15 @@ export default function KelolaProduk() {
         return maxKategori;
     };
 
+    const ICON_COLORS = [
+        "bg-blue-100 text-blue-600",
+        "bg-green-100 text-green-600",
+        "bg-orange-100 text-orange-600",
+        "bg-purple-100 text-purple-600",
+        "bg-pink-100 text-pink-600",
+        "bg-teal-100 text-teal-600",
+    ];
+
     return (
         <AppLayout role="admin">
             <div className="w-full">
@@ -311,10 +322,10 @@ export default function KelolaProduk() {
                         </button>
                         <button
                             onClick={() => setShowOpnameModal(true)}
-                            className="flex items-center gap-2 border border-[#1766D3] text-[#1766D3] hover:bg-blue-50 text-sm px-4 py-2 rounded-lg"
+                            className="flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 text-sm px-4 py-2 rounded-lg"
                         >
                             <FaClipboardCheck />
-                            Opname Stok
+                            Tambah Stok
                         </button>
                     </div>
                 </div>
@@ -405,22 +416,28 @@ export default function KelolaProduk() {
 
                 <div className="bg-white rounded-xl shadow-sm overflow-x-auto text-left">
                     <div className="p-4 flex justify-between items-center">
-                        <select
-                            value={filterKategori}
-                            onChange={(e) => {
-                                setFilterKategori(e.target.value);
-                                setCurrentPage(1);
-                            }}
-                            className="border border-gray-300 rounded-md px-3 py-1 text-sm"
-                        >
-                            <option value="Semua">Semua Kategori</option>
-                            <option value="Makanan">Makanan</option>
-                            <option value="Minuman">Minuman</option>
-                            <option value="Obat">Obat & Kesehatan</option>
-                            <option value="Buku">Buku & Alat tulis</option>
-                            <option value="Almamater">Almamater</option>
-                        </select>
+                        <div className="relative inline-block">
+                            <select
+                                value={filterKategori}
+                                onChange={(e) => {
+                                    setFilterKategori(e.target.value);
+                                    setCurrentPage(1);
+                                }}
+                                className="appearance-none h-10 border border-gray-300 text-slate-600 rounded-md pl-3 pr-10 text-sm font-bold focus:outline-none"
+                            >
+                                <option value="Semua">Semua Kategori</option>
+                                <option value="Makanan">Makanan</option>
+                                <option value="Minuman">Minuman</option>
+                                <option value="Obat">Obat & Kesehatan</option>
+                                <option value="Buku">Buku & Alat tulis</option>
+                                <option value="Almamater">Almamater</option>
+                            </select>
 
+                            <FaChevronDown
+                                className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none"
+                                size={12}
+                            />
+                        </div>
                         <div className="relative w-64">
                             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
                             <input
@@ -437,7 +454,7 @@ export default function KelolaProduk() {
                     </div>
                     <div className="overflow-x-auto">
                         <table className="w-full text-sm min-w-[1000px] whitespace-nowrap p-5">
-                            <thead className="bg-gray-100 text-gray-500">
+                            <thead className="bg-slate-50 text-slate-600">
                                 <tr className="">
                                     <th className="px-4 py-3 ">No</th>
                                     <th className="px-4 py-3">Nama Produk</th>
@@ -453,7 +470,7 @@ export default function KelolaProduk() {
                                 {currentItems.map((item, i) => (
                                     <tr
                                         key={item.id_produk}
-                                        className="hover:bg-gray-50"
+                                        className="border-b border-slate-100 hover:bg-blue-50/40 transition-colors duration-200"
                                     >
                                         <td className="px-4 py-3 text-gray-400 ">
                                             {indexOfFirstItem + i + 1}
@@ -482,8 +499,19 @@ export default function KelolaProduk() {
                                             </div>
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3 ">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             <div className="flex items-center gap-3">
+                                                <div
+                                                    className={`w-9 h-9 flex items-center justify-center rounded-full ${ICON_COLORS[i % ICON_COLORS.length]}`}
+                                                >
+                                                    <DynIcon
+                                                        name={
+                                                            item.kategori?.ikon
+                                                        }
+                                                        size={14}
+                                                    />
+                                                </div>
+
                                                 <div>
                                                     <p className="font-medium">
                                                         {
@@ -491,6 +519,7 @@ export default function KelolaProduk() {
                                                                 ?.nama_kategori
                                                         }
                                                     </p>
+
                                                     <p className="text-xs text-gray-400">
                                                         Kategori produk{" "}
                                                         {item.kategori?.nama_kategori?.toLowerCase()}
@@ -565,7 +594,7 @@ export default function KelolaProduk() {
                                                     onClick={() =>
                                                         handleEdit(item)
                                                     }
-                                                    className="border border-blue-500 text-blue-500 px-3 py-1 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1"
+                                                    className="border border-blue-500 text-blue-600 px-4 py-2 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1"
                                                 >
                                                     <FaEdit size={10} />
                                                     Edit
@@ -575,7 +604,7 @@ export default function KelolaProduk() {
                                                     onClick={() =>
                                                         handleDeleteClick(item)
                                                     }
-                                                    className="border border-red-400 text-red-500 px-3 py-1 rounded-md text-xs hover:bg-red-50 flex items-center gap-1"
+                                                    className="border border-red-400 text-red-600 px-4 py-2 rounded-md text-xs hover:bg-red-50 flex items-center gap-1"
                                                 >
                                                     <FaTrash size={10} />
                                                     Hapus

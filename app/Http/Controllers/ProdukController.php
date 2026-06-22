@@ -156,7 +156,6 @@ class ProdukController extends Controller
 
     public function tambahStok(Request $request)
     {
-        $this->authorizeAdmin();
 
         $request->validate([
             'id_produk' => 'required|exists:produk,id_produk',
