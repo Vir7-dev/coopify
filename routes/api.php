@@ -7,6 +7,7 @@ use App\Http\Controllers\CheckoutController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PembayaranController;
+use App\Http\Controllers\PesananController;
 use App\Http\Controllers\ProdukController;
 
 /*
@@ -76,5 +77,11 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/profil', [AdminProfilController::class, 'index']);
         Route::post('/admin/profil', [AdminProfilController::class, 'update']);
         Route::get('/admin/chart', [AdminProfilController::class, 'chartData']);
+
+        // Pesanan Management
+        Route::get('/admin/pesanan', [PesananController::class, 'index']);
+        Route::get('/admin/pesanan/count', [PesananController::class, 'countBaru']);
+        Route::get('/admin/pesanan/{id}', [PesananController::class, 'show']);
+        Route::put('/admin/pesanan/{id}/status', [PesananController::class, 'updateStatus']);
     });
 });

@@ -197,7 +197,6 @@ const DashboardAdmin = () => {
         {/* STATISTIK */}
         <div className="px-6 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-5">
           {loading ? (
-            // Loading skeleton
             Array.from({ length: 4 }).map((_, i) => (
               <div
                 key={i}
