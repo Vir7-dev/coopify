@@ -1,36 +1,84 @@
 import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import AppLayout from "../Layouts/AppLayout";
 import { FaShoppingCart } from "react-icons/fa";
 import { API_BASE_URL } from "../api";
+import { useCart } from "../context/CartContext";
 
 export default function DetailProduk() {
     const { id } = useParams();
+    const navigate = useNavigate();
+    const { addToCart } = useCart();
 
     const [produk, setProduk] = useState(null);
     const [produkSerupa, setProdukSerupa] = useState([]);
     const [qty, setQty] = useState(1);
     const [activeImage, setActiveImage] = useState(0);
+    const [loadingCart, setLoadingCart] = useState(false);
 
     useEffect(() => {
-        fetch(`${API_BASE_URL}/api/produk`)
+        // Gunakan endpoint khusus untuk single produk
+        fetch(`${API_BASE_URL}/api/produk/${id}`)
             .then((res) => res.json())
             .then((data) => {
-                const detail = data.find((item) => item.id_produk == id);
-
-                setProduk(detail);
-
-                if (detail) {
-                    const similar = data.filter(
-                        (item) =>
-                            item.id_produk !== detail.id_produk &&
-                            item.id_kat_fk_p === detail.id_kat_fk_p,
-                    );
-
-                    setProdukSerupa(similar);
+                if (data) {
+                    setProduk(data);
+                    // Fetch semua produk untuk produk serupa
+                    return fetch(`${API_BASE_URL}/api/produk`);
                 }
-            });
+            })
+            .then((res) => res?.json())
+            .then((allData) => {
+                if (!allData) return;
+                const allProducts = allData.data || allData;
+                const similar = allProducts.filter(
+                    (item) =>
+                        item.id_produk !== Number(id) &&
+                        item.id_kat_fk_p === produk?.id_kat_fk_p,
+                );
+                setProdukSerupa(similar);
+            })
+            .catch((err) => console.error(err));
     }, [id]);
+
+    const handleAddToCart = (e) => {
+        if (!produk || loadingCart || produk.stok === 0) return;
+
+        setLoadingCart(true);
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const startPosition = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        addToCart(produk.id_produk, qty, startPosition, produk)
+            .then(() => {
+                setLoadingCart(false);
+            })
+            .catch(() => {
+                setLoadingCart(false);
+            });
+    };
+
+    const buyNow = (e) => {
+        if (!produk) return;
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const startPosition = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        addToCart(produk.id_produk, qty, startPosition, produk)
+            .then(() => {
+                navigate("/keranjang");
+            })
+            .catch(() => {
+                // Still navigate even if failed
+                navigate("/keranjang");
+            });
+    };
 
     if (!produk) {
         return <AppLayout role="pengguna">Loading...</AppLayout>;
@@ -150,12 +198,20 @@ export default function DetailProduk() {
 
                             {/* BUTTON */}
                             <div className="grid grid-cols-2 gap-4 mt-8">
-                                <button className="h-14 rounded-2xl border-2  text-[#1766D3] font-semibold flex items-center justify-center gap-2 hover:bg-blue-50">
+                                <button
+                                    onClick={handleAddToCart}
+                                    disabled={loadingCart || produk.stok === 0}
+                                    className="h-14 rounded-2xl border-2 text-[#1766D3] font-semibold flex items-center justify-center gap-2 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
                                     <FaShoppingCart />
-                                    Keranjang
+                                    {loadingCart ? "Memuat..." : "Keranjang"}
                                 </button>
 
-                                <button className="h-14 rounded-2xl bg-[#1766D3] text-white font-semibold hover:bg-[#0f7ba5]">
+                                <button
+                                    onClick={buyNow}
+                                    disabled={produk.stok === 0}
+                                    className="h-14 rounded-2xl bg-[#1766D3] text-white font-semibold hover:bg-[#0f7ba5] disabled:opacity-50 disabled:cursor-not-allowed"
+                                >
                                     Beli Sekarang
                                 </button>
                             </div>

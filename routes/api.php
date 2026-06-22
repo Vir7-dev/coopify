@@ -8,7 +8,6 @@ use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PembayaranController;
 use App\Http\Controllers\ProdukController;
-use App\Http\Controllers\UbahSandiController;
 
 /*
 |--------------------------------------------------------------------------
@@ -16,8 +15,8 @@ use App\Http\Controllers\UbahSandiController;
 |--------------------------------------------------------------------------
 */
 
-// Authentication
-Route::post('/login', [AuthController::class, 'login']);
+// Authentication (dengan rate limiting: 5 percobaan per 1 menit)
+Route::post('/login', [AuthController::class, 'login'])->middleware('throttle:5,1');
 
 // Midtrans Callback
 Route::post('/midtrans/notification', [PembayaranController::class, 'handleNotification']);
@@ -30,7 +29,7 @@ Route::get('/produk/{produk}', [ProdukController::class, 'show']);
 
 /*
 |--------------------------------------------------------------------------
-| Protected Routes
+| Authenticated Routes
 |--------------------------------------------------------------------------
 */
 
@@ -44,16 +43,6 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::get('/profil-pengguna', [App\Http\Controllers\ProfilPenggunaController::class, 'index']);
     Route::post('/profil-pengguna', [App\Http\Controllers\ProfilPenggunaController::class, 'update']);
 
-    // Kategori
-    Route::post('/kategori', [KategoriController::class, 'store']);
-    Route::put('/kategori/{id}', [KategoriController::class, 'update']);
-    Route::delete('/kategori/{id}', [KategoriController::class, 'destroy']);
-
-    // Produk
-    Route::post('/produk', [ProdukController::class, 'store']);
-    Route::put('/produk/{produk}', [ProdukController::class, 'update']);
-    Route::delete('/produk/{produk}', [ProdukController::class, 'destroy']);
-
     // Keranjang
     Route::get('/keranjang', [KeranjangController::class, 'index']);
     Route::post('/keranjang', [KeranjangController::class, 'store']);
@@ -65,7 +54,26 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::post('/pembayaran/create', [PembayaranController::class, 'createTransaction']);
     Route::get('/pembayaran/{id}', [PembayaranController::class, 'show']);
 
-    // Profil Admin
-    Route::get('/admin/profil', [AdminProfilController::class, 'index']);
-    Route::post('/admin/profil', [AdminProfilController::class, 'update']);
+    /*
+    |--------------------------------------------------------------------------
+    | Admin Routes (memerlukan role 'admin')
+    |--------------------------------------------------------------------------
+    */
+
+    Route::middleware('admin')->group(function () {
+        // Kategori Management
+        Route::post('/kategori', [KategoriController::class, 'store']);
+        Route::put('/kategori/{id}', [KategoriController::class, 'update']);
+        Route::delete('/kategori/{id}', [KategoriController::class, 'destroy']);
+
+        // Produk Management
+        Route::post('/produk', [ProdukController::class, 'store']);
+        Route::put('/produk/{produk}', [ProdukController::class, 'update']);
+        Route::delete('/produk/{produk}', [ProdukController::class, 'destroy']);
+
+        // Admin Dashboard
+        Route::get('/admin/profil', [AdminProfilController::class, 'index']);
+        Route::post('/admin/profil', [AdminProfilController::class, 'update']);
+        Route::get('/admin/chart', [AdminProfilController::class, 'chartData']);
+    });
 });

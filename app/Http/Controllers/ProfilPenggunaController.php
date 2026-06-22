@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use App\Models\Pesanan;
 use App\Models\DetailPesanan;
 
@@ -36,9 +37,7 @@ class ProfilPenggunaController extends Controller
                 // Cari gambar pertama, atau fallback ke default
                 $gambarUrl = "/img/default.png";
                 if ($detail->produk && $detail->produk->gambar->count() > 0) {
-                    // Update: use relative path or exact URL based on how we fetch
-                    // For Vite, usually we prepend the base URL
-                    $gambarUrl = 'http://127.0.0.1:8000/storage/' . $detail->produk->gambar->first()->url_gambar;
+                    $gambarUrl = asset('storage/' . $detail->produk->gambar->first()->url_gambar);
                 }
 
                 $riwayat[] = [

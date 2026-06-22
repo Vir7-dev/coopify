@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import api from "../api";
+import { useCart } from "../context/CartContext";
 
 import {
     FaUserCircle,
@@ -17,6 +18,7 @@ import {
 
 function Navbar({ role }) {
     const navigate = useNavigate();
+    const { cartCount } = useCart();
 
     const [openProfile, setOpenProfile] = useState(false);
     const [openMenu, setOpenMenu] = useState(false);
@@ -312,10 +314,18 @@ function Navbar({ role }) {
                                 </div>
                             </div>
 
-                            <FaShoppingCart
-                                className="cursor-pointer"
+                            <div
+                                className="relative cursor-pointer"
                                 onClick={() => navigate("/keranjang")}
-                            />
+                                data-cart-icon
+                            >
+                                <FaShoppingCart className="cursor-pointer" />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+                                        {cartCount > 99 ? "99+" : cartCount}
+                                    </span>
+                                )}
+                            </div>
                         </>
                     ) : null}
 

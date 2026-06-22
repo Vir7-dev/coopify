@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -23,6 +24,7 @@ class CheckoutController extends Controller
         $validated = $request->validate([
             'items' => ['required', 'array', 'min:1'],
             'items.*' => ['integer'],
+            'wkt_pengambilan' => ['required', 'date'],
         ]);
 
         $selectedKeranjangIds = collect($validated['items'])
@@ -30,9 +32,11 @@ class CheckoutController extends Controller
             ->unique()
             ->values()
             ->all();
+        $waktuPengambilan = Carbon::parse($validated['wkt_pengambilan'])
+            ->format('Y-m-d H:i:s');
 
         try {
-            $hasil = DB::transaction(function () use ($idPengguna, $selectedKeranjangIds) {
+            $hasil = DB::transaction(function () use ($idPengguna, $selectedKeranjangIds, $waktuPengambilan) {
                 $keranjangItems = DB::table('keranjang as k')
                     ->join('produk as p', 'p.id_produk', '=', 'k.id_prod_fk_k')
                     ->leftJoin('diskon as d', 'd.id_prod_fk_d', '=', 'p.id_produk')
@@ -86,6 +90,7 @@ class CheckoutController extends Controller
                 $idPesanan = DB::table('pesanan')->insertGetId([
                     'kode_pesanan' => $kodePesanan,
                     'tgl_pesanan' => now(),
+                    'wkt_pengambilan' => $waktuPengambilan,
                     'total_harga' => $totalHarga,
                     'status_pesanan' => 'menunggu',
                     'id_peng_fk_ps' => $idPengguna,
@@ -132,6 +137,7 @@ class CheckoutController extends Controller
                     'status' => true,
                     'id_pesanan' => $idPesanan,
                     'kode_pesanan' => $kodePesanan,
+                    'wkt_pengambilan' => $waktuPengambilan,
                     'total_harga' => $totalHarga,
                     'message' => 'Berhasil: checkout berhasil',
                 ];
@@ -157,6 +163,7 @@ class CheckoutController extends Controller
         return response()->json([
             'kode_pesanan' => $hasil['kode_pesanan'],
             'id_pesanan' => $hasil['id_pesanan'],
+            'wkt_pengambilan' => $hasil['wkt_pengambilan'],
             'total_harga' => $hasil['total_harga'],
             'message' => $hasil['message']
         ]);

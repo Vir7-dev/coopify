@@ -22,7 +22,8 @@ class User extends Authenticatable
         'email',
         'no_hp',
         'foto_profil',
-        'role',
+        // 'role' dihapus dari fillable untuk mencegah privilege escalation
+        // Role hanya bisa diubah melalui proses admin yang terotorisasi
         'password',
     ];
 

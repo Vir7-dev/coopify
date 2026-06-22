@@ -4,41 +4,46 @@ namespace App\Http\Controllers;
 
 use App\Models\Produk;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Storage;
 use App\Models\Gambar;
 
 class ProdukController extends Controller
 {
-    private function authorizeAdmin(): void
+    public function index(Request $request)
     {
-        if (!Auth::user() || Auth::user()->role !== 'admin') {
-            abort(403, 'Akses ditolak');
-        }
-    }
+        $perPage = $request->input('per_page', 12);
+        $perPage = min(max((int)$perPage, 1), 50); // 1-50 item per halaman
 
-    public function index()
-    {
-        $produk = Produk::with(['kategori', 'gambar'])->get();
+        $produk = Produk::with(['kategori', 'gambar'])
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+
         return response()->json($produk);
     }
 
     // ================= SEARCH =================
     public function search(Request $request)
     {
-        $keyword = $request->q;
+        $keyword = $request->q ?? '';
+        $perPage = $request->input('per_page', 12);
+        $perPage = min(max((int)$perPage, 1), 50);
 
-        $produk = Produk::with(['kategori', 'gambar'])
-            ->where('nama_produk', 'like', '%' . $keyword . '%')
-            ->get();
+        $query = Produk::with(['kategori', 'gambar'])
+            ->where('nama_produk', 'like', '%' . addcslashes($keyword, '%_') . '%');
+
+        // Filter kategori jika ada
+        if ($request->filled('kategori')) {
+            $query->where('id_kat_fk_p', $request->kategori);
+        }
+
+        $produk = $query->orderBy('created_at', 'desc')
+            ->paginate($perPage);
 
         return response()->json($produk);
     }
 
     public function store(Request $request)
     {
-        $this->authorizeAdmin();
-
         $request->validate([
             'nama_produk' => 'required',
             'harga_jual' => 'required',
@@ -92,8 +97,6 @@ class ProdukController extends Controller
 
     public function update(Request $request, $produk)
     {
-        $this->authorizeAdmin();
-
         $request->validate([
             'nama_produk' => 'required',
             'harga_jual' => 'required',
@@ -125,8 +128,6 @@ class ProdukController extends Controller
 
     public function destroy($produk)
     {
-        $this->authorizeAdmin();
-
         $produk = Produk::findOrFail($produk);
         $produk->delete();
 

@@ -12,6 +12,7 @@ import {
 } from "react-icons/fa";
 import axios from "axios";
 import { API_BASE_URL } from "../api";
+import { useCart } from "../context/CartContext";
 
 function ProductImageSlider({ images }) {
     const [current, setCurrent] = useState(0);
@@ -78,6 +79,7 @@ export default function Produk() {
     const [error, setError] = useState(null);
     const [wishlist, setWishlist] = useState([]);
     const [loadingKeranjang, setLoadingKeranjang] = useState(null);
+    const { addToCart } = useCart();
 
     const resetHarga = () => {
         setMinHarga("");
@@ -119,24 +121,21 @@ export default function Produk() {
     }, [kategori]);
 
     // ── Tambah ke keranjang ───────────────────────────────────────
-    const handleTambahKeranjang = async (e, idProduk) => {
-        e.stopPropagation(); // Jangan trigger navigate ke detail
+    const handleTambahKeranjang = async (e, idProduk, productItem) => {
+        e.stopPropagation();
+        if (item.stok === 0) return;
+
         setLoadingKeranjang(idProduk);
-        try {
-            await axios.post(
-                `${API_BASE_URL}/api/keranjang`,
-                { id_produk: idProduk, jumlah: 1 },
-                { withCredentials: true }
-            );
-            alert("Produk berhasil ditambahkan ke keranjang!");
-        } catch (err) {
-            const msg =
-                err.response?.data?.message ||
-                "Gagal menambahkan ke keranjang.";
-            alert(msg);
-        } finally {
-            setLoadingKeranjang(null);
-        }
+
+        const rect = e.currentTarget.getBoundingClientRect();
+        const startPosition = {
+            x: rect.left + rect.width / 2,
+            y: rect.top + rect.height / 2,
+        };
+
+        const result = await addToCart(idProduk, 1, startPosition, productItem);
+
+        setLoadingKeranjang(null);
     };
 
     // ── Toggle wishlist (local state) ─────────────────────────────
@@ -343,7 +342,7 @@ export default function Produk() {
                                     loadingKeranjang === item.id_produk
                                 }
                                 onClick={(e) =>
-                                    handleTambahKeranjang(e, item.id_produk)
+                                    handleTambahKeranjang(e, item.id_produk, item)
                                 }
                                 className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
                                     item.stok === 0
