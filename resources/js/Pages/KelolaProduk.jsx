@@ -4,6 +4,7 @@ import axios from "axios";
 import Swal from "sweetalert2";
 import api, { API_BASE_URL } from "../api";
 import ProdukModal from "../components/ProdukModal";
+import OpnameStokModal from "../components/OpnameStokModal";
 import HapusProdukModal from "../components/HapusProdukModal";
 import Pagination from "../components/Pagination";
 import {
@@ -18,6 +19,7 @@ import {
     FaTimes,
     FaCheck,
     FaExclamationTriangle,
+    FaClipboardCheck,
 } from "react-icons/fa";
 
 export default function KelolaProduk() {
@@ -29,6 +31,8 @@ export default function KelolaProduk() {
     const [search, setSearch] = useState("");
     const [filterKategori, setFilterKategori] = useState("Semua");
     const [products, setProducts] = useState([]);
+    const [diskon, setDiskon] = useState([]);
+    const [showOpnameModal, setShowOpnameModal] = useState(false);
 
     useEffect(() => {
         api.get("/produk")
@@ -36,6 +40,10 @@ export default function KelolaProduk() {
                 setProducts(res.data);
             })
             .catch((err) => console.log(err));
+
+        api.get("/diskon").then((res) => {
+            setDiskon(res.data.data);
+        });
     }, []);
 
     const fileInputRef = useRef(null);
@@ -77,6 +85,35 @@ export default function KelolaProduk() {
     );
     const totalPages = Math.ceil(filteredProducts.length / itemsPerPage);
 
+    // Tambah STOK OPNAME
+    const handleOpname = async (data) => {
+        try {
+            await api.post("/produk/tambah-stok", {
+                id_produk: data.id_produk,
+                jumlah_tambah: data.jumlah_tambah,
+            });
+
+            const res = await api.get("/produk");
+            setProducts(res.data);
+
+            setShowOpnameModal(false);
+
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil!",
+                text: "Stok berhasil ditambahkan",
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal!",
+                text: error.response?.data?.message || "Terjadi kesalahan",
+            });
+        }
+    };
+
     // TAMBAH
     const handleAdd = () => {
         setIsEdit(false);
@@ -86,7 +123,7 @@ export default function KelolaProduk() {
             nama_produk: "",
             harga_jual: "",
             stok: "",
-            tgl_kadaluarsa: "",
+            persen_diskon: "",
             id_kat_fk_p: "",
             deskripsi: "",
         });
@@ -97,7 +134,7 @@ export default function KelolaProduk() {
         nama_produk: "",
         harga_jual: "",
         stok: "",
-        tgl_kadaluarsa: "",
+        persen_diskon: "",
         id_kat_fk_p: "",
         deskripsi: "",
     });
@@ -111,7 +148,7 @@ export default function KelolaProduk() {
             nama_produk: item.nama_produk,
             harga_jual: item.harga_jual,
             stok: item.stok,
-            tgl_kadaluarsa: item.tgl_kadaluarsa,
+            persen_diskon: item.diskon?.persen_diskon ?? "",
             id_kat_fk_p: item.id_kat_fk_p,
             deskripsi: item.deskripsi,
         });
@@ -137,7 +174,7 @@ export default function KelolaProduk() {
             formData.append("nama_produk", form.nama_produk);
             formData.append("harga_jual", form.harga_jual);
             formData.append("stok", form.stok);
-            formData.append("tgl_kadaluarsa", form.tgl_kadaluarsa);
+            formData.append("persen_diskon", form.persen_diskon);
             formData.append("id_kat_fk_p", form.id_kat_fk_p);
             formData.append("deskripsi", form.deskripsi);
 
@@ -173,7 +210,7 @@ export default function KelolaProduk() {
                 nama_produk: "",
                 harga_jual: "",
                 stok: "",
-                tgl_kadaluarsa: "",
+                persen_diskon: "",
                 id_kat_fk_p: "",
                 deskripsi: "",
             });
@@ -201,9 +238,7 @@ export default function KelolaProduk() {
     };
     const confirmDelete = async () => {
         try {
-            await api.delete(
-                `/produk/${selectedDelete.id_produk}`,
-            );
+            await api.delete(`/produk/${selectedDelete.id_produk}`);
 
             const res = await api.get("/produk");
             setProducts(res.data);
@@ -267,13 +302,21 @@ export default function KelolaProduk() {
                             Manajemen produk koperasi
                         </p>
                     </div>
-
-                    <button
-                        onClick={handleAdd}
-                        className="flex items-center gap-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
-                    >
-                        <FaPlus /> Tambahkan Produk
-                    </button>
+                    <div className="flex gap-3">
+                        <button
+                            onClick={handleAdd}
+                            className="flex items-center gap-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
+                        >
+                            <FaPlus /> Tambahkan Produk
+                        </button>
+                        <button
+                            onClick={() => setShowOpnameModal(true)}
+                            className="flex items-center gap-2 border border-[#1766D3] text-[#1766D3] hover:bg-blue-50 text-sm px-4 py-2 rounded-lg"
+                        >
+                            <FaClipboardCheck />
+                            Opname Stok
+                        </button>
+                    </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
@@ -401,9 +444,7 @@ export default function KelolaProduk() {
                                     <th className="px-4 py-3">Nama Kategori</th>
                                     <th className="px-4 py-3">Harga</th>
                                     <th className="px-4 py-3">Jumlah Stok</th>
-                                    <th className="px-4 py-3">
-                                        Tanggal Kadalurasa
-                                    </th>
+                                    <th className="px-4 py-3">Diskon</th>
                                     <th className="px-4 py-3">Deskripsi</th>
                                     <th className="px-4 py-3">Aksi</th>
                                 </tr>
@@ -458,11 +499,35 @@ export default function KelolaProduk() {
                                             </div>
                                         </td>
 
-                                        <td className="border-b border-gray-200 px-4 py-3 text-gray-700 ">
-                                            Rp{" "}
-                                            {Number(
-                                                item.harga_jual,
-                                            ).toLocaleString("id-ID")}
+                                        <td className="border-b border-gray-200 px-4 py-3">
+                                            {item.diskon ? (
+                                                <>
+                                                    <p className="line-through text-gray-400 text-xs">
+                                                        Rp{" "}
+                                                        {Number(
+                                                            item.harga_jual,
+                                                        ).toLocaleString(
+                                                            "id-ID",
+                                                        )}
+                                                    </p>
+
+                                                    <p className="font-bold text-green-600">
+                                                        Rp{" "}
+                                                        {Number(
+                                                            item.harga_setelah_diskon,
+                                                        ).toLocaleString(
+                                                            "id-ID",
+                                                        )}
+                                                    </p>
+                                                </>
+                                            ) : (
+                                                <p className="font-bold">
+                                                    Rp{" "}
+                                                    {Number(
+                                                        item.harga_jual,
+                                                    ).toLocaleString("id-ID")}
+                                                </p>
+                                            )}
                                         </td>
 
                                         <td className="border-b border-gray-200 px-4 py-3 ">
@@ -478,13 +543,11 @@ export default function KelolaProduk() {
                                         </td>
 
                                         <td className="border-b border-gray-200 px-4 py-3 text-gray-500 ">
-                                            {new Date(
-                                                item.tgl_kadaluarsa,
-                                            ).toLocaleDateString("id-ID", {
-                                                day: "numeric",
-                                                month: "long",
-                                                year: "numeric",
-                                            })}
+                                            <span className="bg-green-100 text-green-600 px-3 py-1 rounded-full text-xs">
+                                                {item.diskon?.persen_diskon ??
+                                                    0}
+                                                %
+                                            </span>
                                         </td>
 
                                         <td className="border-b border-gray-200 px-4 py-3 text-gray-500">
@@ -534,6 +597,12 @@ export default function KelolaProduk() {
                     />
                 </div>
             </div>
+            <OpnameStokModal
+                showModal={showOpnameModal}
+                setShowModal={setShowOpnameModal}
+                products={products}
+                handleSubmit={handleOpname}
+            />
 
             <ProdukModal
                 showModal={showModal}
@@ -542,6 +611,7 @@ export default function KelolaProduk() {
                 form={form}
                 handleChange={handleChange}
                 handleSubmit={handleSubmit}
+                diskon={diskon}
                 fileInputRef={fileInputRef}
                 handleFileChange={handleFileChange}
                 handleUploadClick={handleUploadClick}

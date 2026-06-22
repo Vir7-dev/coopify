@@ -32,6 +32,14 @@ class AdminProfilController extends Controller
         $pesananMasuk   = Pesanan::whereIn('status_pesanan', ['menunggu', 'diproses'])->count();
         $pesananSelesai = Pesanan::where('status_pesanan', 'selesai')->count();
 
+        // Hitung total pemasukan dari pesanan yang sudah lunas
+        $totalPemasukan = DB::table('pembayaran')
+            ->where('status_pem', 'lunas')
+            ->sum('total_bayar');
+
+        // Hitung total transaksi
+        $totalTransaksi = Pesanan::whereIn('status_pesanan', ['selesai', 'menunggu', 'diproses'])->count();
+
         return response()->json([
             'profil' => [
                 'nama'        => $user->nama,
@@ -54,6 +62,8 @@ class AdminProfilController extends Controller
                 'total_kategori'  => $totalKategori,
                 'pesanan_masuk'   => $pesananMasuk,
                 'pesanan_selesai' => $pesananSelesai,
+                'total_pemasukan' => $totalPemasukan,
+                'total_transaksi' => $totalTransaksi,
             ],
         ]);
     }
@@ -121,4 +131,70 @@ class AdminProfilController extends Controller
         ],
     ]);
 }
+
+    /**
+     * GET /api/admin/chart
+     * Ambil data grafik penjualan per hari dalam sebulan
+     */
+    public function chartData(Request $request)
+    {
+        $user = Auth::user();
+
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $tahun = $request->input('tahun', date('Y'));
+        $bulan = $request->input('bulan', date('m'));
+
+        // Format nama bulan Indonesia
+        $namaBulan = [
+            '01' => 'Januari', '02' => 'Februari', '03' => 'Maret',
+            '04' => 'April', '05' => 'Mei', '06' => 'Juni',
+            '07' => 'Juli', '08' => 'Agustus', '09' => 'September',
+            '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
+        ];
+
+        // Ambil data penjualan per hari dalam bulan yang dipilih
+        $penjualanPerHari = DB::table('pesanan as p')
+            ->join('pembayaran as pm', 'pm.id_pes_fk_pb', '=', 'p.id_pesanan')
+            ->where('p.status_pesanan', 'selesai')
+            ->whereYear('p.tgl_pesanan', $tahun)
+            ->whereMonth('p.tgl_pesanan', $bulan)
+            ->select(
+                DB::raw('DAYOFWEEK(p.tgl_pesanan) as hari_ke'),
+                DB::raw('COUNT(*) as total_transaksi'),
+                DB::raw('SUM(p.total_harga) as total_penjualan')
+            )
+            ->groupBy(DB::raw('DAYOFWEEK(p.tgl_pesanan)'))
+            ->get();
+
+        // Nama hari dalam bahasa Indonesia
+        $namaHari = ['Minggu', 'Senin', 'Selasa', 'Rabu', 'Kamis', 'Jumat', 'Sabtu'];
+
+        // Inisialisasi data untuk 7 hari
+        $dataPerHari = [];
+        for ($i = 1; $i <= 7; $i++) {
+            $dataPerHari[$i] = 0;
+        }
+
+        // Map data dari database
+        foreach ($penjualanPerHari as $data) {
+            $dataPerHari[$data->hari_ke] = (int) $data->total_transaksi;
+        }
+
+        return response()->json([
+            'labels' => $namaHari,
+            'datasets' => [
+                [
+                    'label' => 'Penjualan',
+                    'data' => array_values($dataPerHari),
+                    'backgroundColor' => '#1766D3',
+                    'borderRadius' => 8
+                ]
+            ],
+            'bulan' => $namaBulan[$bulan] ?? $bulan,
+            'tahun' => $tahun
+        ]);
+    }
 }

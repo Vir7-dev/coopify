@@ -1,5 +1,7 @@
 import React from "react";
 import { Routes, Route } from "react-router-dom";
+import { CartProvider } from "./context/CartContext";
+import CartFlyZone from "./components/CartFlyZone";
 
 import KelolaProduk from "./Pages/KelolaProduk";
 import KelolaKategori from "./Pages/KelolaKategori";
@@ -18,35 +20,43 @@ import PesananMasuk from "./Pages/PesananMasuk";
 
 function App() {
     return (
-        <Routes>
-            {/* Dashboard */}
-            <Route path="/" element={<Dashboard />} />
-            <Route path="/dashboard-pengguna" element={<Dashboard />} />
-            <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+        <CartProvider>
+            <CartFlyZone>
+                <Routes>
+                    {/* Dashboard */}
+                    <Route path="/" element={<Dashboard />} />
+                    <Route path="/dashboard-pengguna" element={<Dashboard />} />
+                    <Route path="/dashboard-admin" element={<DashboardAdmin />} />
 
-            {/* Auth */}
-            <Route path="/login" element={<Login />} />
+                    {/* Auth */}
+                    <Route path="/login" element={<Login />} />
 
-            {/* Produk */}
-            <Route path="/produk" element={<Produk />} />
-            <Route path="/produk/:kategori" element={<Produk />} />
-            <Route path="/detail-produk/:id" element={<DetailProduk />} />
-            <Route path="/search" element={<Search />} />
+                    {/* Produk */}
+                    <Route path="/produk" element={<Produk />} />
+                    <Route path="/produk/:kategori" element={<Produk />} />
+                    <Route path="/detail-produk/:id" element={<DetailProduk />} />
+                    <Route path="/search" element={<Search />} />
 
             {/* Admin */}
             <Route path="/pesanan-masuk" element={<PesananMasuk />}/>
             <Route path="/kelola-produk" element={<KelolaProduk />} />
             <Route path="/kelola-kategori" element={<KelolaKategori />} />
 
-            {/* Transaksi */}
-            <Route path="/keranjang" element={<Keranjang />} />
-            <Route path="/pembayaran" element={<Pembayaran />} />
+                    {/* Admin */}
+                    <Route path="/kelola-produk" element={<KelolaProduk />} />
+                    <Route path="/kelola-kategori" element={<KelolaKategori />} />
 
-            {/* Profil */}
-            <Route path="/profil-pengguna" element={<ProfilPengguna />} />
-            <Route path="/profil-admin" element={<ProfilAdmin />} />
-            <Route path="/edit-profil" element={<EditProfil />} />
-        </Routes>
+                    {/* Transaksi */}
+                    <Route path="/keranjang" element={<Keranjang />} />
+                    <Route path="/pembayaran" element={<Pembayaran />} />
+
+                    {/* Profil */}
+                    <Route path="/profil-pengguna" element={<ProfilPengguna />} />
+                    <Route path="/profil-admin" element={<ProfilAdmin />} />
+                    <Route path="/edit-profil" element={<EditProfil />} />
+                </Routes>
+            </CartFlyZone>
+        </CartProvider>
     );
 }
 

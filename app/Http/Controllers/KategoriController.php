@@ -4,17 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Kategori;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 
 class KategoriController extends Controller
 {
-    private function authorizeAdmin(): void
-    {
-        if (!Auth::user() || Auth::user()->role !== 'admin') {
-            abort(403, 'Akses ditolak');
-        }
-    }
-
     public function index()
     {
         $kategori = Kategori::withCount('produk')->get()->map(function ($item) {
@@ -32,8 +24,6 @@ class KategoriController extends Controller
 
     public function store(Request $request)
     {
-        $this->authorizeAdmin();
-
         $request->validate([
             'nama_kategori' => 'required|string|max:100',
             'ikon'          => 'nullable|string|max:100',
@@ -58,8 +48,6 @@ class KategoriController extends Controller
 
     public function update(Request $request, $id)
     {
-        $this->authorizeAdmin();
-
         $kategori = Kategori::findOrFail($id);
 
         $request->validate([
@@ -86,9 +74,18 @@ class KategoriController extends Controller
 
     public function destroy($id)
     {
-        $this->authorizeAdmin();
-
         $kategori = Kategori::findOrFail($id);
+
+        // Cek apakah ada produk dalam kategori ini
+        $produkCount = $kategori->produk()->count();
+
+        if ($produkCount > 0) {
+            return response()->json([
+                'message' => "Tidak dapat menghapus kategori. Masih ada {$produkCount} produk yang menggunakan kategori ini.",
+                'produk_count' => $produkCount
+            ], 400);
+        }
+
         $kategori->delete();
 
         return response()->json(['message' => 'Kategori berhasil dihapus']);

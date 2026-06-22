@@ -1,5 +1,6 @@
-import React, { useRef, useState } from "react";
+import React, { useRef, useState, useEffect } from "react";
 import AppLayout from "../Layouts/AppLayout";
+import api from "../api";
 import {
   Chart as ChartJS,
   BarElement,
@@ -21,21 +22,104 @@ const DashboardAdmin = () => {
   const chartRef = useRef();
 
   const [month, setMonth] = useState("Januari");
-  const [year, setYear] = useState("2026");
+  const [year, setYear] = useState(new Date().getFullYear().toString());
 
   const [openMonth, setOpenMonth] = useState(false);
   const [openYear, setOpenYear] = useState(false);
 
-  const data = {
-    labels: ["Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
+  // State untuk data statistik
+  const [stats, setStats] = useState({
+    total_produk: 0,
+    total_kategori: 0,
+    total_pemasukan: 0,
+    total_transaksi: 0,
+  });
+
+  // State untuk data chart
+  const [chartData, setChartData] = useState({
+    labels: ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
     datasets: [
       {
         label: "Penjualan",
-        data: [38, 29, 50, 17, 27, 5],
+        data: [0, 0, 0, 0, 0, 0, 0],
         backgroundColor: "#1766D3",
         borderRadius: 8
       },
     ],
+  });
+
+  const [loading, setLoading] = useState(true);
+
+  // Konversi nama bulan Indonesia ke nomor
+  const bulanKeNomor = {
+    'Januari': '01', 'Februari': '02', 'Maret': '03',
+    'April': '04', 'Mei': '05', 'Juni': '06',
+    'Juli': '07', 'Agustus': '08', 'September': '09',
+    'Oktober': '10', 'November': '11', 'Desember': '12'
+  };
+
+  // Fetch data statistik dan chart
+  useEffect(() => {
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    setLoading(true);
+    try {
+      // Fetch statistik dari profil endpoint
+      const profilRes = await api.get('/admin/profil');
+      const statistik = profilRes.data.statistik || {};
+
+      setStats({
+        total_produk: statistik.total_produk || 0,
+        total_kategori: statistik.total_kategori || 0,
+        total_pemasukan: statistik.total_pemasukan || 0,
+        total_transaksi: statistik.total_transaksi || 0,
+      });
+
+      // Fetch data chart
+      await fetchChartData();
+    } catch (err) {
+      console.error('Error fetching dashboard data:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const fetchChartData = async () => {
+    try {
+      const bulanNomor = bulanKeNomor[month] || '01';
+      const chartRes = await api.get(`/admin/chart?bulan=${bulanNomor}&tahun=${year}`);
+      const data = chartRes.data;
+
+      setChartData({
+        labels: data.labels || ["Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu"],
+        datasets: [{
+          label: 'Penjualan',
+          data: data.datasets?.[0]?.data || [0, 0, 0, 0, 0, 0, 0],
+          backgroundColor: "#1766D3",
+          borderRadius: 8
+        }]
+      });
+    } catch (err) {
+      console.error('Error fetching chart data:', err);
+    }
+  };
+
+  const handleMonthChange = (newMonth) => {
+    setMonth(newMonth);
+    setOpenMonth(false);
+    fetchChartData();
+  };
+
+  const handleYearChange = (newYear) => {
+    setYear(newYear);
+    setOpenYear(false);
+    fetchChartData();
+  };
+
+  const formatRupiah = (angka) => {
+    return 'Rp ' + Number(angka || 0).toLocaleString('id-ID');
   };
 
   const options = {
@@ -53,34 +137,51 @@ const DashboardAdmin = () => {
     pdf.save("laporan-penjualan.pdf");
   };
 
+  const statCards = [
+    {
+      title: "Total Produk",
+      value: stats.total_produk.toString(),
+      icon: <ShoppingBasket size={22} className="text-[#1766D3]" />
+    },
+    {
+      title: "Total Kategori",
+      value: stats.total_kategori.toString(),
+      icon: <Users size={22} className="text-[#1766D3]" />
+    },
+    {
+      title: "Total Pemasukan",
+      value: formatRupiah(stats.total_pemasukan),
+      icon: <BanknoteArrowUp size={22} className="text-[#1766D3]" />
+    },
+    {
+      title: "Total Transaksi",
+      value: stats.total_transaksi.toString(),
+      icon: <NotepadText size={22} className="text-[#1766D3]" />
+    },
+  ];
+
+  const bulanList = [
+    "Januari", "Februari", "Maret", "April", "Mei", "Juni",
+    "Juli", "Agustus", "September", "Oktober", "November", "Desember"
+  ];
+
+  const tahunList = ["2024", "2025", "2026", "2027", "2028"];
+
   return (
     <AppLayout role="admin">
-      <div className="bg-gray-100 min-h-screen pb-20 space-y-12">
-
-        {/* HEADER */}
-        <div className="px-6 md:px-10 pt-6 flex justify-between items-center">
-          <h1 className="text-xl md:text-2xl font-bold text-gray-800">
-            Dashboard Admin
-          </h1>
-
-          <input
-            type="text"
-            placeholder="Cari produk..."
-            className="border border-gray-200 rounded-xl px-4 py-2 w-[250px] md:w-[320px] focus:ring-2 focus:ring-blue-400"
-          />
-        </div>
+      <div className="bg-gray-100 min-h-screen space-y-12">
 
         {/* BANNER */}
         <div className="px-6 md:px-10">
           <div
             className="w-full h-[400px] md:h-[500px] flex items-center rounded-2xl overflow-hidden"
             style={{
-              backgroundImage: "url('/img/banner.admin.png')",
+              backgroundImage: "url('/img/bn.admin.png')",
               backgroundSize: "cover",
               backgroundPosition: "center",
             }}
           >
-            <div className="w-full h-full bg-black/30 flex items-center px-6 md:px-12 text-white">
+            <div className="w-full h-full bg-black/20 flex items-center px-6 md:px-12 text-white">
               <div>
                 <h1 className="text-2xl md:text-3xl font-bold">
                   Dashboard Admin
@@ -95,46 +196,43 @@ const DashboardAdmin = () => {
 
         {/* STATISTIK */}
         <div className="px-6 md:px-10 grid grid-cols-2 md:grid-cols-4 gap-5">
-          {[
-            { 
-              title: "Total Produk", 
-              value: "200", 
-              icon: <ShoppingBasket size={22} className="text-[#1766D3]" /> 
-            },
-            { 
-              title: "Total Pengguna", 
-              value: "200", 
-              icon: <Users size={22} className="text-[#1766D3]" /> 
-            },
-            { 
-              title: "Pemasukan", 
-              value: "Rp 1.500.000", 
-              icon: <BanknoteArrowUp size={22} className="text-[#1766D3]" /> 
-            },
-            { 
-              title: "Transaksi", 
-              value: "40", 
-              icon: <NotepadText size={22} className="text-[#1766D3]" /> 
-            },
-          ].map((item, i) => (
-            <div
-              key={i}
-              className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition hover:-translate-y-1 flex items-center gap-3"
-            >
-              <div className="bg-blue-50 p-3 rounded-xl flex items-center justify-center">
-                {item.icon}
+          {loading ? (
+            // Loading skeleton
+            Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl p-4 shadow-sm animate-pulse"
+              >
+                <div className="flex items-center gap-3">
+                  <div className="bg-gray-200 w-11 h-11 rounded-xl"></div>
+                  <div className="flex-1">
+                    <div className="h-3 bg-gray-200 rounded w-20 mb-2"></div>
+                    <div className="h-5 bg-gray-200 rounded w-16"></div>
+                  </div>
+                </div>
               </div>
+            ))
+          ) : (
+            statCards.map((item, i) => (
+              <div
+                key={i}
+                className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition hover:-translate-y-1 flex items-center gap-3"
+              >
+                <div className="bg-blue-50 p-3 rounded-xl flex items-center justify-center">
+                  {item.icon}
+                </div>
 
-              <div>
-                <p className="text-xs md:text-sm text-gray-500">
-                  {item.title}
-                </p>
-                <p className="font-bold text-base md:text-lg">
-                  {item.value}
-                </p>
+                <div>
+                  <p className="text-xs md:text-sm text-gray-500">
+                    {item.title}
+                  </p>
+                  <p className="font-bold text-base md:text-lg">
+                    {item.value}
+                  </p>
+                </div>
               </div>
-            </div>
-          ))}
+            ))
+          )}
         </div>
 
         {/* FILTER */}
@@ -165,16 +263,10 @@ const DashboardAdmin = () => {
 
               {openMonth && (
                 <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50 border border-gray-100">
-                  {[
-                    "Januari","Februari","Maret","April","Mei","Juni",
-                    "Juli","Agustus","September","Oktober","November","Desember"
-                  ].map((m) => (
+                  {bulanList.map((m) => (
                     <div
                       key={m}
-                      onClick={() => {
-                        setMonth(m);
-                        setOpenMonth(false);
-                      }}
+                      onClick={() => handleMonthChange(m)}
                       className={`px-4 py-2 cursor-pointer text-sm transition
                         ${month === m ? "bg-[#1766D3] text-white" : "hover:bg-blue-50"}
                       `}
@@ -201,13 +293,10 @@ const DashboardAdmin = () => {
 
               {openYear && (
                 <div className="absolute top-12 left-0 w-full bg-white rounded-xl shadow-lg max-h-[180px] overflow-y-auto z-50 border border-gray-100">
-                  {["2024","2025","2026","2027","2028"].map((y) => (
+                  {tahunList.map((y) => (
                     <div
                       key={y}
-                      onClick={() => {
-                        setYear(y);
-                        setOpenYear(false);
-                      }}
+                      onClick={() => handleYearChange(y)}
                       className={`px-4 py-2 cursor-pointer text-sm transition
                         ${year === y ? "bg-[#1766D3] text-white" : "hover:bg-blue-50"}
                       `}
@@ -230,11 +319,11 @@ const DashboardAdmin = () => {
             className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition"
           >
             <h3 className="text-lg font-semibold text-gray-700 mb-4">
-              Grafik Penjualan
+              Grafik Penjualan - {month} {year}
             </h3>
 
             <div className="h-56">
-              <Bar data={data} options={options} />
+              <Bar data={chartData} options={options} />
             </div>
           </div>
         </div>

@@ -147,9 +147,6 @@ class PembayaranController extends Controller
                 'first_name' => $user->nama,
                 'phone' => $user->no_hp,
             ],
-            'enabled_payments' => [
-                'qris',
-            ],
         ];
 
         try {
