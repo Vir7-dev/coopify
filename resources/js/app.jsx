@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { Routes, Route } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import CartFlyZone from "./components/CartFlyZone";
@@ -19,6 +19,32 @@ import Search from "./Pages/Search";
 import PesananMasuk from "./Pages/PesananMasuk";
 
 function App() {
+    useEffect(() => {
+        const loginTime = localStorage.getItem('login_time');
+        const token = localStorage.getItem('token');
+        const user = JSON.parse(localStorage.getItem('user'));
+
+        if (token && loginTime) {
+            if (user?.role === 'admin') {
+                const DURASI_ADMIN = 12 * 60 * 60 * 1000; // 12 jam
+                if (Date.now() - loginTime > DURASI_ADMIN) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('login_time');
+                    window.location.href = '/login';
+                }
+            } else {
+                const DURASI_PENGGUNA = 4 * 60 * 60 * 1000; // 4 jam
+                if (Date.now() - loginTime > DURASI_PENGGUNA) {
+                    localStorage.removeItem('token');
+                    localStorage.removeItem('user');
+                    localStorage.removeItem('login_time');
+                    window.location.href = '/';
+                }
+            }
+        }
+    }, []);
+
     return (
         <CartProvider>
             <CartFlyZone>
@@ -37,12 +63,8 @@ function App() {
                     <Route path="/detail-produk/:id" element={<DetailProduk />} />
                     <Route path="/search" element={<Search />} />
 
-            {/* Admin */}
-            <Route path="/pesanan-masuk" element={<PesananMasuk />}/>
-            <Route path="/kelola-produk" element={<KelolaProduk />} />
-            <Route path="/kelola-kategori" element={<KelolaKategori />} />
-
                     {/* Admin */}
+                    <Route path="/pesanan-masuk" element={<PesananMasuk />} />
                     <Route path="/kelola-produk" element={<KelolaProduk />} />
                     <Route path="/kelola-kategori" element={<KelolaKategori />} />
 
