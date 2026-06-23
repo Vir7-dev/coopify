@@ -46,7 +46,6 @@ function SearchPage() {
     }, [keyword]);
 
     const fetchProducts = (page = 1) => {
-        // Harus ada keyword atau kategoriId
         if (!keyword && !kategoriId) {
             setProducts([]);
             return;

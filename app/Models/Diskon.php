@@ -12,8 +12,7 @@ class Diskon extends Model
 
     protected $fillable = [
         'harga_diskon',
-        'persen_diskon',
-        'id_prod_fk_d'
+        'persen_diskon'
     ];
 
     public function produk()

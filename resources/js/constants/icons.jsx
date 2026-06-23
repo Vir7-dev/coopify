@@ -1,5 +1,6 @@
 import React from "react";
 import {
+  // ── Icon Kategori ──
   FaBox, FaUtensils, FaCoffee, FaPills, FaPencilAlt,
   FaTshirt, FaAppleAlt, FaHamburger, FaBreadSlice, FaCookie,
   FaIceCream, FaLeaf, FaCarrot, FaFish, FaDrumstickBite,
@@ -7,6 +8,14 @@ import {
   FaHeartbeat, FaFirstAid, FaBandAid, FaGlasses, FaPen,
   FaRuler, FaBook, FaBookOpen, FaClipboard, FaStar,
   FaShoppingBag, FaTag, FaGift, FaStore,
+  
+  // ── Icon UI ──
+  FaSearch, FaEdit, FaTrash, FaPlus, FaTags,
+  FaCalendarAlt, FaLayerGroup, FaTimes,
+  FaChevronLeft, FaChevronRight,
+  FaPhone, FaEnvelope, FaMapMarkerAlt,
+  FaUserGraduate, FaShoppingCart, FaIdCard,
+  FaChartLine, FaClipboardList, FaCheckCircle,
 } from "react-icons/fa";
 
 export const ICON_LIST = [
@@ -70,3 +79,14 @@ export function DynIcon({ name, size = 14, className = "" }) {
   const Comp = found.comp;
   return <Comp size={size} className={className} />;
 }
+
+// ── Export UI Icons ──
+export {
+  FaSearch, FaEdit, FaTrash, FaPlus, FaTags,
+  FaCalendarAlt, FaLayerGroup, FaTimes,
+  FaChevronLeft, FaChevronRight,
+  FaPhone, FaEnvelope, FaMapMarkerAlt,
+  FaUserGraduate, FaShoppingCart, FaIdCard,
+  FaChartLine, FaClipboardList, FaCheckCircle,
+  FaBox, FaShoppingBag, FaStar,
+};
