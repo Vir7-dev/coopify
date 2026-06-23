@@ -660,7 +660,6 @@ function Navbar({ role }) {
                     </div>
                 </div>
             )}
-        </div>
         </nav>
     );
 }
