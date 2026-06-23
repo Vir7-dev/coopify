@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { FaBoxes, FaTimes } from "react-icons/fa";
 
 export default function OpnameStokModal({
     showModal,
@@ -11,33 +12,51 @@ export default function OpnameStokModal({
         jumlah_tambah: "",
     });
 
+    useEffect(() => {
+        if (!showModal) {
+            setForm({
+                id_produk: "",
+                jumlah_tambah: "",
+            });
+        }
+    }, [showModal]);
+
     const selectedProduct = products.find(
         (item) => item.id_produk == form.id_produk,
     );
 
     const stokSistem = selectedProduct?.stok || 0;
+
     const stokSetelahTambah =
-    Number(stokSistem) + Number(form.jumlah_tambah || 0);
+        Number(stokSistem) + Number(form.jumlah_tambah || 0);
 
     if (!showModal) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50">
-            <div className="bg-white rounded-xl w-full max-w-xl shadow-lg">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
+            <div className="bg-white w-full max-w-[400px] rounded-[10px] shadow-2xl overflow-hidden">
 
-                <div className="border-b px-6 py-4">
-                    <h2 className="text-lg font-semibold">
-                        Opname Stok
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                       Tambahkan stok produk yang baru 
-                    </p>
+                <div className="bg-[#0099D5] text-white px-5 py-3 flex justify-between items-center">
+                    <div className="flex items-center gap-2">
+                        <FaBoxes className="text-white text-lg" />
+
+                        <h2 className="text-lg font-bold tracking-tight">
+                            Opname Stok
+                        </h2>
+                    </div>
+
+                    <button
+                        onClick={() => setShowModal(false)}
+                        className="hover:scale-110 transition-transform"
+                    >
+                        <FaTimes size={16} />
+                    </button>
                 </div>
 
-                <div className="p-6 space-y-4">
+                <div className="p-5 space-y-3.5">
 
-                    <div>
-                        <label className="text-xs font-medium text-gray-500">
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-gray-500 ml-1">
                             Produk
                         </label>
 
@@ -49,11 +68,9 @@ export default function OpnameStokModal({
                                     id_produk: e.target.value,
                                 })
                             }
-                            className="w-full mt-1 border border-gray-200 rounded-lg px-3 py-2"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
                         >
-                            <option value="">
-                                Pilih Produk
-                            </option>
+                            <option value="">Pilih Produk</option>
 
                             {products.map((item) => (
                                 <option
@@ -66,8 +83,8 @@ export default function OpnameStokModal({
                         </select>
                     </div>
 
-                    <div>
-                        <label className="text-xs font-medium text-gray-500">
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-gray-500 ml-1">
                             Stok Sistem
                         </label>
 
@@ -75,18 +92,18 @@ export default function OpnameStokModal({
                             type="text"
                             disabled
                             value={stokSistem}
-                            className="w-full mt-1 bg-gray-100 border border-gray-200 rounded-lg px-3 py-2"
+                            className="w-full border border-gray-200 bg-gray-50 rounded-lg px-3 py-2 text-xs text-gray-600"
                         />
                     </div>
 
-                    <div>
-                        <label className="text-xs font-medium text-gray-500">
+                    <div className="space-y-1">
+                        <label className="text-[11px] font-semibold text-gray-500 ml-1">
                             Jumlah Tambah Stok
                         </label>
 
                         <input
                             type="number"
-                            min="0"
+                            min="1"
                             value={form.jumlah_tambah}
                             onChange={(e) =>
                                 setForm({
@@ -94,37 +111,37 @@ export default function OpnameStokModal({
                                     jumlah_tambah: e.target.value,
                                 })
                             }
-                            className="w-full mt-1 border border-gray-200 rounded-lg px-3 py-2"
-                            placeholder="Masukkan jumlah stok yang ditambahkan"
+                            placeholder="Masukkan jumlah stok"
+                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
                         />
                     </div>
 
-                   <div className="bg-green-50 border border-green-100 rounded-lg p-4">
-    <p className="text-sm text-gray-600">
-        Stok Setelah Ditambah
-    </p>
+                    <div className="bg-blue-50 border border-blue-100 rounded-xl p-4">
+                        <p className="text-[11px] font-semibold text-gray-500">
+                            Stok Setelah Ditambah
+                        </p>
 
-    <h3 className="font-semibold text-green-600">
-        {stokSetelahTambah}
-    </h3>
-</div>
+                        <h3 className="text-xl font-bold text-[#1D63D3]">
+                            {stokSetelahTambah}
+                        </h3>
+                    </div>
 
-                </div>
+                    <div className="flex gap-3 pt-2">
+                        <button
+                            onClick={() => handleSubmit(form)}
+                            className="flex-1 bg-[#1D63D3] hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
+                        >
+                            Simpan
+                        </button>
 
-                <div className="border-t px-6 py-4 flex justify-end gap-2">
-                    <button
-                        onClick={() => setShowModal(false)}
-                        className="px-4 py-2 border border-gray-300 rounded-lg"
-                    >
-                        Batal
-                    </button>
+                        <button
+                            onClick={() => setShowModal(false)}
+                            className="flex-1 bg-[#0099D5] hover:bg-[#0088C0] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
+                        >
+                            Batal
+                        </button>
+                    </div>
 
-                    <button
-                        onClick={() => handleSubmit(form)}
-                        className="px-4 py-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white rounded-lg"
-                    >
-                        Simpan Opname
-                    </button>
                 </div>
             </div>
         </div>

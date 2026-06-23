@@ -131,9 +131,10 @@ function Navbar({ role }) {
         }
     };
 
-    return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3">
-            <div className="flex items-center w-full">
+   return (
+    <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3 relative">
+        <div className="flex items-center justify-between w-full">
+            
                 {/* LOGO */}
                 <div
                     onClick={() => navigate("/")}
@@ -659,6 +660,7 @@ function Navbar({ role }) {
                     </div>
                 </div>
             )}
+        </div>
         </nav>
     );
 }

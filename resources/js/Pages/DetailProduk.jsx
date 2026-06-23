@@ -17,29 +17,28 @@ export default function DetailProduk() {
     const [loadingCart, setLoadingCart] = useState(false);
 
     useEffect(() => {
-        // Gunakan endpoint khusus untuk single produk
         fetch(`${API_BASE_URL}/api/produk/${id}`)
             .then((res) => res.json())
-            .then((data) => {
-                if (data) {
-                    setProduk(data);
-                    // Fetch semua produk untuk produk serupa
-                    return fetch(`${API_BASE_URL}/api/produk`);
-                }
-            })
-            .then((res) => res?.json())
+            .then((data) => setProduk(data));
+    }, [id]);
+
+    useEffect(() => {
+        if (!produk) return;
+
+        fetch(`${API_BASE_URL}/api/produk`)
+            .then((res) => res.json())
             .then((allData) => {
-                if (!allData) return;
-                const allProducts = allData.data || allData;
+                const allProducts = allData.data || [];
+
                 const similar = allProducts.filter(
                     (item) =>
-                        item.id_produk !== Number(id) &&
-                        item.id_kat_fk_p === produk?.id_kat_fk_p,
+                        item.id_produk !== produk.id_produk &&
+                        item.id_kat_fk_p === produk.id_kat_fk_p,
                 );
+
                 setProdukSerupa(similar);
-            })
-            .catch((err) => console.error(err));
-    }, [id]);
+            });
+    }, [produk]);
 
     const handleAddToCart = (e) => {
         if (!produk || loadingCart || produk.stok === 0) return;
@@ -75,7 +74,6 @@ export default function DetailProduk() {
                 navigate("/keranjang");
             })
             .catch(() => {
-                // Still navigate even if failed
                 navigate("/keranjang");
             });
     };
@@ -87,7 +85,6 @@ export default function DetailProduk() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
-                {/* BREADCRUMB */}
                 <div className="text-sm text-gray-500 mb-4">
                     Home / {produk.kategori?.nama_kategori} /{" "}
                     {produk.nama_produk}
