@@ -92,21 +92,6 @@ function SearchPage() {
         }
     };
 
-    const addToCart = (item) => {
-    setLoadingCart(item.id_produk);
-
-    axios.post("/api/keranjang", {
-        id_produk: item.id_produk,
-        jumlah: 1
-    })
-    .then((res) => alert(res.data.message))
-    .catch((err) => {
-        console.log(err);
-        alert("Gagal menambah keranjang");
-    })
-    .finally(() => setLoadingCart(null));
-};
-
     const handleAddToCart = (e, item) => {
         if (item.stok === 0) return;
         setLoadingCart(item.id_produk);
