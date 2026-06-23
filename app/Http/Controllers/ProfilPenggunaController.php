@@ -21,7 +21,8 @@ class ProfilPenggunaController extends Controller
             ->get();
 
         // 2. Hitung statistik
-        $totalPesanan = $pesanans->count();
+        // Total Pesanan dihitung khusus dari pesanan yang sudah selesai
+        $totalPesanan = $pesanans->where('status_pesanan', 'Selesai')->count();
 
         // Menghitung Total Belanja (hanya yang sudah Selesai atau Ambil Pesanan)
         $totalBelanja = $pesanans->whereIn('status_pesanan', ['Selesai', 'Ambil Pesanan', 'Diproses', 'Lunas'])
@@ -31,8 +32,9 @@ class ProfilPenggunaController extends Controller
         $siapDiambil = $pesanans->where('status_pesanan', 'Ambil Pesanan')->count();
 
         // 3. Format riwayat pesanan agar sesuai dengan frontend
+        // Riwayat pesanan difilter HANYA untuk pesanan yang sudah 'Selesai'
         $riwayat = [];
-        foreach ($pesanans as $pesanan) {
+        foreach ($pesanans->where('status_pesanan', 'Selesai') as $pesanan) {
             foreach ($pesanan->detailPesanan as $detail) {
                 // Cari gambar pertama, atau fallback ke default
                 $gambarUrl = "/img/default.png";

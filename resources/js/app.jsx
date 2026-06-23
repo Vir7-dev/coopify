@@ -18,6 +18,8 @@ import Dashboard from "./Pages/Dashboard";
 import Search from "./Pages/Search";
 import PesananMasuk from "./Pages/PesananMasuk";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+
 function App() {
     useEffect(() => {
         const loginTime = localStorage.getItem('login_time');
@@ -49,33 +51,33 @@ function App() {
         <CartProvider>
             <CartFlyZone>
                 <Routes>
-                    {/* Dashboard */}
+                    {/* Auth & Public */}
                     <Route path="/" element={<Dashboard />} />
-                    <Route path="/dashboard-pengguna" element={<Dashboard />} />
-                    <Route path="/dashboard-admin" element={<DashboardAdmin />} />
-
-                    {/* Auth */}
                     <Route path="/login" element={<Login />} />
-
-                    {/* Produk */}
+                    
+                    {/* Produk (Public) */}
                     <Route path="/produk" element={<Produk />} />
                     <Route path="/produk/:kategori" element={<Produk />} />
                     <Route path="/detail-produk/:id" element={<DetailProduk />} />
                     <Route path="/search" element={<Search />} />
 
-                    {/* Admin */}
-                    <Route path="/pesanan-masuk" element={<PesananMasuk />} />
-                    <Route path="/kelola-produk" element={<KelolaProduk />} />
-                    <Route path="/kelola-kategori" element={<KelolaKategori />} />
+                    {/* Rute Khusus Admin */}
+                    <Route element={<ProtectedRoute allowedRoles={['admin']} />}>
+                        <Route path="/dashboard-admin" element={<DashboardAdmin />} />
+                        <Route path="/pesanan-masuk" element={<PesananMasuk />} />
+                        <Route path="/kelola-produk" element={<KelolaProduk />} />
+                        <Route path="/kelola-kategori" element={<KelolaKategori />} />
+                        <Route path="/profil-admin" element={<ProfilAdmin />} />
+                    </Route>
 
-                    {/* Transaksi */}
-                    <Route path="/keranjang" element={<Keranjang />} />
-                    <Route path="/pembayaran" element={<Pembayaran />} />
-
-                    {/* Profil */}
-                    <Route path="/profil-pengguna" element={<ProfilPengguna />} />
-                    <Route path="/profil-admin" element={<ProfilAdmin />} />
-                    <Route path="/edit-profil" element={<EditProfil />} />
+                    {/* Rute Khusus Pengguna */}
+                    <Route element={<ProtectedRoute allowedRoles={['pengguna']} />}>
+                        <Route path="/dashboard-pengguna" element={<Dashboard />} />
+                        <Route path="/keranjang" element={<Keranjang />} />
+                        <Route path="/pembayaran" element={<Pembayaran />} />
+                        <Route path="/profil-pengguna" element={<ProfilPengguna />} />
+                        <Route path="/edit-profil" element={<EditProfil />} />
+                    </Route>
                 </Routes>
             </CartFlyZone>
         </CartProvider>
