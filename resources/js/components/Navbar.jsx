@@ -134,8 +134,6 @@ function Navbar({ role }) {
     return (
         <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3">
             <div className="flex items-center w-full">
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3 relative">
-            <div className="flex items-center justify-between w-full md:w-auto">
                 {/* LOGO */}
                 <div
                     onClick={() => navigate("/")}
@@ -202,26 +200,6 @@ function Navbar({ role }) {
                     </div>
                 )}
 
-                {/* ICON + PROFILE */}
-                <div className="hidden md:flex items-center gap-4 relative ml-auto">
-
-                {/* SEARCH BAR */}
-                {role !== "admin" && (
-                    <div className="hidden md:flex flex-1 justify-center">
-                        <div className="relative w-full max-w-xl">
-                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-
-                            <input
-                                type="text"
-                                value={keyword}
-                                onChange={(e) => setKeyword(e.target.value)}
-                                onKeyDown={handleSearch}
-                                placeholder="Cari produk..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
-                            />
-                        </div>
-                    </div>
-                )}
 
                 {/* ICON + PROFILE */}
                 <div className="hidden md:flex items-center gap-4 relative">
