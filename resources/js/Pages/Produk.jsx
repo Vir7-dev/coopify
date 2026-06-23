@@ -198,17 +198,19 @@ export default function Produk() {
                         <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-300">
                             <input
                                 type="number"
+                                min="0"
                                 placeholder="Min"
                                 value={minHarga}
-                                onChange={(e) => setMinHarga(e.target.value)}
+                                onChange={(e) => setMinHarga(Math.max(0, Number(e.target.value)))}
                                 className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
                             />
                             <span className="text-gray-400">-</span>
                             <input
                                 type="number"
+                                min="0"
                                 placeholder="Max"
                                 value={maxHarga}
-                                onChange={(e) => setMaxHarga(e.target.value)}
+                                onChange={(e) => setMaxHarga(Math.max(0, Number(e.target.value)))}
                                 className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
                             />
                             <button
