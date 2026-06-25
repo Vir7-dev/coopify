@@ -32,29 +32,36 @@ function ScrollToTop() {
 
 function App() {
     useEffect(() => {
-        const loginTime = localStorage.getItem('login_time');
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user'));
 
-        if (token && loginTime) {
-            if (user?.role === 'admin') {
-                const DURASI_ADMIN = 12 * 60 * 60 * 1000; // 12 jam
-                if (Date.now() - loginTime > DURASI_ADMIN) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('login_time');
-                    window.location.href = '/login';
-                }
-            } else {
-                const DURASI_PENGGUNA = 4 * 60 * 60 * 1000; // 4 jam
-                if (Date.now() - loginTime > DURASI_PENGGUNA) {
-                    localStorage.removeItem('token');
-                    localStorage.removeItem('user');
-                    localStorage.removeItem('login_time');
-                    window.location.href = '/';
-                }
-            }
-        }
+        if (!token || !user) return;
+
+        const DURASI_IDLE = user.role === 'admin'
+            ? 30 * 60 * 1000   
+            : 60 * 60 * 1000;  
+
+        const logout = () => {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('login_time');
+            window.location.replace('/login');
+        };
+
+        let idleTimer = setTimeout(logout, DURASI_IDLE);
+
+        const resetTimer = () => {
+            clearTimeout(idleTimer);
+            idleTimer = setTimeout(logout, DURASI_IDLE);
+        };
+
+        const events = ['mousemove', 'click', 'keydown', 'scroll', 'touchstart'];
+        events.forEach(event => window.addEventListener(event, resetTimer));
+        
+        return () => {
+            clearTimeout(idleTimer);
+            events.forEach(event => window.removeEventListener(event, resetTimer));
+        };
     }, []);
 
     return (
