@@ -234,20 +234,6 @@ function SearchPage() {
                             </div>
                         )}
 
-                        <div className="relative w-full md:w-72">
-
-                            <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />
-
-                            <input
-                                type="text"
-                                placeholder="Cari produk..."
-                                value={search}
-                                onChange={(e) => setSearch(e.target.value)}
-                                onKeyDown={handleSearch}
-                                className="pl-9 pr-4 py-2 w-full rounded-xl border border-gray-300 text-sm bg-white"
-                            />
-
-                        </div>
 
                     </div>
 
