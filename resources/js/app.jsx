@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Routes, Route } from "react-router-dom";
+import { Routes, Route, useLocation } from "react-router-dom";
 import { CartProvider } from "./context/CartContext";
 import CartFlyZone from "./components/CartFlyZone";
 
@@ -17,6 +17,17 @@ import DashboardAdmin from "./Pages/DashboardAdmin";
 import Dashboard from "./Pages/Dashboard";
 import Search from "./Pages/Search";
 import PesananMasuk from "./Pages/PesananMasuk";
+
+// Scroll to top on route change
+function ScrollToTop() {
+    const location = useLocation();
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+    }, [location.pathname, location.search]);
+
+    return null;
+}
 
 function App() {
     useEffect(() => {
@@ -48,6 +59,7 @@ function App() {
     return (
         <CartProvider>
             <CartFlyZone>
+                <ScrollToTop />
                 <Routes>
                     {/* Dashboard */}
                     <Route path="/" element={<Dashboard />} />

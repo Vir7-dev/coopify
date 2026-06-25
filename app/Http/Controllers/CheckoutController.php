@@ -39,7 +39,7 @@ class CheckoutController extends Controller
             $hasil = DB::transaction(function () use ($idPengguna, $selectedKeranjangIds, $waktuPengambilan) {
                 $keranjangItems = DB::table('keranjang as k')
                     ->join('produk as p', 'p.id_produk', '=', 'k.id_prod_fk_k')
-                    ->leftJoin('diskon as d', 'd.id_prod_fk_d', '=', 'p.id_produk')
+                    ->leftJoin('diskon as d', 'd.id_diskon', '=', 'p.id_disk_fk_p')
                     ->where('k.id_peng_fk_k', $idPengguna)
                     ->whereIn('k.id_keranjang', $selectedKeranjangIds)
                     ->select([

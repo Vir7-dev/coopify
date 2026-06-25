@@ -304,7 +304,7 @@ export default function KelolaProduk() {
     ];
 
     return (
-        <AppLayout role="admin">
+        <AppLayout role="admin" showFooter={false}>
             <div className="w-full">
                 <div className="flex justify-between items-center mb-6">
                     <div>

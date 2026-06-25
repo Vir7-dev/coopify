@@ -92,6 +92,7 @@ function SearchPage() {
     };
 
     const handleAddToCart = (e, item) => {
+        e.stopPropagation(); // Prevent navigation to detail page
         if (item.stok === 0) return;
         setLoadingCart(item.id_produk);
 

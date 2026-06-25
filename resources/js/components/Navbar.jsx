@@ -172,7 +172,7 @@ function Navbar({ role }) {
 
                     {/* SEARCH BAR (non-admin) */}
                     {role !== "admin" && (
-                        <div className="relative w-full max-w-xl">
+                        <div className="relative flex-1 max-w-3xl">
                             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
                             <input
                                 type="text"
@@ -319,7 +319,7 @@ function Navbar({ role }) {
 
                             {/* Keranjang */}
                             <div className="relative cursor-pointer" onClick={() => navigate("/keranjang")}>
-                                <FaShoppingCart className="cursor-pointer" />
+                                <FaShoppingCart className="cursor-pointer" data-cart-icon />
                                 {cartCount > 0 && (
                                     <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
                                         {cartCount > 99 ? "99+" : cartCount}

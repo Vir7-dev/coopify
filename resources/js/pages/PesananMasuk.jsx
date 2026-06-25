@@ -42,7 +42,7 @@ export default function PesananMasuk() {
     };
 
     return (
-        <AppLayout role="admin">
+        <AppLayout role="admin" showFooter={false}>
 
             <div className="bg-gray-100 min-h-screen p-6">
 

@@ -94,7 +94,15 @@ export default function Keranjang() {
                 { jumlah: qty },
                 { withCredentials: true },
             );
-            await fetchKeranjang();
+            // Update local state instead of refetching
+            setItems((prev) =>
+                prev.map((item) =>
+                    item.id_keranjang === idKeranjang
+                        ? { ...item, jml_dikeranjang: qty }
+                        : item
+                )
+            );
+            fetchCartCount();
         } catch (err) {
             console.error(err);
         } finally {
@@ -110,6 +118,7 @@ export default function Keranjang() {
             setItems((prev) =>
                 prev.filter((item) => item.id_keranjang !== idKeranjang),
             );
+            fetchCartCount(); // Update badge counter
         } catch (err) {
             console.error(err);
         }
@@ -238,7 +247,7 @@ export default function Keranjang() {
                         {/* Cart Items */}
                         <div className="lg:col-span-2 space-y-4">
                             {/* Select All Card */}
-                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4">
+                            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 select-none">
                                 <label className="flex items-center gap-3 cursor-pointer group">
                                     <div
                                         className={`w-5 h-5 rounded-md border-2 flex items-center justify-center transition-all ${
@@ -343,43 +352,35 @@ export default function Keranjang() {
                                                 {/* Quantity & Subtotal */}
                                                 <div className="flex items-center justify-between mt-4">
                                                     {/* Quantity Controls */}
-                                                    <div className="flex items-center bg-gray-50 rounded-xl overflow-hidden border border-gray-200">
+                                                    <div
+                                                        className="flex items-center bg-gray-50 rounded-xl overflow-hidden border border-gray-200 select-none"
+                                                        onClick={(e) => e.stopPropagation()}
+                                                        onPointerDown={(e) => e.stopPropagation()}
+                                                    >
                                                         <button
-                                                            onClick={() =>
-                                                                updateQty(
-                                                                    item.id_keranjang,
-                                                                    item.jml_dikeranjang -
-                                                                        1,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                updatingId ===
-                                                                item.id_keranjang
-                                                            }
+                                                            type="button"
                                                             className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                updateQty(item.id_keranjang, item.jml_dikeranjang - 1);
+                                                            }}
                                                         >
-                                                            −
+                                                            <span className="select-none">−</span>
                                                         </button>
-                                                        <span className="w-12 text-center font-semibold">
-                                                            {
-                                                                item.jml_dikeranjang
-                                                            }
+                                                        <span className="w-12 text-center font-semibold select-none">
+                                                            {item.jml_dikeranjang}
                                                         </span>
                                                         <button
-                                                            onClick={() =>
-                                                                updateQty(
-                                                                    item.id_keranjang,
-                                                                    item.jml_dikeranjang +
-                                                                        1,
-                                                                )
-                                                            }
-                                                            disabled={
-                                                                updatingId ===
-                                                                item.id_keranjang
-                                                            }
+                                                            type="button"
                                                             className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                                                            onClick={(e) => {
+                                                                e.stopPropagation();
+                                                                e.preventDefault();
+                                                                updateQty(item.id_keranjang, item.jml_dikeranjang + 1);
+                                                            }}
                                                         >
-                                                            +
+                                                            <span className="select-none">+</span>
                                                         </button>
                                                     </div>
 

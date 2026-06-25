@@ -103,7 +103,7 @@ export default function ProfilAdmin() {
     // ---- LOADING STATE ----
     if (loading) {
         return (
-            <AppLayout role="admin">
+            <AppLayout role="admin" showFooter={false}>
                 <div className="flex justify-center items-center min-h-screen">
                     <p className="text-gray-500 text-sm">Memuat data...</p>
                 </div>
@@ -114,7 +114,7 @@ export default function ProfilAdmin() {
     // ---- ERROR STATE ----
     if (error) {
         return (
-            <AppLayout role="admin">
+            <AppLayout role="admin" showFooter={false}>
                 <div className="flex justify-center items-center min-h-screen">
                     <p className="text-red-500 text-sm">{error}</p>
                 </div>
@@ -123,7 +123,7 @@ export default function ProfilAdmin() {
     }
 
     return (
-        <AppLayout role="admin">
+        <AppLayout role="admin" showFooter={false}>
             <div className="bg-gray-100 min-h-screen">
 
                 {/* HEADER */}

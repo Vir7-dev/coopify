@@ -288,7 +288,7 @@ const DashboardAdmin = () => {
     const tahunList = ["2024", "2025", "2026", "2027", "2028"];
 
     return (
-        <AppLayout role="admin">
+        <AppLayout role="admin" showFooter={false}>
             <div className="bg-gray-100 min-h-screen space-y-12">
                 {/* BANNER */}
                 <div className="px-6 md:px-10">

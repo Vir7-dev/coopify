@@ -1,5 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import ReactDOM from "react-dom";
+import { API_BASE_URL } from "../api";
 
 export default function FlyingProduct({ product, onComplete }) {
     const [position, setPosition] = useState({ x: 0, y: 0 });
@@ -51,7 +52,7 @@ export default function FlyingProduct({ product, onComplete }) {
             const dx = end.x - start.x;
             const dy = end.y - start.y;
             const distance = Math.sqrt(dx * dx + dy * dy);
-            const duration = Math.max(200, Math.min(400, distance * 0.5));
+            const duration = Math.max(300, Math.min(600, distance * 0.8));
 
             const elapsed = currentTime - startTimeRef.current;
             let progress = Math.min(elapsed / duration, 1);
@@ -61,7 +62,7 @@ export default function FlyingProduct({ product, onComplete }) {
 
             // Calculate position
             const currentX = start.x + dx * eased;
-            const arcHeight = -Math.abs(dy) * 0.15 * Math.sin(progress * Math.PI);
+            const arcHeight = -Math.abs(dy) * 0.2 * Math.sin(progress * Math.PI);
             const currentY = start.y + dy * eased + arcHeight;
 
             setPosition({ x: currentX, y: currentY });
@@ -75,7 +76,7 @@ export default function FlyingProduct({ product, onComplete }) {
                 setTimeout(() => {
                     setIsAnimating(false);
                     onComplete();
-                }, 250);
+                }, 300);
             } else {
                 animFrameRef.current = requestAnimationFrame(animate);
             }
@@ -114,6 +115,14 @@ export default function FlyingProduct({ product, onComplete }) {
 
     if (!isAnimating) return null;
 
+    // Get product image URL
+    const getImageUrl = () => {
+        if (product.gambar && product.gambar.length > 0) {
+            return `${API_BASE_URL}/storage/${product.gambar[0].url_gambar}`;
+        }
+        return "/img/default.png";
+    };
+
     return ReactDOM.createPortal(
         <div
             style={{
@@ -121,20 +130,20 @@ export default function FlyingProduct({ product, onComplete }) {
                 left: position.x,
                 top: position.y,
                 transform: `translate(-50%, -50%) scale(${isShrinking ? 0 : 1})`,
-                width: "64px",
-                height: "64px",
+                width: "72px",
+                height: "72px",
                 borderRadius: "16px",
                 overflow: "hidden",
-                boxShadow: "0 8px 32px rgba(23, 102, 211, 0.3)",
-                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
+                boxShadow: "0 8px 32px rgba(23, 102, 211, 0.4)",
+                background: "linear-gradient(135deg, #1766D3 0%, #3D8FFF 100%)",
                 zIndex: 99999,
                 pointerEvents: "none",
                 opacity: isShrinking ? 0 : 1,
-                transition: isShrinking ? "transform 0.2s ease-in, opacity 0.2s ease-in" : "none",
+                transition: isShrinking ? "transform 0.25s ease-in, opacity 0.25s ease-in" : "none",
             }}
         >
             <img
-                src={product.gambar?.[0]?.url_gambar || "/img/default.png"}
+                src={getImageUrl()}
                 alt={product.nama_produk || "Product"}
                 style={{
                     width: "100%",
@@ -142,7 +151,7 @@ export default function FlyingProduct({ product, onComplete }) {
                     objectFit: "cover",
                 }}
                 onError={(e) => {
-                    e.target.style.display = "none";
+                    e.target.src = "/img/default.png";
                 }}
             />
         </div>,

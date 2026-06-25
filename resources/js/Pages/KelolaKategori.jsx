@@ -186,7 +186,7 @@ export default function KelolaKategori() {
 
   // Render
   return (
-    <AppLayout role="admin">
+    <AppLayout role="admin" showFooter={false}>
       <div className="w-full">
 
         {/* HEADER */}
