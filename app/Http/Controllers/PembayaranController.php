@@ -26,7 +26,7 @@ class PembayaranController extends Controller
     private function expirePaymentIfNeeded(Pembayaran $pembayaran): bool
     {
         if (
-            $pembayaran->status_pem !== 'menunggu' ||
+            $pembayaran->status_pem !== 'belum_bayar' ||
             !$pembayaran->batas_wkt_pem ||
             !now()->greaterThan($pembayaran->batas_wkt_pem)
         ) {
@@ -222,7 +222,7 @@ class PembayaranController extends Controller
 
             $statusTransaksi = match ($notif->transaction_status) {
                 'capture', 'settlement' => 'berhasil',
-                'pending' => 'menunggu',
+                'pending' => 'belum_bayar',
                 default => 'gagal',
             };
 

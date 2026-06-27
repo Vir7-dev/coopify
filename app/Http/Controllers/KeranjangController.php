@@ -6,6 +6,7 @@ use App\Models\Keranjang;
 use App\Models\Produk;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class KeranjangController extends Controller
 {
@@ -32,6 +33,18 @@ class KeranjangController extends Controller
         ]);
 
         $produk = Produk::findOrFail($request->id_produk);
+
+        // Cek stok menggunakan stored function cek_stok_tersedia
+        $stokCukup = DB::selectOne(
+            'SELECT cek_stok_tersedia(?, ?) AS hasil',
+            [$request->id_produk, $request->jumlah]
+        );
+
+        if (!$stokCukup->hasil) {
+            return response()->json([
+                'message' => 'Stok tidak mencukupi'
+            ], 400);
+        }
 
         $keranjang = Keranjang::where(
             'id_peng_fk_k',
