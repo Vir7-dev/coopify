@@ -22,27 +22,27 @@ function Login() {
   const handleLogin = async () => {
     try {
       const res = await api.post("/login", {
-          nim_nik: nim,
-          password: password,
+        nim_nik: nim,
+        password: password,
       });
       const data = res.data;
 
-        localStorage.setItem("user", JSON.stringify(data.user));
-        localStorage.setItem("token", data.token);
-        localStorage.setItem("login_time", Date.now());
+      localStorage.setItem("user", JSON.stringify(data.user));
+      localStorage.setItem("token", data.token);
+      localStorage.setItem("login_time", Date.now());
 
-        Toast.fire({
-          icon: "success",
-          title: "Login berhasil!",
-        });
+      Toast.fire({
+        icon: "success",
+        title: "Login berhasil!",
+      });
 
-        setTimeout(() => {
-          if (data.user.role === "admin") {
-            window.location.href = "/dashboard-admin";
-          } else {
-            window.location.href = "/dashboard-pengguna";
-          }
-        }, 1500);
+      setTimeout(() => {
+        if (data.user.role === "admin") {
+          window.location.href = "/dashboard-admin";
+        } else {
+          window.location.href = "/dashboard-pengguna";
+        }
+      }, 1500);
     } catch (error) {
       console.error(error);
       Toast.fire({
@@ -128,8 +128,7 @@ function Login() {
           {/* BUTTON */}
           <button
             type="submit"
-            className="w-full bg-white text-[#2D5A74] py-3 rounded-lg font-semibold hover:scale-95 transition"
-          >
+            className="w-full bg-[#2D5A74] text-white py-3 rounded-lg border-2 border-white font-semibold hover:scale-95 transition"          >
             Masuk
           </button>
 
