@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\DB;
 use App\Models\Pesanan;
 use App\Models\DetailPesanan;
 
@@ -24,9 +25,12 @@ class ProfilPenggunaController extends Controller
         // Total Pesanan dihitung khusus dari pesanan yang sudah selesai
         $totalPesanan = $pesanans->where('status_pesanan', 'Selesai')->count();
 
-        // Menghitung Total Belanja (hanya yang sudah Selesai atau Ambil Pesanan)
-        $totalBelanja = $pesanans->whereIn('status_pesanan', ['Selesai', 'Ambil Pesanan', 'Diproses', 'Lunas'])
-            ->sum('total_harga');
+        // Menghitung Total Belanja menggunakan stored function hitung_total_belanja
+        // Function ini menghitung total belanja pengguna dari pesanan yang sudah lunas
+        $totalBelanja = DB::selectOne(
+            'SELECT hitung_total_belanja(?) AS total',
+            [$user->id_pengguna]
+        )->total ?? 0;
 
         // Menghitung Pesanan yang Siap Diambil
         $siapDiambil = $pesanans->where('status_pesanan', 'Ambil Pesanan')->count();
@@ -94,8 +98,8 @@ class ProfilPenggunaController extends Controller
         // Handle file upload
         if ($request->hasFile('foto')) {
             // Hapus foto lama jika ada (opsional, tapi baik untuk menghemat storage)
-            if ($user->foto_profil && \Storage::disk('public')->exists($user->foto_profil)) {
-                \Storage::disk('public')->delete($user->foto_profil);
+            if ($user->foto_profil && Storage::disk('public')->exists($user->foto_profil)) {
+                Storage::disk('public')->delete($user->foto_profil);
             }
 
             $path = $request->file('foto')->store('profil', 'public');

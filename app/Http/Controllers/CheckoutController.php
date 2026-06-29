@@ -120,7 +120,7 @@ class CheckoutController extends Controller
                 }
 
                 DB::table('pembayaran')->insert([
-                    'status_pem' => 'menunggu',
+                    'status_pem' => 'belum_bayar',
                     'total_bayar' => $totalHarga,
                     'batas_wkt_pem' => now()->addMinutes(
                         config('coopify.payment_timeout_minutes')

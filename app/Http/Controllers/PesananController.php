@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Pesanan;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PesananController extends Controller
 {
@@ -75,11 +76,16 @@ class PesananController extends Controller
 
         $pesanan->status_pesanan = $statusBaru;
 
-        // Jika dibatalkan, kembalikan stok
+        // Jika dibatalkan, gunakan stored procedure batalkan_pesanan
+        // untuk kembalikan stok dan update status pembayaran secara otomatis
         if ($statusBaru === 'dibatalkan') {
-            foreach ($pesanan->detailPesanan as $detail) {
-                $detail->produk->increment('stok', $detail->jml_peritem);
-            }
+            DB::statement('CALL batalkan_pesanan(?)', [$id]);
+
+            return response()->json([
+                'message' => "Status pesanan berhasil diupdate ke '$statusBaru'",
+                'data' => Pesanan::with(['pengguna', 'detailPesanan.produk', 'pembayaran'])
+                    ->findOrFail($id)
+            ]);
         }
 
         $pesanan->save();
