@@ -6,11 +6,12 @@ export default function Pagination({
     currentPage,
     totalPages,
     setCurrentPage,
+    label = "item",
 }) {
     return (
         <div className="flex justify-between items-center p-4 text-sm text-gray-500">
             <p>
-                Menampilkan {currentItems} dari {totalItems} produk
+                Menampilkan {currentItems} dari {totalItems} {label}
             </p>
 
             <div className="flex items-center gap-1">

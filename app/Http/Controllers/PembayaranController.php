@@ -221,8 +221,8 @@ class PembayaranController extends Controller
             }
 
             $statusTransaksi = match ($notif->transaction_status) {
-                'capture', 'settlement' => 'berhasil',
-                'pending' => 'belum_bayar',
+                'capture', 'settlement' => 'lunas',
+                'pending' => 'menunggu',
                 default => 'gagal',
             };
 

@@ -167,6 +167,7 @@ function Navbar({ role }) {
                             <li onClick={() => navigate("/dashboard-admin")} className="cursor-pointer hover:text-blue-500">Dashboard</li>
                             <li onClick={() => navigate("/kelola-produk")} className="cursor-pointer hover:text-blue-500">Produk</li>
                             <li onClick={() => navigate("/kelola-kategori")} className="cursor-pointer hover:text-blue-500">Kategori</li>
+                            <li onClick={() => navigate("/pesanan-masuk")} className="cursor-pointer hover:text-blue-500">Pesanan</li>
                         </ul>
                     )}
 
@@ -385,6 +386,7 @@ function Navbar({ role }) {
                                 <button onClick={() => { navigate("/dashboard-admin"); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100">Dashboard</button>
                                 <button onClick={() => { navigate("/kelola-produk"); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100">Produk</button>
                                 <button onClick={() => { navigate("/kelola-kategori"); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100">Kategori</button>
+                                <button onClick={() => { navigate("/pesanan-masuk"); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100 font-semibold">Pesanan</button>
                                 <button onClick={() => setOpenMobileDropdown(!openMobileDropdown)} className="px-6 py-3 text-left hover:bg-gray-100 flex justify-between items-center">
                                     <span>Pesanan Masuk ({orderList.length})</span>
                                     {openMobileDropdown ? <FaChevronUp size={12} /> : <FaChevronDown size={12} />}
