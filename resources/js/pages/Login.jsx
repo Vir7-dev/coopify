@@ -95,10 +95,12 @@ function Login() {
 
           <input
             type="text"
+            inputMode="numeric"
             value={nim}
-            onChange={(e) => setNim(e.target.value)}
+            onChange={(e) => setNim(e.target.value.replace(/\D/g, ""))}
             className="w-full mb-4 p-3 rounded-lg bg-white text-black outline-none"
             placeholder="Masukkan NIM / NIK"
+            maxLength={50}
           />
 
           {/* PASSWORD */}
