@@ -94,6 +94,10 @@ function App() {
                         <Route path="/keranjang" element={<Keranjang />} />
                         <Route path="/pembayaran" element={<Pembayaran />} />
                         <Route path="/profil-pengguna" element={<ProfilPengguna />} />
+                    </Route>
+
+                    {/* Rute Bersama (Admin & Pengguna) */}
+                    <Route element={<ProtectedRoute allowedRoles={['admin', 'pengguna']} />}>
                         <Route path="/edit-profil" element={<EditProfil />} />
                     </Route>
                 </Routes>
