@@ -8,7 +8,7 @@ export default function AppLayout({ children, role, showNavbar = true, showFoote
 
             {showNavbar && <Navbar role={role} />}
 
-            <div className="w-full px-6 pt-20 pb-6">
+            <div className="w-full px-2 pt-20 pb-2">
                 {children}
             </div>
               {showFooter && <Footer role={role} />}
