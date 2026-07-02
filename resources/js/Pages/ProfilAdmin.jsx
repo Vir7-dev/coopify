@@ -19,37 +19,37 @@ export default function ProfilAdmin() {
     const navigate = useNavigate();
 
     // ---- STATE ----
-    const [profil, setProfil]       = useState(null);
+    const [profil, setProfil] = useState(null);
     const [statistik, setStatistik] = useState(null);
-    const [loading, setLoading]     = useState(true);
-    const [error, setError]         = useState(null);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
 
     // ---- FETCH DATA DARI API ----
     useEffect(() => {
-    const token = localStorage.getItem('token'); // ← ambil token dari localStorage
+        const token = localStorage.getItem('token'); // ← ambil token dari localStorage
 
-    axios.get('/api/admin/profil', {
-        headers: {
-            Authorization: `Bearer ${token}`  // ← kirim token
-        }
-    })
-    .then(res => {
-        setProfil(res.data.profil);
-        setStatistik(res.data.statistik);
-    })
-    .catch(err => {
-        console.error(err);
-        setError('Gagal memuat data profil');
-    })
-    .finally(() => setLoading(false));
-}, []);
+        axios.get('/api/admin/profil', {
+            headers: {
+                Authorization: `Bearer ${token}`  // ← kirim token
+            }
+        })
+            .then(res => {
+                setProfil(res.data.profil);
+                setStatistik(res.data.statistik);
+            })
+            .catch(err => {
+                console.error(err);
+                setError('Gagal memuat data profil');
+            })
+            .finally(() => setLoading(false));
+    }, []);
 
     // ---- DATA STATISTIK (dari API) ----
     const stats = statistik ? [
-        { label: "Total Produk",    value: statistik.total_produk,    icon: <FaBox />,           bg: "bg-green-100",  text: "text-green-600",  gradient: "from-green-500/10",  hover: "group-hover:text-green-600"  },
-        { label: "Pesanan Masuk",   value: statistik.pesanan_masuk,   icon: <FaClipboardList />, bg: "bg-blue-100",   text: "text-blue-600",   gradient: "from-blue-500/10",   hover: "group-hover:text-blue-600"   },
-        { label: "Total Kategori",  value: statistik.total_kategori,  icon: <FaLayerGroup />,    bg: "bg-yellow-100", text: "text-yellow-600", gradient: "from-yellow-500/10", hover: "group-hover:text-yellow-600" },
-        { label: "Pesanan Selesai", value: statistik.pesanan_selesai, icon: <FaCheckCircle />,   bg: "bg-pink-100",   text: "text-pink-600",   gradient: "from-pink-500/10",   hover: "group-hover:text-pink-600"   },
+        { label: "Total Produk", value: statistik.total_produk, icon: <FaBox />, bg: "bg-green-100", text: "text-green-600", gradient: "from-green-500/10", hover: "group-hover:text-green-600" },
+        { label: "Pesanan Masuk", value: statistik.pesanan_masuk, icon: <FaClipboardList />, bg: "bg-blue-100", text: "text-blue-600", gradient: "from-blue-500/10", hover: "group-hover:text-blue-600" },
+        { label: "Total Kategori", value: statistik.total_kategori, icon: <FaLayerGroup />, bg: "bg-yellow-100", text: "text-yellow-600", gradient: "from-yellow-500/10", hover: "group-hover:text-yellow-600" },
+        { label: "Pesanan Selesai", value: statistik.pesanan_selesai, icon: <FaCheckCircle />, bg: "bg-pink-100", text: "text-pink-600", gradient: "from-pink-500/10", hover: "group-hover:text-pink-600" },
     ] : [];
 
     // ---- AKSES CEPAT ----
@@ -90,9 +90,9 @@ export default function ProfilAdmin() {
 
     // ---- INFO AKUN (dari API) ----
     const infoAkun = profil ? [
-        { label: "Role",           value: profil.role,           valueClass: "text-blue-600 font-semibold"  },
-        { label: "Status Akun",    value: profil.status,         valueClass: "text-green-600 font-semibold" },
-        { label: "Login Terakhir", value: profil.login_terakhir, valueClass: "text-gray-600"                },
+        { label: "Role", value: profil.role, valueClass: "text-blue-600 font-semibold" },
+        { label: "Status Akun", value: profil.status, valueClass: "text-green-600 font-semibold" },
+        { label: "Login Terakhir", value: profil.login_terakhir, valueClass: "text-gray-600" },
     ] : [];
 
     // ---- INISIAL AVATAR ----
@@ -170,7 +170,7 @@ export default function ProfilAdmin() {
 
                     <button
                         className="bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-1"
-                        onClick={() => navigate("/edit-profil-admin")}
+                        onClick={() => navigate("/edit-profil")}
                     >
                         <FaPencilAlt size={10} className="mt-0.5" /> Edit Profil
                     </button>

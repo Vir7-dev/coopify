@@ -46,17 +46,31 @@ class ProdukController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'nama_produk' => 'required',
+            'nama_produk' => 'required|unique:produk,nama_produk',
             'harga_jual' => 'required',
-            'persen_diskon' => 'nullable|integer|min:0|max:100',
+            'persen_diskon' => 'nullable|numeric|min:0|max:100',
             'id_kat_fk_p' => 'required',
             'deskripsi' => 'required',
             'url_gambar.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
         ], [
+            // Wajib diisi
+            'nama_produk.required' => 'Nama produk wajib diisi.',
+            'nama_produk.unique' => 'Nama produk sudah digunakan.',
+            'harga_jual.required' => 'Harga produk wajib diisi.',
+            'id_kat_fk_p.required' => 'Kategori wajib dipilih.',
+            'deskripsi.required' => 'Deskripsi produk wajib diisi.',
+
+            // Diskon
+            'persen_diskon.min' => 'Persen diskon tidak boleh kurang dari 0.',
+            'persen_diskon.max' => 'Persen diskon tidak boleh lebih dari 100.',
+
+            // Stok
             'stok.min' => 'Stok tidak boleh kurang dari 0.',
-            'url_gambar.image' => 'File harus berupa gambar.',
-            'url_gambar.mimes' => 'Gambar hanya boleh JPG, JPEG, atau PNG.',
-            'url_gambar.max' => 'Ukuran gambar maksimal 2 MB.'
+
+            // Gambar
+            'url_gambar.*.image' => 'File harus berupa gambar.',
+            'url_gambar.*.mimes' => 'Gambar hanya boleh JPG, JPEG, atau PNG.',
+            'url_gambar.*.max' => 'Ukuran gambar maksimal 2 MB.'
         ]);
 
         $diskon = null;
@@ -107,13 +121,33 @@ class ProdukController extends Controller
     public function update(Request $request, $produk)
     {
         $request->validate([
-            'nama_produk' => 'required',
+            'nama_produk' => 'required|unique:produk,nama_produk',
             'harga_jual' => 'required',
             'stok' => 'nullable|integer|min:0',
-            'persen_diskon' => 'nullable|integer|min:0|max:100',
+            'persen_diskon' => 'nullable|numeric|min:0|max:100',
             'id_kat_fk_p' => 'required',
             'deskripsi' => 'required',
             'url_gambar.*' => 'nullable|image|mimes:jpg,jpeg,png|max:2048'
+        ], [
+            // Wajib diisi
+            'nama_produk.required' => 'Nama produk wajib diisi.',
+            'nama_produk.unique' => 'Nama produk sudah digunakan.',
+            'harga_jual.required' => 'Harga produk wajib diisi.',
+            'id_kat_fk_p.required' => 'Kategori wajib dipilih.',
+            'deskripsi.required' => 'Deskripsi produk wajib diisi.',
+
+            // Diskon
+            'persen_diskon.integer' => 'Persen diskon harus berupa angka bulat.',
+            'persen_diskon.min' => 'Persen diskon tidak boleh kurang dari 0.',
+            'persen_diskon.max' => 'Persen diskon tidak boleh lebih dari 100.',
+
+            // Stok
+            'stok.min' => 'Stok tidak boleh kurang dari 0.',
+
+            // Gambar
+            'url_gambar.*.image' => 'File harus berupa gambar.',
+            'url_gambar.*.mimes' => 'Gambar hanya boleh berformat JPG, JPEG, atau PNG.',
+            'url_gambar.*.max' => 'Ukuran gambar maksimal 2 MB.',
         ]);
 
         $produk = Produk::findOrFail($produk);

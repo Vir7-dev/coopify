@@ -231,13 +231,25 @@ export default function KelolaProduk() {
                 });
             }, 300);
         } catch (error) {
+            let message = "Terjadi kesalahan";
+
+            if (error.response?.data?.errors) {
+  
+                message = Object.values(error.response.data.errors)
+                    .flat()
+                    .join("\n");
+            } else if (error.response?.data?.message) {
+                message = error.response.data.message;
+            }
+
             Swal.fire({
                 icon: "error",
-                title: "Gagal!",
-                text: error.response?.data?.message || "Terjadi kesalahan",
+                title: "Validasi Gagal",
+                text: message,
             });
         }
     };
+
     const confirmDelete = async () => {
         try {
             await api.delete(`/produk/${selectedDelete.id_produk}`);
@@ -306,6 +318,7 @@ export default function KelolaProduk() {
     return (
         <AppLayout role="admin" showFooter={false}>
             <div className="w-full">
+                {/* HEADER */}
                 <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
                         <h1 className="text-xl font-semibold">Kelola Produk</h1>
@@ -313,16 +326,17 @@ export default function KelolaProduk() {
                             Manajemen produk koperasi
                         </p>
                     </div>
-                <div className="flex flex-col sm:flex-row gap-3">
+
+                    <div className="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
                         <button
                             onClick={handleAdd}
-                            className="flex items-center justify-center gap-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
+                            className="flex items-center justify-center gap-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg w-full sm:w-auto"
                         >
                             <FaPlus /> Tambahkan Produk
                         </button>
                         <button
                             onClick={() => setShowOpnameModal(true)}
-                            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 text-sm px-4 py-2 rounded-lg"
+                            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 text-sm px-4 py-2 rounded-lg w-full sm:w-auto"
                         >
                             <FaClipboardCheck />
                             Tambah Stok
@@ -415,15 +429,16 @@ export default function KelolaProduk() {
                 </div>
 
                 <div className="bg-white rounded-xl shadow-sm overflow-x-auto text-left">
-                    <div className="p-4 flex justify-between items-center">
-                        <div className="relative inline-block">
+                    <div className="p-4 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-3">
+                        {/* Filter Kategori */}
+                        <div className="relative w-full sm:w-auto">
                             <select
                                 value={filterKategori}
                                 onChange={(e) => {
                                     setFilterKategori(e.target.value);
                                     setCurrentPage(1);
                                 }}
-                                className="appearance-none h-10 border border-gray-300 text-slate-600 rounded-md pl-3 pr-10 text-sm font-bold focus:outline-none"
+                                className="appearance-none w-full sm:w-auto h-10 border border-gray-300 text-slate-600 rounded-md pl-3 pr-10 text-sm font-bold focus:outline-none"
                             >
                                 <option value="Semua">Semua Kategori</option>
                                 <option value="Makanan">Makanan</option>
@@ -438,7 +453,9 @@ export default function KelolaProduk() {
                                 size={12}
                             />
                         </div>
-                        <div className="relative w-64">
+
+                        {/* Search */}
+                        <div className="relative w-full sm:w-64">
                             <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
                             <input
                                 type="text"
