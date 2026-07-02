@@ -183,22 +183,25 @@ function Navbar({ role }) {
                         )}
                     </div>
 
-                    {/* RIGHT: Search Bar (non-admin) + Icons */}
-                    <div className="flex items-center gap-4">
-                        {/* Search Bar - Desktop (non-admin only) */}
-                        {role !== "admin" && (
-                            <div className="relative flex-1 max-w-xl mx-8">
-                                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                    {/* CENTER: Search Bar (non-admin only) */}
+                    {role !== "admin" && (
+                        <div className="flex-1 max-w-2xl mx-8">
+                            <div className="relative">
+                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
                                 <input
                                     type="text"
                                     value={keyword}
                                     onChange={(e) => setKeyword(e.target.value)}
                                     onKeyDown={handleSearch}
                                     placeholder="Cari produk..."
-                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
+                                    className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3] bg-gray-50 hover:bg-white transition-colors"
                                 />
                             </div>
-                        )}
+                        </div>
+                    )}
+
+                    {/* RIGHT: Icons */}
+                    <div className="flex items-center gap-4">
 
                         {/* ADMIN: Pesanan Masuk */}
                         {role === "admin" ? (
