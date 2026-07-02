@@ -71,7 +71,7 @@ function Navbar({ role }) {
 
     const selesaiPesanan = async (id) => {
         try {
-            await api.put(`/admin/pesanan/${id}/status`, { status: 'selesai' });
+            await api.put("/admin/pesanan/" + id + "/status", { status: 'selesai' });
             fetchPesananMenunggu();
         } catch (err) {
             console.error('Error update status:', err);
@@ -82,7 +82,7 @@ function Navbar({ role }) {
     const batalkanPesanan = async (id) => {
         if (!confirm('Yakin ingin membatalkan pesanan ini?')) return;
         try {
-            await api.put(`/admin/pesanan/${id}/status`, { status: 'dibatalkan' });
+            await api.put("/admin/pesanan/" + id + "/status", { status: 'dibatalkan' });
             fetchPesananMenunggu();
         } catch (err) {
             console.error('Error batalkan pesanan:', err);
@@ -146,170 +146,294 @@ function Navbar({ role }) {
     };
 
     return (
-        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm px-6 py-3">
-            <div className="flex items-center justify-between w-full">
-                {/* LOGO */}
-                <div onClick={() => navigate("/")} className="flex items-center gap-2 cursor-pointer">
-                    <img src="/img/logo.png" className="w-10 h-10" alt="logo" />
-                    <span className="text-xl font-bold">Coopify</span>
-                </div>
-
-                {/* HAMBURGER MENU */}
-                <button className="md:hidden" onClick={() => setOpenMenu(!openMenu)}>
-                    {openMenu ? <FaTimes size={22} /> : <FaBars size={22} />}
-                </button>
-
-                {/* DESKTOP MENU */}
-                <div className="hidden md:flex items-center gap-6">
-                    {/* ADMIN MENU */}
-                    {role === "admin" && (
-                        <ul className="flex gap-8">
-                            <li onClick={() => navigate("/dashboard-admin")} className="cursor-pointer hover:text-blue-500">Dashboard</li>
-                            <li onClick={() => navigate("/kelola-produk")} className="cursor-pointer hover:text-blue-500">Produk</li>
-                            <li onClick={() => navigate("/kelola-kategori")} className="cursor-pointer hover:text-blue-500">Kategori</li>
-                            <li onClick={() => navigate("/pesanan-masuk")} className="cursor-pointer hover:text-blue-500">Pesanan</li>
-                        </ul>
-                    )}
-
-                    {/* SEARCH BAR (non-admin) */}
-                    {role !== "admin" && (
-                        <div className="relative flex-1 max-w-3xl">
-                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
-                            <input
-                                type="text"
-                                value={keyword}
-                                onChange={(e) => setKeyword(e.target.value)}
-                                onKeyDown={handleSearch}
-                                placeholder="Cari produk..."
-                                className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
-                            />
+        <nav className="fixed top-0 left-0 w-full z-50 bg-white text-[#1766D3] shadow-sm">
+            {/* DESKTOP LAYOUT (hidden on mobile) */}
+            <div className="hidden md:block">
+                <div className="flex items-center justify-between px-6 py-3">
+                    {/* LEFT: Logo + Admin Menu */}
+                    <div className="flex items-center gap-6">
+                        {/* LOGO */}
+                        <div onClick={() => navigate("/")} className="flex items-center gap-2 cursor-pointer">
+                            <img src="/img/logo.png" className="w-10 h-10" alt="logo" />
+                            <span className="text-xl font-bold">Coopify</span>
                         </div>
-                    )}
-                </div>
 
-                {/* ICONS (Right side) */}
-                <div className="hidden md:flex items-center gap-4">
-                    {/* ADMIN: Pesanan Masuk */}
-                    {role === "admin" ? (
-                        <div className="relative">
-                            <FaCheckCircle
-                                className="cursor-pointer hover:text-blue-600 transition"
-                                size={22}
-                                onClick={() => {
-                                    setOpenOrders(!openOrders);
-                                    if (!openOrders) fetchPesananMenunggu();
-                                }}
-                            />
-                            {orderList.length > 0 && (
-                                <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center leading-none">
-                                    {orderList.length > 99 ? '99+' : orderList.length}
-                                </span>
-                            )}
+                        {/* ADMIN: Navigation Menu (single row) */}
+                        {role === "admin" && (
+                            <div className="flex items-center gap-1 ml-4 border-l border-gray-200 pl-4">
+                                {[
+                                    { label: 'Dashboard', path: '/dashboard-admin' },
+                                    { label: 'Produk', path: '/kelola-produk' },
+                                    { label: 'Kategori', path: '/kelola-kategori' },
+                                    { label: 'Pesanan', path: '/pesanan-masuk' },
+                                ].map((item, index) => (
+                                    <React.Fragment key={item.path}>
+                                        {index > 0 && (
+                                            <div className="h-4 w-px bg-gray-200 mx-1"></div>
+                                        )}
+                                        <span
+                                            onClick={() => navigate(item.path)}
+                                            className="cursor-pointer hover:text-blue-500 font-medium transition px-2 py-1"
+                                        >
+                                            {item.label}
+                                        </span>
+                                    </React.Fragment>
+                                ))}
+                            </div>
+                        )}
+                    </div>
 
-                            {/* Dropdown Pesanan */}
-                            <div
-                                onMouseLeave={() => setOpenOrders(false)}
-                                className={`absolute right-0 mt-3 w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 transition-all duration-300 origin-top
-                                ${openOrders ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
-                            >
-                                <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] text-white px-4 py-3 rounded-t-2xl flex items-center justify-between">
-                                    <div className="flex items-center gap-2">
-                                        <FaCheckCircle size={18} />
-                                        <span className="font-semibold">Pesanan Masuk</span>
+                    {/* RIGHT: Search Bar (non-admin) + Icons */}
+                    <div className="flex items-center gap-4">
+                        {/* Search Bar - Desktop (non-admin only) */}
+                        {role !== "admin" && (
+                            <div className="relative flex-1 max-w-xl mx-8">
+                                <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <input
+                                    type="text"
+                                    value={keyword}
+                                    onChange={(e) => setKeyword(e.target.value)}
+                                    onKeyDown={handleSearch}
+                                    placeholder="Cari produk..."
+                                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
+                                />
+                            </div>
+                        )}
+
+                        {/* ADMIN: Pesanan Masuk */}
+                        {role === "admin" ? (
+                            <div className="relative">
+                                <FaCheckCircle
+                                    className="cursor-pointer hover:text-blue-600 transition"
+                                    size={22}
+                                    onClick={() => {
+                                        setOpenOrders(!openOrders);
+                                        if (!openOrders) fetchPesananMenunggu();
+                                    }}
+                                />
+                                {orderList.length > 0 && (
+                                    <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold min-w-[18px] h-[18px] px-1 rounded-full flex items-center justify-center leading-none">
+                                        {orderList.length > 99 ? '99+' : orderList.length}
+                                    </span>
+                                )}
+
+                                {/* Dropdown Pesanan */}
+                                <div
+                                    onMouseLeave={() => setOpenOrders(false)}
+                                    className={`absolute right-0 mt-3 w-[380px] bg-white rounded-2xl shadow-2xl border border-gray-100 z-50 transition-all duration-300 origin-top
+                                    ${openOrders ? "opacity-100 scale-100" : "opacity-0 scale-95 pointer-events-none"}`}
+                                >
+                                    <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] text-white px-4 py-3 rounded-t-2xl flex items-center justify-between">
+                                        <div className="flex items-center gap-2">
+                                            <FaCheckCircle size={18} />
+                                            <span className="font-semibold">Pesanan Masuk</span>
+                                        </div>
+                                        {orderList.length > 0 && (
+                                            <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                                                {orderList.length} baru
+                                            </span>
+                                        )}
                                     </div>
-                                    {orderList.length > 0 && (
-                                        <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
-                                            {orderList.length} baru
+
+                                    <div className="max-h-[400px] overflow-y-auto">
+                                        {loadingOrders ? (
+                                            <div className="p-8 text-center">
+                                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1766D3] mx-auto"></div>
+                                                <p className="mt-2 text-sm text-gray-500">Memuat pesanan...</p>
+                                            </div>
+                                        ) : orderList.length === 0 ? (
+                                            <div className="p-8 text-center">
+                                                <FaCheckCircle size={40} className="mx-auto text-gray-300 mb-2" />
+                                                <p className="text-sm text-gray-500">Tidak ada pesanan masuk</p>
+                                            </div>
+                                        ) : (
+                                            orderList.map((order, index) => (
+                                                <div key={order.id_pesanan} className="border-b border-gray-100 last:border-b-0">
+                                                    <div
+                                                        onClick={() => setOpenDetail(openDetail === index ? null : index)}
+                                                        className="px-4 py-3 flex justify-between items-start cursor-pointer hover:bg-blue-50/50 transition"
+                                                    >
+                                                        <div className="flex-1">
+                                                            <div className="flex items-center gap-2">
+                                                                <p className="text-sm font-bold text-gray-800">{order.kode_pesanan}</p>
+                                                                <span className="bg-yellow-100 text-yellow-700 text-[10px] font-medium px-2 py-0.5 rounded-full">
+                                                                    {order.status_pesanan}
+                                                                </span>
+                                                            </div>
+                                                            <p className="text-xs text-gray-600 mt-0.5">{order.pengguna?.nama || 'Pengguna'}</p>
+                                                            <p className="text-[11px] text-gray-400">{formatTanggal(order.tgl_pesanan)}</p>
+                                                        </div>
+                                                        <div className="text-right">
+                                                            <p className="text-sm font-bold text-[#1766D3]">
+                                                                Rp {Number(order.total_harga || 0).toLocaleString('id-ID')}
+                                                            </p>
+                                                            <p className="text-[10px] text-gray-400 mt-0.5">{order.detail_pesanan?.length || 0} item</p>
+                                                        </div>
+                                                    </div>
+
+                                                    <div className={`transition-all duration-300 overflow-hidden ${openDetail === index ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}>
+                                                        <div className="px-4 pb-4 bg-gray-50/70">
+                                                            <div className="bg-white rounded-lg p-3 mb-3">
+                                                                <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-2">Item Pesanan</p>
+                                                                <ul className="space-y-1.5">
+                                                                    {order.detail_pesanan?.map((item, i) => (
+                                                                        <li key={i} className="flex justify-between text-xs">
+                                                                            <span className="text-gray-700">
+                                                                                {item.produk?.nama_produk || 'Produk'} <span className="text-gray-400">x{item.jml_peritem}</span>
+                                                                            </span>
+                                                                            <span className="text-gray-600 font-medium">
+                                                                                Rp {Number(item.subtotal_dp || 0).toLocaleString('id-ID')}
+                                                                            </span>
+                                                                        </li>
+                                                                    ))}
+                                                                </ul>
+                                                            </div>
+                                                            <div className="flex gap-2">
+                                                                <button
+                                                                    onClick={() => selesaiPesanan(order.id_pesanan)}
+                                                                    className="flex-1 bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white text-xs font-medium px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5"
+                                                                >
+                                                                    <Check size={14} /> Tandai Selesai
+                                                                </button>
+                                                                <button
+                                                                    onClick={() => batalkanPesanan(order.id_pesanan)}
+                                                                    className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition"
+                                                                >
+                                                                    Batalkan
+                                                                </button>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            ))
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+                        ) : user ? (
+                            <>
+                                {/* Keranjang - Desktop */}
+                                <div className="relative cursor-pointer" onClick={() => navigate("/keranjang")}>
+                                    <FaShoppingCart className="cursor-pointer" data-cart-icon />
+                                    {cartCount > 0 && (
+                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+                                            {cartCount > 99 ? "99+" : cartCount}
                                         </span>
                                     )}
                                 </div>
 
-                                <div className="max-h-[400px] overflow-y-auto">
-                                    {loadingOrders ? (
-                                        <div className="p-8 text-center">
-                                            <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-[#1766D3] mx-auto"></div>
-                                            <p className="mt-2 text-sm text-gray-500">Memuat pesanan...</p>
-                                        </div>
-                                    ) : orderList.length === 0 ? (
-                                        <div className="p-8 text-center">
-                                            <FaCheckCircle size={40} className="mx-auto text-gray-300 mb-2" />
-                                            <p className="text-sm text-gray-500">Tidak ada pesanan masuk</p>
-                                        </div>
-                                    ) : (
-                                        orderList.map((order, index) => (
-                                            <div key={order.id_pesanan} className="border-b border-gray-100 last:border-b-0">
-                                                <div
-                                                    onClick={() => setOpenDetail(openDetail === index ? null : index)}
-                                                    className="px-4 py-3 flex justify-between items-start cursor-pointer hover:bg-blue-50/50 transition"
-                                                >
-                                                    <div className="flex-1">
-                                                        <div className="flex items-center gap-2">
-                                                            <p className="text-sm font-bold text-gray-800">{order.kode_pesanan}</p>
-                                                            <span className="bg-yellow-100 text-yellow-700 text-[10px] font-medium px-2 py-0.5 rounded-full">
-                                                                {order.status_pesanan}
-                                                            </span>
-                                                        </div>
-                                                        <p className="text-xs text-gray-600 mt-0.5">{order.pengguna?.nama || 'Pengguna'}</p>
-                                                        <p className="text-[11px] text-gray-400">{formatTanggal(order.tgl_pesanan)}</p>
-                                                    </div>
-                                                    <div className="text-right">
-                                                        <p className="text-sm font-bold text-[#1766D3]">
-                                                            Rp {Number(order.total_harga || 0).toLocaleString('id-ID')}
-                                                        </p>
-                                                        <p className="text-[10px] text-gray-400 mt-0.5">{order.detail_pesanan?.length || 0} item</p>
-                                                    </div>
-                                                </div>
-
-                                                <div className={`transition-all duration-300 overflow-hidden ${openDetail === index ? "max-h-60 opacity-100" : "max-h-0 opacity-0"}`}>
-                                                    <div className="px-4 pb-4 bg-gray-50/70">
-                                                        <div className="bg-white rounded-lg p-3 mb-3">
-                                                            <p className="text-[10px] text-gray-400 uppercase tracking-wide mb-2">Item Pesanan</p>
-                                                            <ul className="space-y-1.5">
-                                                                {order.detail_pesanan?.map((item, i) => (
-                                                                    <li key={i} className="flex justify-between text-xs">
-                                                                        <span className="text-gray-700">
-                                                                            {item.produk?.nama_produk || 'Produk'} <span className="text-gray-400">x{item.jml_peritem}</span>
-                                                                        </span>
-                                                                        <span className="text-gray-600 font-medium">
-                                                                            Rp {Number(item.subtotal_dp || 0).toLocaleString('id-ID')}
-                                                                        </span>
-                                                                    </li>
-                                                                ))}
-                                                            </ul>
-                                                        </div>
-                                                        <div className="flex gap-2">
-                                                            <button
-                                                                onClick={() => selesaiPesanan(order.id_pesanan)}
-                                                                className="flex-1 bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white text-xs font-medium px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5"
-                                                            >
-                                                                <Check size={14} /> Tandai Selesai
-                                                            </button>
-                                                            <button
-                                                                onClick={() => batalkanPesanan(order.id_pesanan)}
-                                                                className="px-3 py-2 bg-red-50 hover:bg-red-100 text-red-600 text-xs font-medium rounded-lg transition"
-                                                            >
-                                                                Batalkan
-                                                            </button>
-                                                        </div>
-                                                    </div>
-                                                </div>
+                                {/* Notifikasi - Desktop */}
+                                <div className="relative">
+                                    <FaBell onClick={() => setOpenNotif(!openNotif)} className="cursor-pointer" />
+                                    <div
+                                        className={`absolute right-0 mt-3 w-[320px] bg-white rounded-xl shadow-xl transition
+                                        ${openNotif ? "opacity-100" : "opacity-0 pointer-events-none"}`}
+                                        onMouseLeave={() => setOpenNotif(false)}
+                                    >
+                                        <div className="bg-[#1766D3] text-white p-3 rounded-t-xl">Notifikasi</div>
+                                        {notifications.map((n, i) => (
+                                            <div key={i} className="p-3 border-b text-sm">
+                                                Pesanan <b>{n.code}</b> siap diambil
                                             </div>
-                                        ))
-                                    )}
+                                        ))}
+                                    </div>
                                 </div>
-                            </div>
-                        </div>
-                    ) : user ? (
-                        <>
-                            {/* Notifikasi */}
+                            </>
+                        ) : null}
+
+                        {/* Profile / Login - Desktop */}
+                        {user ? (
                             <div className="relative">
-                                <FaBell onClick={() => setOpenNotif(!openNotif)} className="cursor-pointer" />
+                                {user?.foto_profil ? (
+                                    <img
+                                        src={user.foto_profil}
+                                        alt="Profile"
+                                        className="w-8 h-8 rounded-full object-cover cursor-pointer border border-gray-200"
+                                        onClick={() => setOpenProfile(!openProfile)}
+                                    />
+                                ) : (
+                                    <FaUserCircle className="text-2xl cursor-pointer" onClick={() => setOpenProfile(!openProfile)} />
+                                )}
+
+                                {openProfile && (
+                                    <div
+                                        className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-[999]"
+                                        onMouseLeave={() => setOpenProfile(false)}
+                                    >
+                                        <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
+                                            <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] overflow-hidden flex items-center justify-center font-bold">
+                                                {user?.foto_profil ? (
+                                                    <img src={user.foto_profil} alt="Profile" className="w-full h-full object-cover" />
+                                                ) : (
+                                                    (user?.nama || user?.name || "").charAt(0).toUpperCase()
+                                                )}
+                                            </div>
+                                            <div>
+                                                <p className="font-semibold text-sm">{user?.nama || user?.name || (role === "admin" ? "Admin Kopi" : "Pengguna")}</p>
+                                            </div>
+                                        </div>
+                                        <div className="py-2 text-sm text-black">
+                                            <div onClick={() => navigate(profilePath)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Lihat Profil</div>
+                                            <div onClick={() => { setOpenProfile(false); setOpenPasswordModal(true); }} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Ubah Kata Sandi</div>
+                                            <div onClick={handleLogout} className="px-4 py-2 text-red-500 cursor-pointer">Keluar</div>
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        ) : (
+                            <div onClick={() => navigate("/login")} className="cursor-pointer font-bold text-white bg-[#1766D3] hover:bg-[#3D8FFF] px-4 py-2 rounded-lg shadow-sm transition active:scale-95">
+                                Log in
+                            </div>
+                        )}
+                    </div>
+                </div>
+            </div>
+
+            {/* MOBILE LAYOUT (hidden on desktop) */}
+            <div className="md:hidden">
+                {/* Top row: Logo + Search + Icons + Hamburger */}
+                <div className="flex items-center justify-between px-3 py-2 gap-2">
+                    {/* LOGO */}
+                    <div onClick={() => navigate("/")} className="flex items-center gap-1.5 cursor-pointer flex-shrink-0">
+                        <img src="/img/logo.png" className="w-7 h-7" alt="logo" />
+                        <span className="text-base font-bold hidden sm:inline">Coopify</span>
+                    </div>
+
+                    {/* Search Bar - Mobile */}
+                    <div className="relative flex-1 max-w-[220px] sm:max-w-[280px]">
+                        <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                        <input
+                            type="text"
+                            value={keyword}
+                            onChange={(e) => setKeyword(e.target.value)}
+                            onKeyDown={handleSearch}
+                            placeholder="Cari..."
+                            className="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
+                        />
+                    </div>
+
+                    {/* Icons - Mobile (Keranjang + Notifikasi) */}
+                    {role !== "admin" && user && (
+                        <div className="flex items-center gap-1.5">
+                            {/* Keranjang */}
+                            <div className="relative cursor-pointer p-1" onClick={() => navigate("/keranjang")}>
+                                <FaShoppingCart className="w-5 h-5 cursor-pointer" data-cart-icon />
+                                {cartCount > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center">
+                                        {cartCount > 99 ? "99+" : cartCount}
+                                    </span>
+                                )}
+                            </div>
+
+                            {/* Notifikasi */}
+                            <div className="relative p-1">
+                                <FaBell onClick={() => setOpenNotif(!openNotif)} className="w-5 h-5 cursor-pointer" />
                                 <div
-                                    className={`absolute right-0 mt-3 w-[320px] bg-white rounded-xl shadow-xl transition
+                                    className={`absolute right-0 mt-2 w-[280px] bg-white rounded-xl shadow-xl transition
                                     ${openNotif ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                                     onMouseLeave={() => setOpenNotif(false)}
                                 >
-                                    <div className="bg-[#1766D3] text-white p-3 rounded-t-xl">Notifikasi</div>
+                                    <div className="bg-[#1766D3] text-white p-3 rounded-t-xl text-sm">Notifikasi</div>
                                     {notifications.map((n, i) => (
                                         <div key={i} className="p-3 border-b text-sm">
                                             Pesanan <b>{n.code}</b> siap diambil
@@ -317,63 +441,20 @@ function Navbar({ role }) {
                                     ))}
                                 </div>
                             </div>
-
-                            {/* Keranjang */}
-                            <div className="relative cursor-pointer" onClick={() => navigate("/keranjang")}>
-                                <FaShoppingCart className="cursor-pointer" data-cart-icon />
-                                {cartCount > 0 && (
-                                    <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
-                                        {cartCount > 99 ? "99+" : cartCount}
-                                    </span>
-                                )}
-                            </div>
-                        </>
-                    ) : null}
-
-                    {/* Profile / Login */}
-                    {user ? (
-                        <div className="relative">
-                            {user?.foto_profil ? (
-                                <img
-                                    src={user.foto_profil}
-                                    alt="Profile"
-                                    className="w-8 h-8 rounded-full object-cover cursor-pointer border border-gray-200"
-                                    onClick={() => setOpenProfile(!openProfile)}
-                                />
-                            ) : (
-                                <FaUserCircle className="text-2xl cursor-pointer" onClick={() => setOpenProfile(!openProfile)} />
-                            )}
-
-                            {openProfile && (
-                                <div
-                                    className="absolute right-0 mt-3 w-64 bg-white rounded-xl shadow-xl overflow-hidden z-[999]"
-                                    onMouseLeave={() => setOpenProfile(false)}
-                                >
-                                    <div className="bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] p-4 flex items-center gap-3 text-white">
-                                        <div className="w-10 h-10 rounded-full bg-white text-[#3F7EA2] overflow-hidden flex items-center justify-center font-bold">
-                                            {user?.foto_profil ? (
-                                                <img src={user.foto_profil} alt="Profile" className="w-full h-full object-cover" />
-                                            ) : (
-                                                (user?.nama || user?.name || "").charAt(0).toUpperCase()
-                                            )}
-                                        </div>
-                                        <div>
-                                            <p className="font-semibold text-sm">{user?.nama || user?.name || (role === "admin" ? "Admin Kopi" : "Pengguna")}</p>
-                                        </div>
-                                    </div>
-                                    <div className="py-2 text-sm text-black">
-                                        <div onClick={() => navigate(profilePath)} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Lihat Profil</div>
-                                        <div onClick={() => { setOpenProfile(false); setOpenPasswordModal(true); }} className="px-4 py-2 hover:bg-gray-100 cursor-pointer">Ubah Kata Sandi</div>
-                                        <div onClick={handleLogout} className="px-4 py-2 text-red-500 cursor-pointer">Keluar</div>
-                                    </div>
-                                </div>
-                            )}
                         </div>
-                    ) : (
-                        <div onClick={() => navigate("/login")} className="cursor-pointer font-bold text-white bg-[#1766D3] hover:bg-[#3D8FFF] px-4 py-2 rounded-lg shadow-sm transition active:scale-95">
+                    )}
+
+                    {/* Login Button - Mobile (guest) */}
+                    {!user && (
+                        <div onClick={() => navigate("/login")} className="cursor-pointer font-bold text-white bg-[#1766D3] hover:bg-[#3D8FFF] px-3 py-1.5 rounded-lg text-xs shadow-sm transition active:scale-95">
                             Log in
                         </div>
                     )}
+
+                    {/* Hamburger Menu */}
+                    <button className="p-1" onClick={() => setOpenMenu(!openMenu)}>
+                        {openMenu ? <FaTimes size={22} /> : <FaBars size={22} />}
+                    </button>
                 </div>
             </div>
 
@@ -408,27 +489,20 @@ function Navbar({ role }) {
                                 )}
                                 <button onClick={() => { navigate(profilePath); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100">Lihat Profil</button>
                                 <button onClick={() => { setOpenMenu(false); setOpenPasswordModal(true); }} className="px-6 py-3 text-left hover:bg-gray-100">Ubah Kata Sandi</button>
+                                <button onClick={() => { setOpenMenu(false); handleLogout(); }} className="px-6 py-3 text-left text-red-500 hover:bg-red-50">Keluar</button>
+                            </>
+                        ) : user ? (
+                            <>
+                                <button onClick={() => navigate("/")} className="px-6 py-3 text-left hover:bg-gray-100">Beranda</button>
+                                <button onClick={() => { navigate(profilePath); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100">Lihat Profil</button>
+                                <button onClick={() => { setOpenMenu(false); setOpenPasswordModal(true); }} className="px-6 py-3 text-left hover:bg-gray-100">Ubah Kata Sandi</button>
+                                <button onClick={() => { setOpenMenu(false); handleLogout(); }} className="px-6 py-3 text-left text-red-500 hover:bg-red-50">Keluar</button>
                             </>
                         ) : (
                             <>
                                 <button onClick={() => navigate("/")} className="px-6 py-3 text-left hover:bg-gray-100">Beranda</button>
-                                <button onClick={() => { navigate("/keranjang"); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100">Keranjang</button>
-                                <button onClick={() => setOpenMobileDropdown(!openMobileDropdown)} className="px-6 py-3 text-left hover:bg-gray-100 flex justify-between items-center">
-                                    <span>Notifikasi</span>
-                                    <span>{openMobileDropdown ? "▲" : "▼"}</span>
-                                </button>
-                                {openMobileDropdown && (
-                                    <div className="bg-gray-50 border-b">
-                                        {notifications.map((n, i) => (
-                                            <div key={i} className="px-8 py-2 text-sm">Pesanan <b>{n.code}</b> siap diambil</div>
-                                        ))}
-                                    </div>
-                                )}
-                                <button onClick={() => { navigate(profilePath); setOpenMenu(false); }} className="px-6 py-3 text-left hover:bg-gray-100">Lihat Profil</button>
-                                <button onClick={() => { setOpenMenu(false); setOpenPasswordModal(true); }} className="px-6 py-3 text-left hover:bg-gray-100">Ubah Kata Sandi</button>
                             </>
                         )}
-                        <button onClick={() => { setOpenMenu(false); handleLogout(); }} className="px-6 py-3 text-left text-red-500 hover:bg-red-50">Keluar</button>
                     </div>
                 </div>
             )}

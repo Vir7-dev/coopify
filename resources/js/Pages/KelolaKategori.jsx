@@ -190,7 +190,7 @@ export default function KelolaKategori() {
       <div className="w-full">
 
         {/* HEADER */}
-        <div className="flex justify-between items-center mb-6">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
           <div>
             <h1 className="text-xl font-semibold">Kelola Kategori Produk</h1>
             <p className="text-sm text-gray-500">Manajemen kategori produk koperasi</p>

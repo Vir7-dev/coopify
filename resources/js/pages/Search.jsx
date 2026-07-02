@@ -4,12 +4,12 @@ import axios from "axios";
 import { useLocation, useNavigate, Link } from "react-router-dom";
 import {
     FaShoppingCart,
-    FaHeart,
     FaSearch,
     FaSortAmountDown,
     FaRedo,
     FaTimes,
     FaChevronRight,
+    FaChevronLeft,
 } from "react-icons/fa";
 import { API_BASE_URL } from "../api";
 import { useCart } from "../context/CartContext";
@@ -129,123 +129,148 @@ function SearchPage() {
 
     return (
         <AppLayout role="pengguna">
-            <div className="bg-gray-100 min-h-screen p-6">
+            <div className="bg-gray-100 min-h-screen p-4 sm:p-6">
 
                 {/* HEADER */}
                 <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
 
-                    <div>
-                        <div className="flex items-center gap-2 text-sm text-gray-500 mb-2">
-                            <Link to="/" className="hover:text-[#1766D3]">Beranda</Link>
-                            <FaChevronRight className="text-xs" />
-                            <span>
-                                {kategoriId ? "Kategori" : "Pencarian"}
-                            </span>
-                            {(keyword || kategoriId) && (
-                                <>
-                                    <FaChevronRight className="text-xs" />
-                                    <span className="text-gray-700 font-medium">
-                                        {keyword || "Semua Produk"}
-                                    </span>
-                                </>
-                            )}
-                        </div>
-
-                        <h2 className="text-3xl font-bold text-gray-800">
-                            {kategoriId ? "Kategori Produk" : keyword ? "Hasil Pencarian" : "Semua Produk"}
-                        </h2>
-
-                        {total > 0 && (
-                            <p className="text-sm text-gray-500 mt-1">
-                                {total} produk ditemukan
-                            </p>
-                        )}
-                    </div>
-                    <div className="flex flex-col md:items-center md:flex-row gap-3 w-full md:w-auto md:ml-auto">
-
-                        <div className="flex items-center gap-2">
-                            <FaSortAmountDown className="text-gray-500" />
-
-                            <select
-                                value={sortBy}
-                                onChange={(e) => setSortBy(e.target.value)}
-                                className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-white"
-                            >
-                                <option value="terlaris">
-                                    Terlaris
-                                </option>
-
-                                <option value="terbaru">
-                                    Terbaru
-                                </option>
-                            </select>
-                        </div>
-
+                    <div className="flex items-center gap-3">
                         <button
-                            onClick={() => setShowHarga(!showHarga)}
-                            className="px-3 py-1 text-sm border border-gray-300 rounded-lg bg-white"
+                            onClick={() => navigate(-1)}
+                            className="flex items-center gap-1 text-[#1766D3] hover:text-[#0f7ba5] font-medium"
                         >
-                            Range Harga
+                            <FaChevronLeft size={18} />
                         </button>
 
-                        {showHarga && (
-                            <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-300">
-
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={minHarga}
-                                    onChange={(e) => setMinHarga(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "-" || e.key === "+" || e.key === "e") {
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                    className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
-                                />
-
-                                <span>-</span>
-
-                                <input
-                                    type="number"
-                                    min="0"
-                                    value={maxHarga}
-                                    onChange={(e) => setMaxHarga(e.target.value)}
-                                    onKeyDown={(e) => {
-                                        if (e.key === "-" || e.key === "+" || e.key === "e") {
-                                            e.preventDefault();
-                                        }
-                                    }}
-                                    className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
-                                />
-
-                                <button
-                                    onClick={resetHarga}
-                                >
-                                    <FaRedo />
-                                </button>
-
-                                <button
-                                    onClick={() => setShowHarga(false)}
-                                >
-                                    <FaTimes />
-                                </button>
-
+                        <div>
+                            <div className="flex items-center gap-2 text-xs sm:text-sm text-gray-500 mb-1">
+                                <Link to="/" className="hover:text-[#1766D3]">Beranda</Link>
+                                <FaChevronRight className="text-xs" />
+                                <span>
+                                    {kategoriId ? "Kategori" : "Pencarian"}
+                                </span>
+                                {(keyword || kategoriId) && (
+                                    <>
+                                        <FaChevronRight className="text-xs" />
+                                        <span className="text-gray-700 font-medium">
+                                            {keyword || "Semua Produk"}
+                                        </span>
+                                    </>
+                                )}
                             </div>
-                        )}
 
+                            <h2 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-800">
+                                {kategoriId ? "Kategori Produk" : keyword ? "Hasil Pencarian" : "Semua Produk"}
+                            </h2>
 
+                            {total > 0 && (
+                                <p className="text-xs sm:text-sm text-gray-500 mt-1">
+                                    {total} produk ditemukan
+                                </p>
+                            )}
+                        </div>
+                    </div>
+
+                    {/* FILTER CONTROLS */}
+                    <div className="flex flex-col gap-3 w-full">
+                        {/* Filter Buttons Row */}
+                        <div className="flex flex-wrap items-center gap-2">
+                            {/* Sort Dropdown */}
+                            <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
+                                <FaSortAmountDown className="text-[#1766D3] text-sm" />
+                                <select
+                                    value={sortBy}
+                                    onChange={(e) => setSortBy(e.target.value)}
+                                    className="text-xs sm:text-sm bg-transparent text-gray-700 focus:outline-none cursor-pointer"
+                                >
+                                    <option value="terlaris">Terlaris</option>
+                                    <option value="terbaru">Terbaru</option>
+                                </select>
+                            </div>
+
+                            {/* Range Harga Button */}
+                            <button
+                                onClick={() => setShowHarga(!showHarga)}
+                                className={`flex items-center gap-2 px-3 py-2 text-xs sm:text-sm border rounded-xl transition-all shadow-sm ${
+                                    showHarga
+                                        ? 'bg-[#1766D3] text-white border-[#1766D3]'
+                                        : 'bg-white text-gray-700 border-gray-200 hover:border-[#1766D3] hover:text-[#1766D3]'
+                                }`}
+                            >
+                                <span>🏷️</span>
+                                <span>Range Harga</span>
+                            </button>
+                        </div>
+
+                        {/* Price Range Inputs - Always rendered but hidden/shown */}
+                        <div className={`flex flex-wrap items-center gap-2 bg-white border border-gray-200 rounded-xl p-3 shadow-sm transition-all duration-300 ${showHarga ? 'opacity-100 max-h-20' : 'opacity-0 max-h-0 p-0 overflow-hidden border-0'}`}>
+                            <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                                <span className="text-xs text-gray-500 font-medium">Min:</span>
+                                <div className="relative flex-1">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={minHarga}
+                                        onChange={(e) => setMinHarga(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "+" || e.key === "e") {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                        placeholder="0"
+                                        className="w-full pl-8 pr-2 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3]"
+                                    />
+                                </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                                <span className="text-xs text-gray-500 font-medium">Max:</span>
+                                <div className="relative flex-1">
+                                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
+                                    <input
+                                        type="number"
+                                        min="0"
+                                        value={maxHarga}
+                                        onChange={(e) => setMaxHarga(e.target.value)}
+                                        onKeyDown={(e) => {
+                                            if (e.key === "-" || e.key === "+" || e.key === "e") {
+                                                e.preventDefault();
+                                            }
+                                        }}
+                                        placeholder="∞"
+                                        className="w-full pl-8 pr-2 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3]"
+                                    />
+                                </div>
+                            </div>
+
+                            <button
+                                onClick={resetHarga}
+                                className="p-2 text-gray-400 hover:text-[#1766D3] hover:bg-blue-50 rounded-lg transition-all"
+                                title="Reset"
+                            >
+                                <FaRedo size={14} />
+                            </button>
+
+                            <button
+                                onClick={() => setShowHarga(false)}
+                                className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                                title="Tutup"
+                            >
+                                <FaTimes size={14} />
+                            </button>
+                        </div>
                     </div>
 
                 </div>
                 {/* LOADING */}
                 {loading && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                         {Array.from({ length: 6 }).map((_, i) => (
-                            <div key={i} className="bg-white rounded-2xl p-4 shadow-sm animate-pulse">
-                                <div className="bg-gray-200 h-36 rounded-xl mb-4" />
-                                <div className="h-4 bg-gray-200 rounded w-3/4 mb-2" />
-                                <div className="h-4 bg-gray-200 rounded w-1/2" />
+                            <div key={i} className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm animate-pulse">
+                                <div className="bg-gray-200 h-28 sm:h-36 rounded-xl mb-3 sm:mb-4" />
+                                <div className="h-3 sm:h-4 bg-gray-200 rounded w-3/4 mb-2" />
+                                <div className="h-3 sm:h-4 bg-gray-200 rounded w-1/2" />
                             </div>
                         ))}
                     </div>
@@ -253,7 +278,7 @@ function SearchPage() {
 
                 {/* PRODUK */}
                 {!loading && (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
 
                         {filtered.map((item) => (
 
@@ -262,12 +287,10 @@ function SearchPage() {
                                 onClick={() =>
                                     navigate(`/detail-produk/${item.id_produk}`)
                                 }
-                                className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
+                                className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
                             >
 
-                                <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
-
-                                    <FaHeart className="absolute top-3 left-3 text-gray-300 hover:text-red-500" />
+                                <div className="relative bg-gray-50 rounded-xl h-28 sm:h-36 flex items-center justify-center overflow-hidden">
 
                                     <img
                                         src={
@@ -277,22 +300,22 @@ function SearchPage() {
                                                 : "/img/default.png"
                                         }
                                         alt={item.nama_produk}
-                                        className="h-28 object-contain mx-auto transition-all duration-500"
+                                        className="h-20 sm:h-28 object-contain mx-auto transition-all duration-500"
                                     />
 
                                 </div>
 
-                                <div className="mt-3 space-y-1">
+                                <div className="mt-2 sm:mt-3 space-y-0.5 sm:space-y-1">
 
-                                    <h3 className="text-sm font-semibold text-gray-800">
+                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
                                         {item.nama_produk}
                                     </h3>
 
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-[10px] sm:text-xs text-gray-500">
                                         {item.terjual || 0} terjual
                                     </p>
 
-                                    <p className="text-base font-bold text-[#1297C9]">
+                                    <p className="text-xs sm:text-base font-bold text-[#1297C9]">
                                         Rp{" "}
                                         {Number(
                                             item.harga_jual
@@ -300,7 +323,7 @@ function SearchPage() {
                                     </p>
 
                                     <p
-                                        className={`text-xs font-semibold ${item.stok === 0
+                                        className={`text-[10px] sm:text-xs font-semibold ${item.stok === 0
                                             ? "text-gray-400"
                                             : item.stok < 5
                                                 ? "text-red-500"
@@ -318,15 +341,15 @@ function SearchPage() {
                                             item.stok === 0 ||
                                             loadingCart === item.id_produk
                                         }
-                                        className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${item.stok === 0
+                                        className={`mt-2 sm:mt-4 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all ${item.stok === 0
                                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                             : "bg-[#1766D3] hover:bg-[#3D8FFF] active:scale-95 text-white shadow-sm"
                                             }`}
                                     >
-                                        <FaShoppingCart size={12} />
+                                        <FaShoppingCart size={10} className="sm:w-3 sm:h-3" />
 
                                         {loadingCart === item.id_produk
-                                            ? "Loading..."
+                                            ? "..."
                                             : "Tambah"}
                                     </button>
 
@@ -412,9 +435,9 @@ function SearchPage() {
                 )}
 
                 {/* TOTAL RESULTS INFO */}
-                {!loading && total > 0 && (
+                {!loading && filtered.length > 0 && (
                     <div className="text-center text-sm text-gray-500 mt-4">
-                        Menampilkan {products.length} dari {total} hasil
+                        Menampilkan {filtered.length} dari {total} hasil
                     </div>
                 )}
 

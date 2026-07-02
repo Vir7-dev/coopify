@@ -6,7 +6,6 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\DB;
 use App\Models\Pesanan;
-use App\Models\DetailPesanan;
 
 class ProfilPenggunaController extends Controller
 {
@@ -16,7 +15,7 @@ class ProfilPenggunaController extends Controller
 
         // 1. Dapatkan semua riwayat pesanan
         // Kami menggunakan Eager Loading untuk menghindari query N+1
-        $pesanans = Pesanan::with(['detailPesanan.produk.gambar', 'detailPesanan.produk.kategori'])
+        $pesanans = Pesanan::with(['detailPesanan.produk.gambar', 'detailPesanan.produk.kategori', 'pembayaran'])
             ->where('id_peng_fk_ps', $user->id_pengguna)
             ->orderBy('tgl_pesanan', 'desc')
             ->get();
@@ -61,6 +60,33 @@ class ProfilPenggunaController extends Controller
             }
         }
 
+        // 4. Dapatkan pesanan yang belum dibayar (status_pem = 'menunggu')
+        $pesananBelumBayar = [];
+        $pesananPending = $pesanans->filter(function ($pesanan) {
+            return $pesanan->pembayaran &&
+                   $pesanan->pembayaran->status_pem === 'menunggu' &&
+                   ($pesanan->pembayaran->batas_wkt_pem === null || now()->lessThan($pesanan->pembayaran->batas_wkt_pem));
+        });
+
+        foreach ($pesananPending as $pesanan) {
+            $pembayaran = $pesanan->pembayaran;
+            $totalItems = $pesanan->detailPesanan->sum('jml_peritem');
+            $listProduk = $pesanan->detailPesanan->map(function ($detail) {
+                return $detail->produk ? $detail->produk->nama_produk : 'Produk Tidak Ditemukan';
+            })->toArray();
+
+            $pesananBelumBayar[] = [
+                'id_pesanan' => $pesanan->id_pesanan,
+                'kode_pesanan' => $pesanan->kode_pesanan,
+                'total_harga' => (float) $pesanan->total_harga,
+                'total_items' => $totalItems,
+                'produk_names' => implode(', ', $listProduk),
+                'wkt_pengambilan' => $pesanan->wkt_pengambilan ? $pesanan->wkt_pengambilan->format('Y-m-d H:i') : null,
+                'batas_wkt_pem' => $pembayaran->batas_wkt_pem ? $pembayaran->batas_wkt_pem->toIso8601String() : null,
+                'tgl_pesanan' => $pesanan->tgl_pesanan ? $pesanan->tgl_pesanan->format('Y-m-d H:i:s') : null,
+            ];
+        }
+
         return response()->json([
             'user' => [
                 'id_pengguna' => $user->id_pengguna,
@@ -76,7 +102,8 @@ class ProfilPenggunaController extends Controller
                 'total_belanja' => (float) $totalBelanja,
                 'siap_diambil' => $siapDiambil,
             ],
-            'riwayat' => $riwayat
+            'riwayat' => $riwayat,
+            'pesanan_belum_bayar' => $pesananBelumBayar,
         ]);
     }
 

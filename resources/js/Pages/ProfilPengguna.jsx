@@ -8,7 +8,10 @@ import {
   FaPhone,
   FaEnvelope,
   FaCreditCard,
-  FaBoxOpen
+  FaBoxOpen,
+  FaClock,
+  FaQrcode,
+  FaExclamationTriangle
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 
@@ -22,6 +25,7 @@ export default function ProfilPengguna() {
     siap_diambil: 0
   });
   const [data, setData] = useState([]);
+  const [pesananBelumBayar, setPesananBelumBayar] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -34,6 +38,7 @@ export default function ProfilPengguna() {
       setUser(res.data.user);
       setStatistik(res.data.statistik);
       setData(res.data.riwayat);
+      setPesananBelumBayar(res.data.pesanan_belum_bayar || []);
     } catch (error) {
       console.error(error);
       Swal.fire({
@@ -46,12 +51,47 @@ export default function ProfilPengguna() {
     }
   };
 
+  // Fungsi untuk menghitung sisa waktu pembayaran
+  const getRemainingTime = (batasWktPem) => {
+    if (!batasWktPem) return null;
+    const deadline = new Date(batasWktPem).getTime();
+    const now = Date.now();
+    const diff = deadline - now;
+
+    if (diff <= 0) return null;
+
+    const minutes = Math.floor(diff / 60000);
+    const seconds = Math.floor((diff % 60000) / 1000);
+
+    if (minutes >= 60) {
+      const hours = Math.floor(minutes / 60);
+      const mins = minutes % 60;
+      return `${hours}j ${mins}m`;
+    }
+
+    return `${minutes}m ${seconds}dtk`;
+  };
+
+  const handleBayarUlang = (pesanan) => {
+    navigate(`/pembayaran?pesanan=${pesanan.id_pesanan}`, {
+      state: {
+        id_pesanan: pesanan.id_pesanan,
+        kode_pesanan: pesanan.kode_pesanan,
+        total: pesanan.total_harga,
+        wkt_pengambilan: pesanan.wkt_pengambilan,
+      },
+    });
+  };
+
   const getStatusStyle = (status) => {
     if (status === "Ambil Pesanan") {
       return "bg-blue-100 text-blue-600";
     }
     if (status === "Selesai") {
       return "bg-green-100 text-green-600";
+    }
+    if (status === "kadaluarsa") {
+      return "bg-red-100 text-red-600";
     }
     return "bg-gray-100 text-gray-500";
   };
@@ -161,6 +201,80 @@ export default function ProfilPengguna() {
             </div>
           </div>
         </div>
+
+        {/* PESANAN BELUM BAYAR */}
+        {pesananBelumBayar.length > 0 && (
+          <div className="mx-4 sm:mx-6 mt-6 bg-amber-50 border border-amber-200 rounded-xl overflow-hidden">
+            <div className="p-4 flex items-center gap-2 border-b border-amber-200">
+              <FaExclamationTriangle className="text-amber-500" />
+              <h2 className="text-lg font-semibold text-amber-800">Pesanan Menunggu Pembayaran</h2>
+            </div>
+
+            <div className="p-4 space-y-3">
+              {pesananBelumBayar.map((pesanan) => {
+                const sisaWaktu = getRemainingTime(pesanan.batas_wkt_pem);
+                const isUrgent = sisaWaktu && sisaWaktu.includes('m ') && parseInt(sisaWaktu) < 15;
+
+                return (
+                  <div
+                    key={pesanan.id_pesanan}
+                    className={`bg-white rounded-xl p-4 shadow-sm border ${
+                      isUrgent ? 'border-red-300' : 'border-gray-200'
+                    }`}
+                  >
+                    <div className="flex justify-between items-start mb-2">
+                      <div>
+                        <p className="font-semibold text-sm">{pesanan.kode_pesanan}</p>
+                        <p className="text-xs text-gray-500">{pesanan.produk_names}</p>
+                      </div>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
+                        isUrgent ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
+                      }`}>
+                        {isUrgent ? 'Segera!' : 'Menunggu'}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap gap-4 text-sm mb-3">
+                      <div>
+                        <p className="text-gray-500 text-xs">Total</p>
+                        <p className="font-bold text-emerald-600">
+                          Rp {pesanan.total_harga.toLocaleString("id-ID")}
+                        </p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs">Items</p>
+                        <p className="font-medium">{pesanan.total_items} unit</p>
+                      </div>
+                      <div>
+                        <p className="text-gray-500 text-xs">Pengambilan</p>
+                        <p className="font-medium flex items-center gap-1">
+                          <FaClock className="text-gray-400" size={12} />
+                          {pesanan.wkt_pengambilan || '-'}
+                        </p>
+                      </div>
+                      {sisaWaktu && (
+                        <div>
+                          <p className="text-gray-500 text-xs">Sisa Waktu</p>
+                          <p className={`font-bold ${isUrgent ? 'text-red-500' : 'text-amber-500'}`}>
+                            {sisaWaktu}
+                          </p>
+                        </div>
+                      )}
+                    </div>
+
+                    <button
+                      onClick={() => handleBayarUlang(pesanan)}
+                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2"
+                    >
+                      <FaQrcode />
+                      Bayar Sekarang
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
 
         {/* RIWAYAT */}
         <div className="mx-4 sm:mx-6 mt-6 bg-white rounded-xl shadow overflow-hidden">

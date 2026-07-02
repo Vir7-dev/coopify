@@ -92,21 +92,21 @@ function Dashboard() {
         <AppLayout role="pengguna">
             <div className="bg-gray-100 min-h-screen pb-20">
                 {/* BANNER */}
-                <div className="px-6 md:px-10">
+                <div className="px-4 sm:px-6 md:px-10">
                     <div
-                        className="h-[400px] rounded-2xl overflow-hidden flex items-center"
+                        className="h-[200px] sm:h-[280px] md:h-[350px] lg:h-[400px] rounded-xl sm:rounded-2xl overflow-hidden flex items-center"
                         style={{
                             backgroundImage: "url('/img/bg2.png')",
                             backgroundSize: "cover",
                             backgroundPosition: "center",
                         }}
                     >
-                        <div className="bg-black/20 w-full h-full flex items-center px-10 text-white">
+                        <div className="bg-black/30 w-full h-full flex items-center px-6 sm:px-10 md:px-12 text-white">
                             <div>
-                                <h1 className="text-4xl font-bold">
+                                <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold">
                                     Coopify
                                 </h1>
-                                <p className="mt-3 text-lg">
+                                <p className="mt-2 sm:mt-3 text-sm sm:text-base md:text-lg">
                                     Belanja cepat & mudah untuk semua kebutuhan
                                 </p>
                             </div>
@@ -115,35 +115,35 @@ function Dashboard() {
                 </div>
 
                 {/* KATEGORI */}
-                <div className="px-6 md:px-10 mt-10">
-                    <h2 className="text-2xl font-bold mb-5">Kategori Produk</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-5 gap-5">
+                <div className="px-4 sm:px-6 md:px-10 mt-8 sm:mt-10">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-5">Kategori Produk</h2>
+                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3 sm:gap-4 md:gap-5">
                         {categories.map((cat) => (
                             <Link
                                 key={cat.id}
                                 to={`/search?kategori=${cat.id}`}
-                                className="bg-white p-5 rounded-2xl flex flex-col items-center shadow hover:-translate-y-2 hover:shadow-xl transition-all"
+                                className="bg-white p-3 sm:p-4 md:p-5 rounded-xl sm:rounded-2xl flex flex-col items-center shadow hover:-translate-y-2 hover:shadow-xl transition-all"
                             >
-                                <div className="text-3xl text-blue-600">
+                                <div className="text-2xl sm:text-3xl text-blue-600">
                                     {getCategoryIcon(cat.nama)}
                                 </div>
-                                <p className="mt-3 font-medium">{cat.nama}</p>
+                                <p className="mt-2 sm:mt-3 text-xs sm:text-sm font-medium text-center">{cat.nama}</p>
                             </Link>
                         ))}
                     </div>
                 </div>
 
                 {/* PRODUK */}
-                <div className="px-6 md:px-10 mt-10">
-                    <h2 className="text-2xl font-bold mb-5">Produk Terbaru</h2>
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                <div className="px-4 sm:px-6 md:px-10 mt-8 sm:mt-10">
+                    <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-5">Produk Terbaru</h2>
+                    <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                         {products.map((item) => (
                             <div
                                 key={item.id_produk}
                                 onClick={() => navigate(`/detail-produk/${item.id_produk}`)}
-                                className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
+                                className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
                             >
-                                <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
+                                <div className="relative bg-gray-50 rounded-xl h-28 sm:h-36 flex items-center justify-center overflow-hidden">
                                     <img
                                         src={
                                             item.gambar && item.gambar.length > 0
@@ -151,34 +151,34 @@ function Dashboard() {
                                                 : "/img/default.png"
                                         }
                                         alt={item.nama_produk}
-                                        className="h-28 object-contain mx-auto"
+                                        className="h-20 sm:h-28 object-contain mx-auto"
                                     />
                                 </div>
 
-                                <div className="mt-3 space-y-1">
-                                    <h3 className="text-sm font-semibold text-gray-800">
+                                <div className="mt-2 sm:mt-3 space-y-0.5 sm:space-y-1">
+                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
                                         {item.nama_produk}
                                     </h3>
-                                    <p className="text-xs text-gray-500">
+                                    <p className="text-[10px] sm:text-xs text-gray-500">
                                         Produk Cooperativa
                                     </p>
 
                                     {item.diskon ? (
                                         <>
-                                            <p className="text-xs text-gray-400 line-through">
+                                            <p className="text-[10px] sm:text-xs text-gray-400 line-through">
                                                 Rp {Number(item.harga_jual).toLocaleString("id-ID")}
                                             </p>
-                                            <p className="text-base font-bold text-[#1297C9]">
+                                            <p className="text-xs sm:text-base font-bold text-[#1297C9]">
                                                 Rp {Number(item.harga_setelah_diskon).toLocaleString("id-ID")}
                                             </p>
                                         </>
                                     ) : (
-                                        <p className="text-base font-bold text-[#1297C9]">
+                                        <p className="text-xs sm:text-base font-bold text-[#1297C9]">
                                             Rp {Number(item.harga_jual).toLocaleString("id-ID")}
                                         </p>
                                     )}
 
-                                    <p className={`text-xs font-semibold ${
+                                    <p className={`text-[10px] sm:text-xs font-semibold ${
                                         item.stok === 0 ? "text-gray-400"
                                             : item.stok < 5 ? "text-red-500"
                                             : "text-green-600"
@@ -190,14 +190,14 @@ function Dashboard() {
                                 <button
                                     onClick={(e) => handleAddToCart(e, item)}
                                     disabled={item.stok === 0 || loadingCart === item.id_produk}
-                                    className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
+                                    className={`mt-2 sm:mt-4 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all ${
                                         item.stok === 0
                                             ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                             : "bg-[#1766D3] text-white shadow-sm"
                                     }`}
                                 >
-                                    <FaShoppingCart size={12} />
-                                    {loadingCart === item.id_produk ? "Loading..." : item.stok === 0 ? "Habis" : "Tambah"}
+                                    <FaShoppingCart size={10} className="sm:w-3 sm:h-3" />
+                                    {loadingCart === item.id_produk ? "..." : item.stok === 0 ? "Habis" : "Tambah"}
                                 </button>
                             </div>
                         ))}

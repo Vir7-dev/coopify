@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Midtrans\Config;
 use Midtrans\Notification;
 use Midtrans\Snap;
@@ -198,6 +199,15 @@ class PembayaranController extends Controller
         try {
             $notif = new Notification();
 
+            // DEBUG: Log what we receive from Midtrans
+            \Log::info('Midtrans Notification', [
+                'order_id' => $notif->order_id,
+                'transaction_status' => $notif->transaction_status,
+                'status_code' => $notif->status_code,
+                'gross_amount' => $notif->gross_amount,
+                'payment_type' => $notif->payment_type ?? 'unknown',
+            ]);
+
             $pesanan = Pesanan::where(
                 'kode_pesanan',
                 $notif->order_id
@@ -223,8 +233,17 @@ class PembayaranController extends Controller
             $statusTransaksi = match ($notif->transaction_status) {
                 'capture', 'settlement' => 'lunas',
                 'pending' => 'menunggu',
+                'deny' => 'gagal',
+                'cancel' => 'gagal',
+                'expire' => 'kadaluarsa',
                 default => 'gagal',
             };
+
+            // DEBUG: Log the mapped status
+            \Log::info('Mapped Status', [
+                'original_status' => $notif->transaction_status,
+                'mapped_status' => $statusTransaksi,
+            ]);
 
             DB::statement(
                 "CALL konfirmasi_pembayaran(

@@ -9,8 +9,8 @@ export default function DeleteModal({
     return (
         <>
             {showDeleteModal && (
-                <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50">
-                    <div className="bg-white w-[350px] rounded-xl shadow-lg p-5">
+                <div className="fixed inset-0 bg-black/40 flex justify-center items-center z-50 p-4">
+                    <div className="bg-white w-full max-w-[350px] rounded-xl shadow-lg p-4 sm:p-5">
                         <h2 className="text-lg font-semibold mb-2">
                             Konfirmasi Hapus
                         </h2>

@@ -9,12 +9,12 @@ export default function Pagination({
     label = "item",
 }) {
     return (
-        <div className="flex justify-between items-center p-4 text-sm text-gray-500">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-3 p-4 text-sm text-gray-500">
             <p>
                 Menampilkan {currentItems} dari {totalItems} {label}
             </p>
 
-            <div className="flex items-center gap-1">
+            <div className="flex items-center gap-1 flex-wrap">
                 <button
                     onClick={() => setCurrentPage(currentPage - 1)}
                     disabled={currentPage === 1}
@@ -25,7 +25,7 @@ export default function Pagination({
                     }`}
                 >
                     <FaChevronLeft size={10} />
-                    Previous
+                    <span className="hidden sm:inline">Previous</span>
                 </button>
 
                 {[...Array(totalPages)].map((_, i) => (
@@ -51,7 +51,7 @@ export default function Pagination({
                             : "bg-blue-500 text-white border-blue-500 hover:bg-blue-600"
                     }`}
                 >
-                    Next
+                    <span className="hidden sm:inline">Next</span>
                     <FaChevronRight size={10} />
                 </button>
             </div>

@@ -306,23 +306,23 @@ export default function KelolaProduk() {
     return (
         <AppLayout role="admin" showFooter={false}>
             <div className="w-full">
-                <div className="flex justify-between items-center mb-6">
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
                     <div>
                         <h1 className="text-xl font-semibold">Kelola Produk</h1>
                         <p className="text-sm text-gray-500">
                             Manajemen produk koperasi
                         </p>
                     </div>
-                    <div className="flex gap-3">
+                <div className="flex flex-col sm:flex-row gap-3">
                         <button
                             onClick={handleAdd}
-                            className="flex items-center gap-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
+                            className="flex items-center justify-center gap-2 bg-[#1766D3] hover:bg-[#3D8FFF] text-white text-sm px-4 py-2 rounded-lg"
                         >
                             <FaPlus /> Tambahkan Produk
                         </button>
                         <button
                             onClick={() => setShowOpnameModal(true)}
-                            className="flex items-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 text-sm px-4 py-2 rounded-lg"
+                            className="flex items-center justify-center gap-2 bg-blue-50 text-blue-600 border border-blue-200 hover:bg-blue-100 text-sm px-4 py-2 rounded-lg"
                         >
                             <FaClipboardCheck />
                             Tambah Stok

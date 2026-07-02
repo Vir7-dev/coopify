@@ -4,11 +4,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
     FaShoppingCart,
     FaSearch,
-    FaHeart,
     FaSortAmountDown,
     FaRedo,
     FaTimes,
     FaBoxOpen,
+    FaArrowLeft,
 } from "react-icons/fa";
 import axios from "axios";
 import { API_BASE_URL } from "../api";
@@ -163,82 +163,113 @@ export default function Produk() {
         <AppLayout role="pengguna">
             {/* Header */}
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-6">
-                <div>
-                    <h2 className="text-2xl font-bold text-gray-800 capitalize">
-                        {kategori?.replace("-", " ")}
-                    </h2>
-                    <p className="text-sm text-gray-500">
-                        Temukan produk terbaik di kategori ini
-                    </p>
+                <div className="flex items-center gap-3">
+                    <button
+                        onClick={() => navigate(-1)}
+                        className="flex items-center gap-1 text-[#1766D3] hover:text-[#0f7ba5] font-medium"
+                    >
+                        <FaArrowLeft size={18} />
+                    </button>
+                    <div>
+                        <h2 className="text-xl sm:text-2xl font-bold text-gray-800 capitalize">
+                            {kategori?.replace("-", " ")}
+                        </h2>
+                        <p className="text-sm text-gray-500">
+                            Temukan produk terbaik di kategori ini
+                        </p>
+                    </div>
                 </div>
 
-                <div className="flex flex-col md:items-center md:flex-row gap-3 w-full md:w-auto md:ml-auto">
-                    {/* Sort */}
-                    <div className="flex items-center gap-2">
-                        <FaSortAmountDown className="text-gray-500" />
-                        <select
-                            value={sortBy}
-                            onChange={(e) => setSortBy(e.target.value)}
-                            className="border border-gray-300 rounded-lg px-2 py-1 text-sm bg-white hover:bg-gray-100 focus:outline-none"
+                {/* FILTER CONTROLS */}
+                <div className="flex flex-col gap-3 w-full">
+                    {/* Search + Filter Row */}
+                    <div className="flex flex-wrap items-center gap-2">
+                        {/* Search */}
+                        <div className="relative flex-1 min-w-[180px]">
+                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                            <input
+                                type="text"
+                                placeholder="Cari produk..."
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                className="pl-9 pr-4 py-2 w-full rounded-xl border border-gray-200 text-xs sm:text-sm bg-white focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3] shadow-sm"
+                            />
+                        </div>
+
+                        {/* Sort Dropdown */}
+                        <div className="flex items-center gap-2 bg-white border border-gray-200 rounded-xl px-3 py-2 shadow-sm">
+                            <FaSortAmountDown className="text-[#1766D3] text-sm" />
+                            <select
+                                value={sortBy}
+                                onChange={(e) => setSortBy(e.target.value)}
+                                className="text-xs sm:text-sm bg-transparent text-gray-700 focus:outline-none cursor-pointer"
+                            >
+                                <option value="terlaris">Terlaris</option>
+                                <option value="terbaru">Terbaru</option>
+                            </select>
+                        </div>
+
+                        {/* Range Harga Button */}
+                        <button
+                            onClick={() => setShowHarga(!showHarga)}
+                            className={`flex items-center gap-2 px-3 py-2 text-xs sm:text-sm border rounded-xl transition-all shadow-sm ${
+                                showHarga
+                                    ? 'bg-[#1766D3] text-white border-[#1766D3]'
+                                    : 'bg-white text-gray-700 border-gray-200 hover:border-[#1766D3] hover:text-[#1766D3]'
+                            }`}
                         >
-                            <option value="terlaris">Terlaris</option>
-                            <option value="terbaru">Terbaru</option>
-                        </select>
+                            <span>🏷️</span>
+                            <span>Range Harga</span>
+                        </button>
                     </div>
 
-                    {/* Range Harga */}
-                    <button
-                        onClick={() => setShowHarga(!showHarga)}
-                        className="px-3 py-1 text-sm border border-gray-300 rounded-lg bg-white hover:bg-gray-100 transition whitespace-nowrap"
-                    >
-                        Range Harga
-                    </button>
-
-                    {showHarga && (
-                        <div className="flex items-center gap-2 bg-gray-50 p-2 rounded-lg border border-gray-300">
-                            <input
-                                type="number"
-                                min="0"
-                                placeholder="Min"
-                                value={minHarga}
-                                onChange={(e) => setMinHarga(Math.max(0, Number(e.target.value)))}
-                                className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
-                            />
-                            <span className="text-gray-400">-</span>
-                            <input
-                                type="number"
-                                min="0"
-                                placeholder="Max"
-                                value={maxHarga}
-                                onChange={(e) => setMaxHarga(Math.max(0, Number(e.target.value)))}
-                                className="border border-gray-300 rounded px-2 py-1 text-sm w-20"
-                            />
-                            <button
-                                onClick={resetHarga}
-                                className="text-gray-500 hover:text-blue-500"
-                                title="Reset harga"
-                            >
-                                <FaRedo />
-                            </button>
-                            <button
-                                onClick={() => setShowHarga(false)}
-                                className="text-gray-500 hover:text-red-500"
-                            >
-                                <FaTimes />
-                            </button>
+                    {/* Price Range Inputs - Always rendered but hidden/shown */}
+                    <div className={`flex flex-wrap items-center gap-2 bg-white border border-gray-200 rounded-xl p-3 shadow-sm transition-all duration-300 ${showHarga ? 'opacity-100 max-h-20' : 'opacity-0 max-h-0 p-0 overflow-hidden border-0'}`}>
+                        <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                            <span className="text-xs text-gray-500 font-medium">Min:</span>
+                            <div className="relative flex-1">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="0"
+                                    value={minHarga}
+                                    onChange={(e) => setMinHarga(Math.max(0, Number(e.target.value)))}
+                                    className="w-full pl-8 pr-2 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3]"
+                                />
+                            </div>
                         </div>
-                    )}
 
-                    {/* Search */}
-                    <div className="relative w-full md:w-72">
-                        <FaSearch className="absolute left-3 top-3 text-gray-400 text-sm" />
-                        <input
-                            type="text"
-                            placeholder="Cari produk..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-9 pr-4 py-2 w-full rounded-xl border border-gray-300 text-sm bg-white focus:outline-none"
-                        />
+                        <div className="flex items-center gap-2 flex-1 min-w-[140px]">
+                            <span className="text-xs text-gray-500 font-medium">Max:</span>
+                            <div className="relative flex-1">
+                                <span className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-xs">Rp</span>
+                                <input
+                                    type="number"
+                                    min="0"
+                                    placeholder="∞"
+                                    value={maxHarga}
+                                    onChange={(e) => setMaxHarga(Math.max(0, Number(e.target.value)))}
+                                    className="w-full pl-8 pr-2 py-1.5 text-xs sm:text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3]"
+                                />
+                            </div>
+                        </div>
+
+                        <button
+                            onClick={resetHarga}
+                            className="p-2 text-gray-400 hover:text-[#1766D3] hover:bg-blue-50 rounded-lg transition-all"
+                            title="Reset"
+                        >
+                            <FaRedo size={14} />
+                        </button>
+
+                        <button
+                            onClick={() => setShowHarga(false)}
+                            className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-all"
+                            title="Tutup"
+                        >
+                            <FaTimes size={14} />
+                        </button>
                     </div>
                 </div>
             </div>
@@ -278,51 +309,36 @@ export default function Produk() {
 
             {/* Product grid */}
             {!loading && !error && filtered.length > 0 && (
-                <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-6">
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
                     {filtered.map((item) => (
                         <div
                             key={item.id_produk}
                             onClick={() =>
                                 navigate(`/detail-produk/${item.id_produk}`)
                             }
-                            className="bg-white rounded-2xl p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
+                            className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
                         >
-                            <div className="relative bg-gray-50 rounded-xl h-36 flex items-center justify-center overflow-hidden">
+                            <div className="relative bg-gray-50 rounded-xl h-28 sm:h-36 flex items-center justify-center overflow-hidden">
                                 <ProductImageSlider images={item.gambar} />
-                                {/* Wishlist button */}
-                                <button
-                                    onClick={(e) =>
-                                        toggleWishlist(e, item.id_produk)
-                                    }
-                                    className="absolute top-2 left-2"
-                                >
-                                    <FaHeart
-                                        className={`transition-colors ${
-                                            wishlist.includes(item.id_produk)
-                                                ? "text-red-500"
-                                                : "text-gray-300 hover:text-red-400"
-                                        }`}
-                                    />
-                                </button>
                             </div>
 
-                            <div className="mt-3 space-y-1">
-                                <h3 className="text-sm font-semibold text-gray-800 line-clamp-2">
+                            <div className="mt-2 sm:mt-3 space-y-0.5 sm:space-y-1">
+                                <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
                                     {item.nama_produk}
                                 </h3>
-                                <p className="text-xs text-gray-500">
+                                <p className="text-[10px] sm:text-xs text-gray-500">
                                     {item.terjual} terjual
                                 </p>
                                 {item.diskon ? (
                                     <>
-                                        <p className="text-xs text-gray-400 line-through">
+                                        <p className="text-[10px] sm:text-xs text-gray-400 line-through">
                                             Rp{" "}
                                             {Number(
                                                 item.harga_jual,
                                             ).toLocaleString("id-ID")}
                                         </p>
 
-                                        <p className="text-base font-bold text-[#1297C9]">
+                                        <p className="text-xs sm:text-base font-bold text-[#1297C9]">
                                             Rp{" "}
                                             {Number(
                                                 item.harga_setelah_diskon,
@@ -330,7 +346,7 @@ export default function Produk() {
                                         </p>
                                     </>
                                 ) : (
-                                    <p className="text-base font-bold text-[#1297C9]">
+                                    <p className="text-xs sm:text-base font-bold text-[#1297C9]">
                                         Rp{" "}
                                         {Number(item.harga_jual).toLocaleString(
                                             "id-ID",
@@ -338,7 +354,7 @@ export default function Produk() {
                                     </p>
                                 )}
                                 <p
-                                    className={`text-xs font-semibold ${
+                                    className={`text-[10px] sm:text-xs font-semibold ${
                                         item.stok === 0
                                             ? "text-gray-400"
                                             : item.stok < 5
@@ -361,15 +377,15 @@ export default function Produk() {
                                 onClick={(e) =>
                                     handleTambahKeranjang(e, item.id_produk, item)
                                 }
-                                className={`mt-4 w-full py-2 rounded-xl text-sm flex items-center justify-center gap-2 transition-all ${
+                                className={`mt-2 sm:mt-4 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all ${
                                     item.stok === 0
                                         ? "bg-gray-200 text-gray-400 cursor-not-allowed"
                                         : "bg-[#1766D3] hover:bg-[#3D8FFF] active:scale-95 text-white shadow-sm"
                                 }`}
                             >
-                                <FaShoppingCart size={12} />
+                                <FaShoppingCart size={10} className="sm:w-3 sm:h-3" />
                                 {loadingKeranjang === item.id_produk
-                                    ? "Menambahkan..."
+                                    ? "..."
                                     : item.stok === 0
                                       ? "Habis"
                                       : "Tambah"}

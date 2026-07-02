@@ -33,8 +33,8 @@ export default function OpnameStokModal({
     if (!showModal) return null;
 
     return (
-        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-4">
-            <div className="bg-white w-full max-w-[400px] rounded-[10px] shadow-2xl overflow-hidden">
+        <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-2 sm:p-4">
+            <div className="bg-white w-full max-w-[400px] max-h-[90vh] overflow-y-auto rounded-[10px] shadow-2xl">
 
                 <div className="bg-[#0099D5] text-white px-5 py-3 flex justify-between items-center">
                     <div className="flex items-center gap-2">

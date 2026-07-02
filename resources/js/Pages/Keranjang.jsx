@@ -10,6 +10,7 @@ import {
     FaShoppingBag,
     FaClock,
     FaChevronRight,
+    FaChevronLeft,
     FaCheck,
     FaExclamationTriangle,
 } from "react-icons/fa";
@@ -21,6 +22,27 @@ function toDateTimeInputValue(date) {
     )}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
 }
 
+// Hitung minimal 30 menit dari sekarang
+function getMinPickupTime() {
+    const date = new Date();
+    date.setMinutes(date.getMinutes() + 30);
+    return toDateTimeInputValue(date);
+}
+
+// Validasi waktu pickup - pastikan tidak kurang dari 30 menit
+function validatePickupTime(value) {
+    if (!value) return null;
+    const selected = new Date(value);
+    const minTime = new Date();
+    minTime.setMinutes(minTime.getMinutes() + 30);
+
+    // Jika waktu yang dipilih kurang dari minimal, return null untuk reset
+    if (selected < minTime) {
+        return null;
+    }
+    return value;
+}
+
 export default function Keranjang() {
     const navigate = useNavigate();
     const { fetchCartCount } = useCart();
@@ -29,9 +51,7 @@ export default function Keranjang() {
     const [items, setItems] = useState([]);
     const [loading, setLoading] = useState(true);
     const [pickupTime, setPickupTime] = useState(() => {
-        const date = new Date();
-        date.setMinutes(date.getMinutes() + 30);
-        return toDateTimeInputValue(date);
+        return getMinPickupTime();
     });
     const [updatingId, setUpdatingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
@@ -84,8 +104,10 @@ export default function Keranjang() {
     const subtotalPerItem = (item) =>
         Number(item.produk.harga_jual) * item.jml_dikeranjang;
 
-    const updateQty = async (idKeranjang, qty) => {
-        if (qty < 1) return;
+    const updateQty = async (idKeranjang, qty, maxStok) => {
+        // Validasi: qty minimal 1 dan maksimal sesuai stok
+        if (qty < 1 || qty > maxStok) return;
+
         setUpdatingId(idKeranjang);
 
         try {
@@ -219,33 +241,41 @@ export default function Keranjang() {
 
     return (
         <AppLayout showFooter={false}>
-            <div className="min-h-screen bg-gray-50 pb-32">
+            <div className="min-h-screen bg-gray-50 pb-36 sm:pb-32 md:pb-8">
                 {/* Header */}
-                <div className="bg-white border-b border-gray-100 px-6 py-5">
+                <div className="bg-white border-b border-gray-100 px-4 sm:px-6 py-4 sm:py-5">
                     <div className="max-w-6xl mx-auto">
                         <div className="flex items-center justify-between">
-                            <div>
-                                <h1 className="text-2xl font-bold text-gray-900">
-                                    Keranjang Belanja
-                                </h1>
-                                <p className="text-sm text-gray-500 mt-1">
-                                    {items.length} produk dalam keranjang
-                                </p>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={() => navigate(-1)}
+                                    className="text-[#1766D3] p-1 sm:p-0"
+                                >
+                                    <FaChevronLeft size={20} />
+                                </button>
+                                <div>
+                                    <h1 className="text-lg sm:text-2xl font-bold text-gray-900">
+                                        Keranjang Belanja
+                                    </h1>
+                                    <p className="text-xs sm:text-sm text-gray-500 mt-0 sm:mt-1">
+                                        {items.length} produk dalam keranjang
+                                    </p>
+                                </div>
                             </div>
                             <button
                                 onClick={() => navigate("/")}
-                                className="text-[#1766D3] font-medium hover:underline flex items-center gap-1"
+                                className="text-[#1766D3] font-medium hover:underline flex items-center gap-1 text-sm"
                             >
-                                + Tambah Produk
+                                + Tambah
                             </button>
                         </div>
                     </div>
                 </div>
 
-                <div className="max-w-6xl mx-auto px-6 py-6">
-                    <div className="grid lg:grid-cols-3 gap-6">
+                <div className="max-w-6xl mx-auto px-3 sm:px-6 py-4 sm:py-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                         {/* Cart Items */}
-                        <div className="lg:col-span-2 space-y-4">
+                        <div className="lg:col-span-2 space-y-3 sm:space-y-4">
                             {/* Select All Card */}
                             <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-4 select-none">
                                 <label className="flex items-center gap-3 cursor-pointer group">
@@ -278,17 +308,17 @@ export default function Keranjang() {
                             {items.map((item) => (
                                 <div
                                     key={item.id_keranjang}
-                                    className={`bg-white rounded-2xl shadow-sm border transition-all ${
+                                    className={`bg-white rounded-xl sm:rounded-2xl shadow-sm border transition-all ${
                                         item.checked
                                             ? "border-gray-100"
                                             : "border-gray-200 opacity-60"
                                     }`}
                                 >
-                                    <div className="p-5">
-                                        <div className="flex gap-4">
+                                    <div className="p-3 sm:p-5">
+                                        <div className="flex gap-3">
                                             {/* Checkbox */}
                                             <div
-                                                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all self-start mt-2 ${
+                                                className={`w-5 h-5 rounded-md border-2 flex items-center justify-center cursor-pointer transition-all self-start mt-1 sm:mt-2 ${
                                                     item.checked
                                                         ? "bg-[#1766D3] border-[#1766D3]"
                                                         : "border-gray-300 hover:border-[#1766D3]"
@@ -312,24 +342,24 @@ export default function Keranjang() {
                                                             : "/img/no-image.png"
                                                     }
                                                     alt={item.produk.nama_produk}
-                                                    className="w-24 h-24 object-cover rounded-xl border border-gray-100"
+                                                    className="w-20 h-20 sm:w-24 sm:h-24 object-cover rounded-lg sm:rounded-xl border border-gray-100"
                                                 />
                                                 {!item.checked && (
-                                                    <div className="absolute inset-0 bg-white/60 rounded-xl" />
+                                                    <div className="absolute inset-0 bg-white/60 rounded-lg sm:rounded-xl" />
                                                 )}
                                             </div>
 
                                             {/* Product Info */}
                                             <div className="flex-1 min-w-0">
                                                 <div className="flex justify-between items-start">
-                                                    <div>
-                                                        <h3 className="font-semibold text-gray-900 truncate pr-2">
+                                                    <div className="flex-1 min-w-0 pr-2">
+                                                        <h3 className="font-semibold text-sm sm:text-base text-gray-900 truncate">
                                                             {
                                                                 item.produk
                                                                     .nama_produk
                                                             }
                                                         </h3>
-                                                        <p className="text-sm text-gray-500 mt-1">
+                                                        <p className="text-xs sm:text-sm text-gray-500 mt-0 sm:mt-1">
                                                             {formatRupiah(
                                                                 item.produk
                                                                     .harga_jual,
@@ -342,51 +372,60 @@ export default function Keranjang() {
                                                                 item.id_keranjang,
                                                             )
                                                         }
-                                                        className="p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors"
+                                                        className="p-1.5 sm:p-2 text-gray-400 hover:text-red-500 hover:bg-red-50 rounded-lg transition-colors flex-shrink-0"
                                                         title="Hapus"
                                                     >
-                                                        <FaTrash size={16} />
+                                                        <FaTrash size={14} className="sm:w-4 sm:h-4" />
                                                     </button>
                                                 </div>
 
                                                 {/* Quantity & Subtotal */}
-                                                <div className="flex items-center justify-between mt-4">
+                                                <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 gap-2 sm:gap-0">
                                                     {/* Quantity Controls */}
                                                     <div
-                                                        className="flex items-center bg-gray-50 rounded-xl overflow-hidden border border-gray-200 select-none"
+                                                        className="flex items-center bg-gray-50 rounded-lg sm:rounded-xl overflow-hidden border border-gray-200 select-none"
                                                         onClick={(e) => e.stopPropagation()}
                                                         onPointerDown={(e) => e.stopPropagation()}
                                                     >
                                                         <button
                                                             type="button"
-                                                            className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                                                            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                                                            disabled={item.jml_dikeranjang <= 1}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 e.preventDefault();
-                                                                updateQty(item.id_keranjang, item.jml_dikeranjang - 1);
+                                                                updateQty(item.id_keranjang, item.jml_dikeranjang - 1, item.produk.stok);
                                                             }}
                                                         >
                                                             <span className="select-none">−</span>
                                                         </button>
-                                                        <span className="w-12 text-center font-semibold select-none">
+                                                        <span className="w-8 sm:w-12 text-center font-semibold text-sm sm:text-base">
                                                             {item.jml_dikeranjang}
                                                         </span>
                                                         <button
                                                             type="button"
-                                                            className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 transition-colors"
+                                                            className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"
+                                                            disabled={item.jml_dikeranjang >= item.produk.stok}
                                                             onClick={(e) => {
                                                                 e.stopPropagation();
                                                                 e.preventDefault();
-                                                                updateQty(item.id_keranjang, item.jml_dikeranjang + 1);
+                                                                if (item.jml_dikeranjang < item.produk.stok) {
+                                                                    updateQty(item.id_keranjang, item.jml_dikeranjang + 1, item.produk.stok);
+                                                                }
                                                             }}
                                                         >
                                                             <span className="select-none">+</span>
                                                         </button>
                                                     </div>
 
+                                                    {/* Stock Info */}
+                                                    <p className="text-xs text-gray-400">
+                                                        Stok: {item.produk.stok}
+                                                    </p>
+
                                                     {/* Subtotal */}
-                                                    <div className="text-right">
-                                                        <p className="text-lg font-bold text-[#1766D3]">
+                                                    <div className="text-right w-full sm:w-auto sm:mt-0">
+                                                        <p className="text-base sm:text-lg font-bold text-[#1766D3]">
                                                             {formatRupiah(
                                                                 subtotalPerItem(
                                                                     item,
@@ -395,7 +434,7 @@ export default function Keranjang() {
                                                         </p>
                                                         {item.jml_dikeranjang >
                                                             1 && (
-                                                            <p className="text-xs text-gray-400">
+                                                            <p className="text-xs text-gray-400 hidden sm:block">
                                                                 {formatRupiah(
                                                                     item.produk
                                                                         .harga_jual,
@@ -415,9 +454,10 @@ export default function Keranjang() {
                             ))}
                         </div>
 
-                        {/* Order Summary - Sticky */}
-                        <div className="lg:col-span-1">
-                            <div className="bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24">
+                        {/* Order Summary - Mobile: Bottom sticky, Desktop: Side panel */}
+                        <div className="lg:col-span-1 order-first lg:order-last">
+                            {/* Desktop Summary Card */}
+                            <div className="hidden lg:block bg-white rounded-2xl shadow-lg border border-gray-100 p-6 sticky top-24">
                                 <h2 className="font-bold text-lg text-gray-900 mb-5">
                                     Ringkasan Belanja
                                 </h2>
@@ -456,10 +496,16 @@ export default function Keranjang() {
                                     <input
                                         type="datetime-local"
                                         value={pickupTime}
-                                        min={toDateTimeInputValue(new Date())}
-                                        onChange={(e) =>
-                                            setPickupTime(e.target.value)
-                                        }
+                                        min={getMinPickupTime()}
+                                        onChange={(e) => {
+                                            const validated = validatePickupTime(e.target.value);
+                                            if (validated) {
+                                                setPickupTime(validated);
+                                            } else {
+                                                // Jika tidak valid, reset ke minimal
+                                                setPickupTime(getMinPickupTime());
+                                            }
+                                        }}
                                         className="w-full border border-gray-200 rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1766D3] focus:border-transparent transition-all bg-gray-50 hover:bg-gray-100"
                                     />
                                     <p className="text-xs text-gray-400 mt-2">
@@ -494,6 +540,54 @@ export default function Keranjang() {
                                         </span>
                                     </div>
                                 )}
+                            </div>
+
+                            {/* Mobile Summary - Bottom Sticky */}
+                            <div className="lg:hidden fixed bottom-0 left-0 right-0 bg-white border-t border-gray-200 p-3 sm:p-4 z-40 shadow-[0_-4px_20px_rgba(0,0,0,0.1)]">
+                                {/* Mobile Summary Toggle */}
+                                <div className="flex items-center justify-between mb-2">
+                                    <div className="flex items-center gap-2">
+                                        <span className="text-sm text-gray-600">Total:</span>
+                                        <span className="text-lg font-bold text-[#1766D3]">
+                                            {formatRupiah(totalPrice)}
+                                        </span>
+                                    </div>
+                                    <span className="text-xs text-gray-500">
+                                        {checkedItems.length} produk dipilih
+                                    </span>
+                                </div>
+
+                                {/* Mobile Pickup Time */}
+                                <input
+                                    type="datetime-local"
+                                    value={pickupTime}
+                                    min={getMinPickupTime()}
+                                    onChange={(e) => {
+                                        const validated = validatePickupTime(e.target.value);
+                                        if (validated) {
+                                            setPickupTime(validated);
+                                        } else {
+                                            setPickupTime(getMinPickupTime());
+                                        }
+                                    }}
+                                    className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-[#1766D3] mb-2 bg-gray-50"
+                                />
+
+                                {/* Mobile Checkout Button */}
+                                <button
+                                    onClick={checkout}
+                                    disabled={checkedItems.length === 0 || !pickupTime}
+                                    className={`w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all ${
+                                        checkedItems.length === 0
+                                            ? "bg-gray-300 cursor-not-allowed"
+                                            : "bg-gradient-to-r from-[#1766D3] to-[#3D8FFF]"
+                                    }`}
+                                >
+                                    Checkout
+                                    {checkedItems.length > 0 && (
+                                        <FaChevronRight />
+                                    )}
+                                </button>
                             </div>
                         </div>
                     </div>

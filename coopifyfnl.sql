@@ -401,7 +401,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `konfirmasi_pembayaran` (IN `p_id_pe
             p_id_pembayaran
         );
 
-        IF p_status_transaksi = 'berhasil' THEN
+        IF p_status_transaksi = 'lunas' THEN
 
             UPDATE pembayaran
             SET
@@ -423,6 +423,24 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `konfirmasi_pembayaran` (IN `p_id_pe
             WHERE id_pembayaran = p_id_pembayaran;
 
             SET p_pesan = 'Pembayaran masih menunggu';
+
+        ELSEIF p_status_transaksi = 'kadaluarsa' THEN
+
+            UPDATE pembayaran
+            SET status_pem = 'kadaluarsa'
+            WHERE id_pembayaran = p_id_pembayaran;
+
+            UPDATE pesanan
+            SET status_pesanan = 'kadaluarsa'
+            WHERE id_pesanan = v_id_pesanan;
+
+            -- Kembalikan stok produk
+            UPDATE produk p
+            INNER JOIN detail_pesanan dp ON dp.id_prod_fk_dp = p.id_produk
+            SET p.stok = p.stok + dp.jml_peritem
+            WHERE dp.id_pes_fk_dp = v_id_pesanan;
+
+            SET p_pesan = 'Pembayaran kadaluarsa';
 
         ELSE
 

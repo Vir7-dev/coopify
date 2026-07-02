@@ -24,64 +24,6 @@ export default function FlyingProduct({ product, onComplete }) {
         startPosRef.current = { x: startX, y: startY };
         setPosition({ x: startX, y: startY });
 
-        // Find cart icon
-        const cartIcon = document.querySelector('[data-cart-icon]');
-        if (!cartIcon) {
-            console.warn("Cart icon not found");
-            setIsAnimating(false);
-            onComplete();
-            return;
-        }
-
-        const cartRect = cartIcon.getBoundingClientRect();
-        endPosRef.current = {
-            x: cartRect.left + cartRect.width / 2,
-            y: cartRect.top + cartRect.height / 2
-        };
-
-        startTimeRef.current = performance.now();
-
-        // Start animation on next frame
-        animFrameRef.current = requestAnimationFrame(animate);
-
-        function animate(currentTime) {
-            const start = startPosRef.current;
-            const end = endPosRef.current;
-
-            // Calculate distance and duration
-            const dx = end.x - start.x;
-            const dy = end.y - start.y;
-            const distance = Math.sqrt(dx * dx + dy * dy);
-            const duration = Math.max(300, Math.min(600, distance * 0.8));
-
-            const elapsed = currentTime - startTimeRef.current;
-            let progress = Math.min(elapsed / duration, 1);
-
-            // Ease out cubic
-            const eased = 1 - Math.pow(1 - progress, 3);
-
-            // Calculate position
-            const currentX = start.x + dx * eased;
-            const arcHeight = -Math.abs(dy) * 0.2 * Math.sin(progress * Math.PI);
-            const currentY = start.y + dy * eased + arcHeight;
-
-            setPosition({ x: currentX, y: currentY });
-
-            if (progress >= 1) {
-                // Animation complete - start shrink
-                setIsShrinking(true);
-                triggerCartShake();
-
-                // Clean up after shrink
-                setTimeout(() => {
-                    setIsAnimating(false);
-                    onComplete();
-                }, 300);
-            } else {
-                animFrameRef.current = requestAnimationFrame(animate);
-            }
-        }
-
         function triggerCartShake() {
             const styleId = "flying-cart-shake";
             let styleEl = document.getElementById(styleId);
@@ -106,7 +48,99 @@ export default function FlyingProduct({ product, onComplete }) {
             `;
         }
 
+        function animate(currentTime) {
+            const start = startPosRef.current;
+            const end = endPosRef.current;
+
+            // Calculate distance and duration
+            const dx = end.x - start.x;
+            const dy = end.y - start.y;
+            const distance = Math.sqrt(dx * dx + dy * dy);
+            const duration = Math.max(300, Math.min(600, distance * 0.8));
+
+            const elapsed = currentTime - startTimeRef.current;
+            let progress = Math.min(elapsed / duration, 1);
+
+            // Ease out cubic
+            const eased = 1 - Math.pow(1 - progress, 3);
+
+            // Calculate position with arc
+            const currentX = start.x + dx * eased;
+            const arcHeight = -Math.abs(dy) * 0.2 * Math.sin(progress * Math.PI);
+            const currentY = start.y + dy * eased + arcHeight;
+
+            setPosition({ x: currentX, y: currentY });
+
+            if (progress >= 1) {
+                // Animation complete - start shrink
+                setIsShrinking(true);
+                triggerCartShake();
+
+                // Clean up after shrink
+                setTimeout(() => {
+                    setIsAnimating(false);
+                    onComplete();
+                }, 300);
+            } else {
+                animFrameRef.current = requestAnimationFrame(animate);
+            }
+        }
+
+        // Small delay to ensure DOM is ready
+        const findCartAndAnimate = () => {
+            // Find cart icon - check both desktop and mobile versions
+            let cartIcon = document.querySelector('[data-cart-icon]');
+
+            // If cart icon found but might be hidden, try to find visible one
+            if (cartIcon) {
+                const rect = cartIcon.getBoundingClientRect();
+                // Check if element is visible (not hidden, has dimensions)
+                if (rect.width === 0 || rect.height === 0 || rect.top < 0) {
+                    // Element might be hidden in mobile, look for visible one
+                    const allCartIcons = document.querySelectorAll('[data-cart-icon]');
+                    for (const icon of allCartIcons) {
+                        const r = icon.getBoundingClientRect();
+                        if (r.width > 0 && r.height > 0 && r.top >= 0) {
+                            cartIcon = icon;
+                            break;
+                        }
+                    }
+                }
+            }
+
+            if (!cartIcon) {
+                console.warn("Cart icon not found");
+                setIsAnimating(false);
+                onComplete();
+                return;
+            }
+
+            const cartRect = cartIcon.getBoundingClientRect();
+
+            // Verify cart is in visible viewport
+            if (cartRect.width === 0 || cartRect.height === 0 || cartRect.top < 0 || cartRect.left < 0) {
+                console.warn("Cart icon not visible in viewport");
+                setIsAnimating(false);
+                onComplete();
+                return;
+            }
+
+            endPosRef.current = {
+                x: cartRect.left + cartRect.width / 2,
+                y: cartRect.top + cartRect.height / 2
+            };
+
+            startTimeRef.current = performance.now();
+
+            // Start animation on next frame
+            animFrameRef.current = requestAnimationFrame(animate);
+        };
+
+        // Small delay to ensure DOM is fully rendered
+        const timeoutId = setTimeout(findCartAndAnimate, 10);
+
         return () => {
+            clearTimeout(timeoutId);
             if (animFrameRef.current) {
                 cancelAnimationFrame(animFrameRef.current);
             }

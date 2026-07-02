@@ -1,7 +1,8 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useLocation, useNavigate, useSearchParams, Link } from "react-router-dom";
 import AppLayout from "../Layouts/AppLayout";
 import api from "../api";
+import { FaArrowLeft, FaQrcode, FaInfoCircle } from "react-icons/fa";
 
 const POLL_INTERVAL_MS = 2000;
 const POLL_MAX_ATTEMPTS = 30;
@@ -81,13 +82,13 @@ export default function Pembayaran({
 
         if (paymentStatus === "gagal") {
             setStatus("failed");
-            setError("Pembayaran gagal. Silakan coba lagi.");
+            setError("Pembayaran ditolak oleh server. Silakan coba lagi atau gunakan metode pembayaran lain.");
             return true;
         }
 
         if (paymentStatus === "kadaluarsa") {
             setStatus("failed");
-            setError("Pembayaran sudah kadaluarsa.");
+            setError("Waktu pembayaran telah habis. Silakan buat pesanan baru.");
             return true;
         }
 
@@ -149,10 +150,16 @@ export default function Pembayaran({
             );
         } catch (err) {
             setStatus("failed");
-            setError(
-                err.response?.data?.message ||
-                    "Gagal memverifikasi status pembayaran.",
-            );
+            const errorMessage = err.response?.data?.message || "";
+            if (errorMessage.includes("kadaluarsa")) {
+                setError("Waktu pembayaran telah habis. Silakan buat pesanan baru.");
+            } else if (errorMessage.includes("sudah dibayar") || errorMessage.includes("lunas")) {
+                setError("Pesanan sudah dibayar sebelumnya.");
+            } else {
+                setError(
+                    "Tidak dapat memverifikasi status pembayaran. Silakan coba lagi atau periksa di menu pesanan.",
+                );
+            }
         } finally {
             pollingRef.current = false;
         }
@@ -385,6 +392,25 @@ export default function Pembayaran({
                                         </p>
                                     )}
 
+                                {status === "idle" && (
+                                    <div className="w-full bg-blue-50 border border-blue-200 rounded-xl p-4 text-left">
+                                        <div className="flex gap-3">
+                                            <FaInfoCircle className="text-blue-500 flex-shrink-0 mt-0.5" />
+                                            <div className="text-sm text-blue-700">
+                                                <p className="font-medium mb-1">Cara Pembayaran:</p>
+                                                <ol className="list-decimal list-inside space-y-1 text-blue-600">
+                                                    <li>Klik tombol <span className="font-semibold">"Bayar Sekarang"</span> di bawah</li>
+                                                    <li>Scan QRIS yang muncul menggunakan aplikasi pembayaran (GoPay, OVO, Dana, ShopeePay, dll)</li>
+                                                    <li>Masukkan PIN untuk menyelesaikan pembayaran</li>
+                                                </ol>
+                                                <p className="mt-2 text-blue-500 text-xs">
+                                                    Pesanan akan diproses setelah pembayaran berhasil diverifikasi.
+                                                </p>
+                                            </div>
+                                        </div>
+                                    </div>
+                                )}
+
                                 {status !== "paid" &&
                                     status !== "confirming" && (
                                         <button
@@ -394,8 +420,9 @@ export default function Pembayaran({
                                                 seconds <= 0 ||
                                                 !pesananId
                                             }
-                                            className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition"
+                                            className="w-full bg-emerald-600 hover:bg-emerald-500 disabled:opacity-50 text-white font-semibold py-3 rounded-xl transition flex items-center justify-center gap-2"
                                         >
+                                            <FaQrcode />
                                             {status === "loading"
                                                 ? "Memuat..."
                                                 : "Bayar Sekarang"}
@@ -408,10 +435,14 @@ export default function Pembayaran({
                                     </div>
                                 )}
 
-                                <p className="text-xs text-gray-500 text-center">
-                                    Klik tombol di atas untuk membuka popup QRIS
-                                    Midtrans
-                                </p>
+                                {/* Navigasi ke Dashboard - selalu muncul */}
+                                <button
+                                    onClick={() => navigate("/")}
+                                    className="w-full bg-gray-200 hover:bg-gray-300 text-gray-600 font-medium py-2.5 rounded-xl transition flex items-center justify-center gap-2"
+                                >
+                                    <FaArrowLeft />
+                                    Kembali ke Beranda
+                                </button>
                             </div>
                         </div>
                     </div>

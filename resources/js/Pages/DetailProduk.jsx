@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import AppLayout from "../Layouts/AppLayout";
-import { FaShoppingCart } from "react-icons/fa";
+import { FaShoppingCart, FaArrowLeft } from "react-icons/fa";
 import { API_BASE_URL } from "../api";
 import { useCart } from "../context/CartContext";
 
@@ -85,21 +85,30 @@ export default function DetailProduk() {
     return (
         <AppLayout role="pengguna">
             <div className="bg-white rounded-2xl border border-gray-100 p-4 hover:shadow-lg transition-all duration-300 hover:-translate-y-1">
+                {/* Tombol Kembali */}
+                <button
+                    onClick={() => navigate(-1)}
+                    className="flex items-center gap-2 text-[#1766D3] hover:text-[#0f7ba5] font-medium mb-4 transition-colors"
+                >
+                    <FaArrowLeft size={18} />
+                    <span>Kembali</span>
+                </button>
+
                 <div className="text-sm text-gray-500 mb-4">
                     Home / {produk.kategori?.nama_kategori} /{" "}
                     {produk.nama_produk}
                 </div>
 
                 {/* DETAIL PRODUK */}
-                <div className="bg-white rounded-3xl shadow-md border border-gray-100 p-6">
-                    <div className="grid lg:grid-cols-2 gap-8">
+                <div className="bg-white rounded-3xl shadow-md border border-gray-100 p-4 md:p-6">
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 lg:gap-8">
                         {/* GAMBAR */}
                         <div>
-                            <div className="bg-gray-50 rounded-3xl  h-[500px] flex items-center justify-center">
+                            <div className="bg-gray-50 rounded-3xl h-[300px] md:h-[400px] lg:h-[500px] flex items-center justify-center">
                                 <img
                                     src={`${API_BASE_URL}/storage/${produk.gambar?.[activeImage]?.url_gambar}`}
                                     alt={produk.nama_produk}
-                                    className="max-h-[400px] object-contain"
+                                    className="max-h-[250px] md:max-h-[350px] lg:max-h-[400px] object-contain"
                                 />
                             </div>
 
@@ -129,7 +138,7 @@ export default function DetailProduk() {
                                 {produk.kategori?.nama_kategori}
                             </div>
 
-                            <h1 className="text-4xl font-bold mt-3 text-gray-800">
+                            <h1 className="text-2xl md:text-3xl lg:text-4xl font-bold mt-3 text-gray-800">
                                 {produk.nama_produk}
                             </h1>
 
@@ -137,14 +146,14 @@ export default function DetailProduk() {
                             <div className="bg-blue-50 rounded-2xl p-6 mt-6">
                                 <p className="text-gray-500 text-sm">Harga</p>
 
-                                <h2 className="text-4xl font-bold text-[#1297C9]">
+                                <h2 className="text-2xl md:text-3xl lg:text-4xl font-bold text-[#1297C9]">
                                     Rp{" "}
                                     {produk.harga_jual.toLocaleString("id-ID")}
                                 </h2>
                             </div>
 
                             {/* STOK */}
-                            <div className="flex gap-10 mt-6 border-b pb-6">
+                            <div className="flex flex-col sm:flex-row sm:gap-10 mt-6 border-b pb-6">
                                 <div>
                                     <p className="text-gray-400 text-sm">
                                         Stok
@@ -167,7 +176,7 @@ export default function DetailProduk() {
                             </div>
 
                             {/* QTY */}
-                            <div className="flex items-center gap-5 mt-6">
+                            <div className="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-5 mt-6">
                                 <span className="text-gray-500">Jumlah</span>
 
                                 <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden">
@@ -194,7 +203,7 @@ export default function DetailProduk() {
                             </div>
 
                             {/* BUTTON */}
-                            <div className="grid grid-cols-2 gap-4 mt-8">
+                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-8">
                                 <button
                                     onClick={handleAddToCart}
                                     disabled={loadingCart || produk.stok === 0}
