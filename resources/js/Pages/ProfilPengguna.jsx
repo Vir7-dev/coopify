@@ -166,38 +166,75 @@ export default function ProfilPengguna() {
           </button>
         </div>
 
-        {/* STATISTIK */}
-        <div className="mx-4 sm:mx-6 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mb-6 mt-6">
-
-          <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-            <div className="bg-blue-100 text-blue-600 p-3 rounded-xl text-lg">
-              <FaShoppingCart />
+        {/* STATISTIK - Mobile Optimized */}
+        <div className="mx-4 sm:mx-6 mt-6">
+          {/* Desktop View */}
+          <div className="hidden sm:grid grid-cols-3 gap-4">
+            <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+              <div className="bg-blue-100 text-blue-600 p-3 rounded-xl text-lg">
+                <FaShoppingCart />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total Pesanan</p>
+                <h2 className="text-xl font-bold">{statistik.total_pesanan}</h2>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Total Pesanan</p>
-              <h2 className="text-xl font-bold">{statistik.total_pesanan}</h2>
+
+            <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+              <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
+                <FaCreditCard />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Total Belanja</p>
+                <h2 className="text-xl font-bold">
+                  Rp {statistik.total_belanja.toLocaleString("id-ID")}
+                </h2>
+              </div>
+            </div>
+
+            <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+              <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
+                <FaBoxOpen />
+              </div>
+              <div>
+                <p className="text-xs text-gray-500">Siap Diambil</p>
+                <h2 className="text-xl font-bold">{statistik.siap_diambil}</h2>
+              </div>
             </div>
           </div>
 
-          <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-            <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
-              <FaCreditCard />
+          {/* Mobile View - Card Style */}
+          <div className="sm:hidden grid grid-cols-1 gap-3">
+            <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+              <div className="bg-blue-100 text-blue-600 p-3 rounded-xl">
+                <FaShoppingCart size={20} />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500">Total Pesanan</p>
+                <h2 className="text-lg font-bold text-gray-900">{statistik.total_pesanan}</h2>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Total Belanja</p>
-              <h2 className="text-xl font-bold">
-                Rp {statistik.total_belanja.toLocaleString("id-ID")}
-              </h2>
-            </div>
-          </div>
 
-          <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-            <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
-              <FaBoxOpen />
+            <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+              <div className="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
+                <FaCreditCard size={20} />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500">Total Belanja</p>
+                <h2 className="text-lg font-bold text-gray-900">
+                  Rp {statistik.total_belanja.toLocaleString("id-ID")}
+                </h2>
+              </div>
             </div>
-            <div>
-              <p className="text-xs text-gray-500">Siap Diambil</p>
-              <h2 className="text-xl font-bold">{statistik.siap_diambil}</h2>
+
+            <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+              <div className="bg-amber-100 text-amber-600 p-3 rounded-xl">
+                <FaBoxOpen size={20} />
+              </div>
+              <div className="flex-1">
+                <p className="text-xs text-gray-500">Siap Diambil</p>
+                <h2 className="text-lg font-bold text-gray-900">{statistik.siap_diambil}</h2>
+              </div>
             </div>
           </div>
         </div>

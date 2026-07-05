@@ -175,8 +175,6 @@ class PembayaranController extends Controller
 
     public function handleNotification(Request $request)
     {
-        $this->setupMidtrans();
-
         $orderId = $request->input('order_id');
         $statusCode = $request->input('status_code');
         $grossAmount = $request->input('gross_amount');
@@ -197,20 +195,29 @@ class PembayaranController extends Controller
         }
 
         try {
-            $notif = new Notification();
+            // Development: gunakan payload langsung dari request
+            // Production: gunakan Notification() dari Midtrans
+            if (app()->environment('local')) {
+                $notif = (object) $request->all();
+            } else {
+                $this->setupMidtrans();
+                $notif = new Notification();
+            }
 
-            // DEBUG: Log what we receive from Midtrans
             \Log::info('Midtrans Notification', [
-                'order_id' => $notif->order_id,
-                'transaction_status' => $notif->transaction_status,
-                'status_code' => $notif->status_code,
-                'gross_amount' => $notif->gross_amount,
-                'payment_type' => $notif->payment_type ?? 'unknown',
+                'order_id' => $notif->order_id ?? $orderId,
+                'transaction_status' => $notif->transaction_status ?? $request->input('transaction_status'),
+                'status_code' => $notif->status_code ?? $statusCode,
+                'gross_amount' => $notif->gross_amount ?? $grossAmount,
+                'payment_type' => $notif->payment_type ?? $request->input('payment_type') ?? 'unknown',
             ]);
+
+            $transactionStatus = $notif->transaction_status ?? $request->input('transaction_status', 'unknown');
+            $transactionId = $notif->transaction_id ?? $request->input('transaction_id', 'unknown');
 
             $pesanan = Pesanan::where(
                 'kode_pesanan',
-                $notif->order_id
+                $orderId
             )->first();
 
             if (!$pesanan) {
@@ -230,7 +237,7 @@ class PembayaranController extends Controller
                 ], 404);
             }
 
-            $statusTransaksi = match ($notif->transaction_status) {
+            $statusTransaksi = match ($transactionStatus) {
                 'capture', 'settlement' => 'lunas',
                 'pending' => 'menunggu',
                 'deny' => 'gagal',
@@ -239,9 +246,8 @@ class PembayaranController extends Controller
                 default => 'gagal',
             };
 
-            // DEBUG: Log the mapped status
             \Log::info('Mapped Status', [
-                'original_status' => $notif->transaction_status,
+                'original_status' => $transactionStatus,
                 'mapped_status' => $statusTransaksi,
             ]);
 
@@ -251,9 +257,9 @@ class PembayaranController extends Controller
                 )",
                 [
                     $pembayaran->id_pembayaran,
-                    $notif->transaction_id,
+                    $transactionId,
                     $statusTransaksi,
-                    $notif->gross_amount,
+                    $grossAmount,
                     $signatureKey,
                 ]
             );

@@ -137,11 +137,13 @@ function Dashboard() {
                 <div className="px-4 sm:px-6 md:px-10 mt-8 sm:mt-10">
                     <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-4 sm:mb-5">Produk Terbaru</h2>
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-3 lg:grid-cols-6 gap-3 sm:gap-4 md:gap-5 lg:gap-6">
-                        {products.map((item) => (
+                        {products
+                            .filter(item => item.stok > 0)
+                            .map((item) => (
                             <div
                                 key={item.id_produk}
                                 onClick={() => navigate(`/detail-produk/${item.id_produk}`)}
-                                className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
+                                className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer flex flex-col"
                             >
                                 <div className="relative bg-gray-50 rounded-xl h-28 sm:h-36 flex items-center justify-center overflow-hidden">
                                     <img
@@ -155,13 +157,10 @@ function Dashboard() {
                                     />
                                 </div>
 
-                                <div className="mt-2 sm:mt-3 space-y-0.5 sm:space-y-1">
-                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
+                                <div className="mt-2 sm:mt-3 flex flex-col flex-grow">
+                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5em] mb-1">
                                         {item.nama_produk}
                                     </h3>
-                                    <p className="text-[10px] sm:text-xs text-gray-500">
-                                        Produk Cooperativa
-                                    </p>
 
                                     {item.diskon ? (
                                         <>
@@ -173,31 +172,26 @@ function Dashboard() {
                                             </p>
                                         </>
                                     ) : (
-                                        <p className="text-xs sm:text-base font-bold text-[#1297C9]">
-                                            Rp {Number(item.harga_jual).toLocaleString("id-ID")}
-                                        </p>
+                                        <>
+                                            <p className="text-xs sm:text-base font-bold text-[#1297C9]">
+                                                Rp {Number(item.harga_jual).toLocaleString("id-ID")}
+                                            </p>
+                                            <div className="h-[1.1rem]"></div>
+                                        </>
                                     )}
 
-                                    <p className={`text-[10px] sm:text-xs font-semibold ${
-                                        item.stok === 0 ? "text-gray-400"
-                                            : item.stok < 5 ? "text-red-500"
-                                            : "text-green-600"
-                                    }`}>
-                                        {item.stok === 0 ? "Stok: Habis" : `Stok: ${item.stok} tersedia`}
+                                    <p className="text-[10px] sm:text-xs font-semibold text-green-600 mt-auto">
+                                        Stok: {item.stok} tersedia
                                     </p>
                                 </div>
 
                                 <button
                                     onClick={(e) => handleAddToCart(e, item)}
-                                    disabled={item.stok === 0 || loadingCart === item.id_produk}
-                                    className={`mt-2 sm:mt-4 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all ${
-                                        item.stok === 0
-                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                            : "bg-[#1766D3] text-white shadow-sm"
-                                    }`}
+                                    disabled={loadingCart === item.id_produk}
+                                    className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all bg-[#1766D3] text-white shadow-sm hover:bg-[#3D8FFF] active:scale-[0.98]"
                                 >
                                     <FaShoppingCart size={10} className="sm:w-3 sm:h-3" />
-                                    {loadingCart === item.id_produk ? "..." : item.stok === 0 ? "Habis" : "Tambah"}
+                                    {loadingCart === item.id_produk ? "..." : "Tambah"}
                                 </button>
                             </div>
                         ))}
@@ -250,9 +244,9 @@ function Dashboard() {
                         </div>
                     )}
 
-                    {totalProducts > 0 && (
+                    {products.filter(item => item.stok > 0).length > 0 && (
                         <div className="text-center text-sm text-gray-500 mt-4">
-                            Menampilkan {products.length} dari {totalProducts} produk
+                            Menampilkan {products.filter(item => item.stok > 0).length} dari {totalProducts} produk
                         </div>
                     )}
                 </div>
