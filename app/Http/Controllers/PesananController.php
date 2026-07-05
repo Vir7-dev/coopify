@@ -50,14 +50,16 @@ class PesananController extends Controller
      */
     public function updateStatus(Request $request, $id)
     {
-        $request->validate([
-            'status' => 'required|in:menunggu,diproses,siap diambil,selesai,dibatalkan'
-        ]);
+        \Log::info("updateStatus called for ID: $id", ['request' => $request->all()]);
+        try {
+            $request->validate([
+                'status' => 'required|in:menunggu,diproses,siap diambil,selesai,dibatalkan'
+            ]);
 
-        $pesanan = Pesanan::findOrFail($id);
+            $pesanan = Pesanan::findOrFail($id);
 
-        $statusLama = $pesanan->status_pesanan;
-        $statusBaru = $request->status;
+            $statusLama = $pesanan->status_pesanan;
+            $statusBaru = $request->status;
 
         // Validasi transisi status
         $validTransitions = [
@@ -89,11 +91,19 @@ class PesananController extends Controller
         }
 
         $pesanan->save();
+        \Log::info("updateStatus success for ID: $id, New Status: $statusBaru");
 
         return response()->json([
             'message' => "Status pesanan berhasil diupdate ke '$statusBaru'",
             'data' => $pesanan
         ]);
+        } catch (\Exception $e) {
+            \Log::error("updateStatus Exception: " . $e->getMessage());
+            return response()->json(['message' => 'Exception: ' . $e->getMessage()], 500);
+        } catch (\Error $e) {
+            \Log::error("updateStatus Error: " . $e->getMessage());
+            return response()->json(['message' => 'Error: ' . $e->getMessage()], 500);
+        }
     }
 
     /**

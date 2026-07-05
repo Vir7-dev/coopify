@@ -55,6 +55,8 @@ export default function Keranjang() {
     });
     const [updatingId, setUpdatingId] = useState(null);
     const [deletingId, setDeletingId] = useState(null);
+    const [editingQtyId, setEditingQtyId] = useState(null);
+    const [editingQtyValue, setEditingQtyValue] = useState("");
 
     useEffect(() => {
         fetchKeranjang();
@@ -129,6 +131,40 @@ export default function Keranjang() {
             console.error(err);
         } finally {
             setUpdatingId(null);
+        }
+    };
+
+    // Handle direct input editing
+    const startEditingQty = (item) => {
+        setEditingQtyId(item.id_keranjang);
+        setEditingQtyValue(String(item.jml_dikeranjang));
+    };
+
+    const handleQtyInputChange = (value) => {
+        // Only allow numeric values
+        const numericValue = value.replace(/[^0-9]/g, '');
+        setEditingQtyValue(numericValue);
+    };
+
+    const saveQtyInput = async (item) => {
+        const qty = parseInt(editingQtyValue) || 1;
+        const clampedQty = Math.max(1, Math.min(qty, item.produk.stok));
+
+        setEditingQtyId(null);
+        setEditingQtyValue("");
+
+        if (clampedQty !== item.jml_dikeranjang) {
+            await updateQty(item.id_keranjang, clampedQty, item.produk.stok);
+        }
+    };
+
+    const handleQtyKeyDown = (e, item) => {
+        if (e.key === "Enter") {
+            e.preventDefault();
+            saveQtyInput(item);
+        } else if (e.key === "Escape") {
+            setEditingQtyId(null);
+            setEditingQtyValue("");
         }
     };
 
@@ -383,9 +419,10 @@ export default function Keranjang() {
                                                 <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between mt-3 gap-2 sm:gap-0">
                                                     {/* Quantity Controls */}
                                                     <div
-                                                        className="flex items-center bg-gray-50 rounded-lg sm:rounded-xl overflow-hidden border border-gray-200 select-none"
+                                                        className="flex items-center bg-gray-50 rounded-lg sm:rounded-xl select-none"
                                                         onClick={(e) => e.stopPropagation()}
                                                         onPointerDown={(e) => e.stopPropagation()}
+                                                        style={{ boxShadow: 'inset 0 1px 3px rgba(0,0,0,0.06)' }}
                                                     >
                                                         <button
                                                             type="button"
@@ -399,9 +436,32 @@ export default function Keranjang() {
                                                         >
                                                             <span className="select-none">−</span>
                                                         </button>
-                                                        <span className="w-8 sm:w-12 text-center font-semibold text-sm sm:text-base">
-                                                            {item.jml_dikeranjang}
-                                                        </span>
+                                                        {editingQtyId === item.id_keranjang ? (
+                                                            <input
+                                                                type="text"
+                                                                inputMode="numeric"
+                                                                pattern="[0-9]*"
+                                                                value={editingQtyValue}
+                                                                onChange={(e) => handleQtyInputChange(e.target.value)}
+                                                                onBlur={() => saveQtyInput(item)}
+                                                                onKeyDown={(e) => handleQtyKeyDown(e, item)}
+                                                                onClick={(e) => e.stopPropagation()}
+                                                                className="w-10 sm:w-12 h-8 sm:h-10 text-center font-semibold text-sm sm:text-base bg-white rounded-md focus:outline-none focus:ring-2 focus:ring-[#1766D3] focus:ring-offset-1"
+                                                                style={{ minWidth: '2.5rem' }}
+                                                                autoFocus
+                                                            />
+                                                        ) : (
+                                                            <button
+                                                                type="button"
+                                                                onClick={(e) => {
+                                                                    e.stopPropagation();
+                                                                    startEditingQty(item);
+                                                                }}
+                                                                className="w-10 sm:w-12 h-8 sm:h-10 text-center font-semibold text-sm sm:text-base hover:bg-gray-200 transition-colors"
+                                                            >
+                                                                {item.jml_dikeranjang}
+                                                            </button>
+                                                        )}
                                                         <button
                                                             type="button"
                                                             className="w-8 h-8 sm:w-10 sm:h-10 flex items-center justify-center text-gray-600 hover:bg-gray-100 disabled:opacity-50 disabled:cursor-not-allowed transition-colors text-sm sm:text-base"

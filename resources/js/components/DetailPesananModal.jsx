@@ -7,7 +7,8 @@ export default function DetailPesananModal({
     formatTanggal,
     getStatusClass,
     getStatusLabel,
-    updateStatus,
+    handleUpdateStatus,
+    getNextActionLabel,
 }) {
     if (!selectedOrder) return null;
 
@@ -117,35 +118,16 @@ export default function DetailPesananModal({
 
                 {/* Footer */}
                 <div className="border-t p-3 flex gap-2 flex-shrink-0">
-
-                    {selectedOrder.status_pesanan === "menunggu" && (
-                        <button
-                            onClick={() =>
-                                updateStatus(
-                                    selectedOrder.id_pesanan,
-                                    "diproses"
-                                )
-                            }
-                            className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl transition text-sm font-medium"
-                        >
-                            Proses Pesanan
-                        </button>
-                    )}
-
-                    {selectedOrder.status_pesanan === "diproses" && (
-                        <button
-                            onClick={() =>
-                                updateStatus(
-                                    selectedOrder.id_pesanan,
-                                    "selesai"
-                                )
-                            }
-                            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition text-sm font-medium"
-                        >
-                            <CheckCircle size={16} />
-                            Tandai Selesai
-                        </button>
-                    )}
+                    {selectedOrder.status_pesanan !== "selesai" &&
+                        selectedOrder.status_pesanan !== "dibatalkan" && (
+                            <button
+                                onClick={() => handleUpdateStatus(selectedOrder.id_pesanan, selectedOrder.status_pesanan)}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition text-sm font-medium"
+                            >
+                                <CheckCircle size={16} />
+                                {getNextActionLabel(selectedOrder.status_pesanan)}
+                            </button>
+                        )}
 
                     <button
                         onClick={() => setSelectedOrder(null)}

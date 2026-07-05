@@ -22,7 +22,7 @@ class ProfilPenggunaController extends Controller
 
         // 2. Hitung statistik
         // Total Pesanan dihitung khusus dari pesanan yang sudah selesai
-        $totalPesanan = $pesanans->where('status_pesanan', 'Selesai')->count();
+        $totalPesanan = $pesanans->where('status_pesanan', 'selesai')->count();
 
         // Menghitung Total Belanja menggunakan stored function hitung_total_belanja
         // Function ini menghitung total belanja pengguna dari pesanan yang sudah lunas
@@ -31,13 +31,14 @@ class ProfilPenggunaController extends Controller
             [$user->id_pengguna]
         )->total ?? 0;
 
-        // Menghitung Pesanan yang Siap Diambil
-        $siapDiambil = $pesanans->where('status_pesanan', 'Ambil Pesanan')->count();
+        // Menghitung Pesanan yang Sedang Diproses dan Siap Diambil
+        $siapDiambil = $pesanans->whereIn('status_pesanan', ['diproses', 'siap diambil'])->count();
 
         // 3. Format riwayat pesanan agar sesuai dengan frontend
-        // Riwayat pesanan difilter HANYA untuk pesanan yang sudah 'Selesai'
+        // Menampilkan semua riwayat pesanan (yang sudah dibayar/diproses/selesai)
         $riwayat = [];
-        foreach ($pesanans->where('status_pesanan', 'Selesai') as $pesanan) {
+        // Menampilkan semua status pesanan di riwayat
+        foreach ($pesanans as $pesanan) {
             foreach ($pesanan->detailPesanan as $detail) {
                 // Cari gambar pertama, atau fallback ke default
                 $gambarUrl = "/img/default.png";
@@ -70,6 +71,48 @@ class ProfilPenggunaController extends Controller
 
         foreach ($pesananPending as $pesanan) {
             $pembayaran = $pesanan->pembayaran;
+
+            // Auto-sync status dari Midtrans jika di localhost (tanpa ngrok)
+            if (app()->isLocal() && $pembayaran->snap_token) {
+                \Midtrans\Config::$serverKey = config('midtrans.server_key');
+                \Midtrans\Config::$isProduction = config('midtrans.is_production');
+                \Midtrans\Config::$isSanitized = true;
+                \Midtrans\Config::$is3ds = true;
+                
+                try {
+                    $statusRes = \Midtrans\Transaction::status($pesanan->kode_pesanan);
+                    $statusTransaksi = match ($statusRes->transaction_status ?? '') {
+                        'capture', 'settlement' => 'berhasil',
+                        'pending' => 'menunggu',
+                        'deny', 'cancel' => 'gagal',
+                        'expire' => 'kadaluarsa',
+                        default => 'menunggu',
+                    };
+
+                    if ($statusTransaksi !== 'menunggu') {
+                        DB::statement(
+                            "CALL konfirmasi_pembayaran(?, ?, ?, ?, ?, @hasil)",
+                            [
+                                $pembayaran->id_pembayaran,
+                                $statusRes->transaction_id ?? 'MANUAL_SYNC',
+                                $statusTransaksi,
+                                $statusRes->gross_amount ?? $pesanan->total_harga,
+                                'MANUAL_SYNC_NO_SIGNATURE',
+                            ]
+                        );
+                        $pembayaran->refresh();
+                        $pesanan->refresh();
+                        
+                        // Jika statusnya sudah tidak menunggu, lewati dari daftar belum bayar
+                        if ($pembayaran->status_pem !== 'menunggu') {
+                            continue;
+                        }
+                    }
+                } catch (\Exception $e) {
+                    // Abaikan jika tidak ditemukan di midtrans
+                }
+            }
+
             $totalItems = $pesanan->detailPesanan->sum('jml_peritem');
             $listProduk = $pesanan->detailPesanan->map(function ($detail) {
                 return $detail->produk ? $detail->produk->nama_produk : 'Produk Tidak Ditemukan';

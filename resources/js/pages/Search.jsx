@@ -287,7 +287,7 @@ function SearchPage() {
                                 onClick={() =>
                                     navigate(`/detail-produk/${item.id_produk}`)
                                 }
-                                className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer"
+                                className="bg-white rounded-xl sm:rounded-2xl p-3 sm:p-4 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-1 border border-gray-100 cursor-pointer flex flex-col"
                             >
 
                                 <div className="relative bg-gray-50 rounded-xl h-28 sm:h-36 flex items-center justify-center overflow-hidden">
@@ -305,52 +305,41 @@ function SearchPage() {
 
                                 </div>
 
-                                <div className="mt-2 sm:mt-3 space-y-0.5 sm:space-y-1">
+                                <div className="mt-2 sm:mt-3 flex flex-col flex-grow">
 
-                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2">
+                                    <h3 className="text-xs sm:text-sm font-semibold text-gray-800 line-clamp-2 min-h-[2.5em] mb-1">
                                         {item.nama_produk}
                                     </h3>
 
-                                    <p className="text-[10px] sm:text-xs text-gray-500">
-                                        {item.terjual || 0} terjual
-                                    </p>
+                                    {item.diskon ? (
+                                        <>
+                                            <p className="text-[10px] sm:text-xs text-gray-400 line-through">
+                                                Rp {Number(item.harga_jual).toLocaleString("id-ID")}
+                                            </p>
+                                            <p className="text-xs sm:text-base font-bold text-[#1297C9]">
+                                                Rp {Number(item.harga_setelah_diskon).toLocaleString("id-ID")}
+                                            </p>
+                                        </>
+                                    ) : (
+                                        <>
+                                            <p className="text-xs sm:text-base font-bold text-[#1297C9]">
+                                                Rp {Number(item.harga_jual).toLocaleString("id-ID")}
+                                            </p>
+                                            <div className="h-[1.1rem]"></div>
+                                        </>
+                                    )}
 
-                                    <p className="text-xs sm:text-base font-bold text-[#1297C9]">
-                                        Rp{" "}
-                                        {Number(
-                                            item.harga_jual
-                                        ).toLocaleString("id-ID")}
-                                    </p>
-
-                                    <p
-                                        className={`text-[10px] sm:text-xs font-semibold ${item.stok === 0
-                                            ? "text-gray-400"
-                                            : item.stok < 5
-                                                ? "text-red-500"
-                                                : "text-green-600"
-                                            }`}
-                                    >
-                                        {item.stok > 0
-                                            ? `Stok: ${item.stok} tersedia`
-                                            : "Stok Habis"}
+                                    <p className={`text-[10px] sm:text-xs font-semibold mt-auto ${item.stok < 5 ? "text-red-500" : "text-green-600"}`}>
+                                        Stok: {item.stok} tersedia
                                     </p>
 
                                     <button
                                         onClick={(e) => handleAddToCart(e, item)}
-                                        disabled={
-                                            item.stok === 0 ||
-                                            loadingCart === item.id_produk
-                                        }
-                                        className={`mt-2 sm:mt-4 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all ${item.stok === 0
-                                            ? "bg-gray-200 text-gray-400 cursor-not-allowed"
-                                            : "bg-[#1766D3] hover:bg-[#3D8FFF] active:scale-95 text-white shadow-sm"
-                                            }`}
+                                        disabled={loadingCart === item.id_produk}
+                                        className="mt-2 sm:mt-3 w-full py-1.5 sm:py-2 rounded-lg sm:rounded-xl text-xs sm:text-sm flex items-center justify-center gap-1 sm:gap-2 transition-all bg-[#1766D3] hover:bg-[#3D8FFF] active:scale-[0.98] text-white shadow-sm"
                                     >
                                         <FaShoppingCart size={10} className="sm:w-3 sm:h-3" />
-
-                                        {loadingCart === item.id_produk
-                                            ? "..."
-                                            : "Tambah"}
+                                        {loadingCart === item.id_produk ? "..." : "Tambah"}
                                     </button>
 
                                 </div>
@@ -362,7 +351,7 @@ function SearchPage() {
                     </div>
                 )}
 
-                {!loading && products.length === 0 && (keyword || kategoriId) && (
+                {!loading && filtered.length === 0 && (keyword || kategoriId) && (
                     <div className="text-center mt-10 bg-white rounded-2xl p-10 shadow-sm">
                         <div className="w-20 h-20 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
                             <FaSearch className="text-3xl text-gray-300" />
