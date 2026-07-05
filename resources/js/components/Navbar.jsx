@@ -69,13 +69,13 @@ function Navbar({ role }) {
         }
     };
 
-    const selesaiPesanan = async (id) => {
+    const prosesPesanan = async (id) => {
         try {
-            await api.put("/admin/pesanan/" + id + "/status", { status: 'selesai' });
+            await api.put("/admin/pesanan/" + id + "/status", { status: 'diproses' });
             fetchPesananMenunggu();
         } catch (err) {
             console.error('Error update status:', err);
-            alert('Gagal menyelesaikan pesanan');
+            alert('Gagal memproses pesanan');
         }
     };
 
@@ -293,10 +293,10 @@ function Navbar({ role }) {
                                                             </div>
                                                             <div className="flex gap-2">
                                                                 <button
-                                                                    onClick={() => selesaiPesanan(order.id_pesanan)}
-                                                                    className="flex-1 bg-green-500 hover:bg-green-600 active:scale-[0.98] text-white text-xs font-medium px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5"
+                                                                    onClick={() => prosesPesanan(order.id_pesanan)}
+                                                                    className="flex-1 bg-blue-500 hover:bg-blue-600 active:scale-[0.98] text-white text-xs font-medium px-3 py-2 rounded-lg transition flex items-center justify-center gap-1.5"
                                                                 >
-                                                                    <Check size={14} /> Tandai Selesai
+                                                                    <Check size={14} /> Proses Pesanan
                                                                 </button>
                                                                 <button
                                                                     onClick={() => batalkanPesanan(order.id_pesanan)}

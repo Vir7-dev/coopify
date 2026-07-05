@@ -48,29 +48,39 @@ export default function PesananMasuk() {
         fetchPesanan();
     }, []);
 
-    const updateStatus = async (id, status) => {
-        try {
-            await api.put(`/admin/pesanan/${id}/status`, {
-                status,
-            });
+    const handleUpdateStatus = async (id, currentStatus) => {
+        let nextStatus = '';
+        if (currentStatus === 'menunggu') nextStatus = 'diproses';
+        else if (currentStatus === 'diproses') nextStatus = 'siap diambil';
+        else if (currentStatus === 'siap diambil') nextStatus = 'selesai';
+        
+        if (!nextStatus) return;
 
+        try {
+            await api.put(`/admin/pesanan/${id}/status`, { status: nextStatus });
             await fetchPesanan();
             setSelectedOrder(null);
-
             Swal.fire({
                 icon: "success",
                 title: "Berhasil!",
-                text: `Status berhasil diubah menjadi ${getStatusLabel(status)}`,
+                text: "Status pesanan berhasil diperbarui",
                 timer: 2000,
                 showConfirmButton: false,
             });
-        } catch (err) {
+        } catch (error) {
+            console.error(error);
             Swal.fire({
                 icon: "error",
                 title: "Gagal!",
-                text: err.response?.data?.message || "Terjadi kesalahan",
+                text: error.response?.data?.message || 'Gagal mengubah status',
             });
         }
+    };
+    const getNextActionLabel = (status) => {
+        if (status === 'menunggu') return 'Proses Pesanan';
+        if (status === 'diproses') return 'Siap Diambil';
+        if (status === 'siap diambil') return 'Selesaikan';
+        return '';
     };
     // Helper untuk extract tanggal saja (YYYY-MM-DD) dari timestamp
     // Handle both formats: "2026-06-26 12:30:00" or "2026-06-26T12:30:00.000000Z"
@@ -595,9 +605,9 @@ export default function PesananMasuk() {
                     formatTanggal={formatTanggal}
                     getStatusClass={getStatusClass}
                     getStatusLabel={getStatusLabel}
-                    updateStatus={updateStatus}
+                    handleUpdateStatus={handleUpdateStatus}
+                    getNextActionLabel={getNextActionLabel}
                 />
-
             </div>
         </AppLayout>
     );

@@ -84,10 +84,10 @@ export default function ProfilPengguna() {
   };
 
   const getStatusStyle = (status) => {
-    if (status === "Ambil Pesanan") {
+    if (status === "siap diambil") {
       return "bg-blue-100 text-blue-600";
     }
-    if (status === "Selesai") {
+    if (status === "selesai") {
       return "bg-green-100 text-green-600";
     }
     if (status === "kadaluarsa") {
@@ -226,13 +226,12 @@ export default function ProfilPengguna() {
                 </h2>
               </div>
             </div>
-
             <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
               <div className="bg-amber-100 text-amber-600 p-3 rounded-xl">
                 <FaBoxOpen size={20} />
               </div>
               <div className="flex-1">
-                <p className="text-xs text-gray-500">Siap Diambil</p>
+                <p className="text-xs text-gray-500">Proses & Siap</p>
                 <h2 className="text-lg font-bold text-gray-900">{statistik.siap_diambil}</h2>
               </div>
             </div>

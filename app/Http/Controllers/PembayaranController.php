@@ -83,6 +83,37 @@ class PembayaranController extends Controller
         $pembayaran = $pesanan->pembayaran;
         $this->expirePaymentIfNeeded($pembayaran);
 
+        // Auto-sync status dari Midtrans jika di localhost (tanpa ngrok)
+        if (app()->isLocal() && $pembayaran->status_pem === 'menunggu' && $pembayaran->snap_token) {
+            $this->setupMidtrans();
+            try {
+                $statusRes = \Midtrans\Transaction::status($pesanan->kode_pesanan);
+                $statusTransaksi = match ($statusRes->transaction_status ?? '') {
+                    'capture', 'settlement' => 'berhasil',
+                    'pending' => 'menunggu',
+                    'deny', 'cancel' => 'gagal',
+                    'expire' => 'kadaluarsa',
+                    default => 'menunggu',
+                };
+
+                if ($statusTransaksi !== 'menunggu') {
+                    DB::statement(
+                        "CALL konfirmasi_pembayaran(?, ?, ?, ?, ?, @hasil)",
+                        [
+                            $pembayaran->id_pembayaran,
+                            $statusRes->transaction_id ?? 'MANUAL_SYNC',
+                            $statusTransaksi,
+                            $statusRes->gross_amount ?? $pesanan->total_harga,
+                            'MANUAL_SYNC_NO_SIGNATURE',
+                        ]
+                    );
+                    $pembayaran->refresh();
+                }
+            } catch (\Exception $e) {
+                // Abaikan jika tidak ditemukan di midtrans
+            }
+        }
+
         return response()->json([
             'pesanan_id' => $pesanan->id_pesanan,
             'kode_pesanan' => $pesanan->kode_pesanan,
@@ -238,7 +269,7 @@ class PembayaranController extends Controller
             }
 
             $statusTransaksi = match ($transactionStatus) {
-                'capture', 'settlement' => 'lunas',
+                'capture', 'settlement' => 'berhasil',
                 'pending' => 'menunggu',
                 'deny' => 'gagal',
                 'cancel' => 'gagal',
