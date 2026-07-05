@@ -235,7 +235,7 @@ class PembayaranController extends Controller
                 $notif = new Notification();
             }
 
-            \Log::info('Midtrans Notification', [
+            Log::info('Midtrans Notification', [
                 'order_id' => $notif->order_id ?? $orderId,
                 'transaction_status' => $notif->transaction_status ?? $request->input('transaction_status'),
                 'status_code' => $notif->status_code ?? $statusCode,
@@ -271,13 +271,10 @@ class PembayaranController extends Controller
             $statusTransaksi = match ($transactionStatus) {
                 'capture', 'settlement' => 'berhasil',
                 'pending' => 'menunggu',
-                'deny' => 'gagal',
-                'cancel' => 'gagal',
-                'expire' => 'kadaluarsa',
                 default => 'gagal',
             };
 
-            \Log::info('Mapped Status', [
+            Log::info('Mapped Status', [
                 'original_status' => $transactionStatus,
                 'mapped_status' => $statusTransaksi,
             ]);

@@ -188,7 +188,7 @@ export default function Pembayaran({
                     return;
                 }
 
-                if (data.status_pembayaran === "menunggu") {
+                if (data.status_pembayaran === "belum_bayar") {
                     setStatus("idle");
                 }
             } catch (err) {

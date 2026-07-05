@@ -325,7 +325,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkout_keranjang` (IN `p_id_pengg
 
             VALUES(
 
-                'menunggu',
+                'belum_bayar',
                 v_total_harga,
                 DATE_ADD(NOW(),INTERVAL 24 HOUR),
                 v_id_pesanan
@@ -419,7 +419,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `konfirmasi_pembayaran` (IN `p_id_pe
         ELSEIF p_status_transaksi = 'menunggu' THEN
 
             UPDATE pembayaran
-            SET status_pem = 'menunggu'
+            SET status_pem = 'belum_bayar'
             WHERE id_pembayaran = p_id_pembayaran;
 
             SET p_pesan = 'Pembayaran masih menunggu';
@@ -741,7 +741,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 
 CREATE TABLE `pembayaran` (
   `id_pembayaran` int NOT NULL,
-  `status_pem` enum('menunggu','lunas','gagal','dikembalikan','kadaluarsa') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'menunggu',
+  `status_pem` enum('belum_bayar','lunas','gagal','dikembalikan','kadaluarsa') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'menunggu',
   `total_bayar` decimal(12,2) DEFAULT NULL,
   `batas_wkt_pem` datetime DEFAULT NULL,
   `id_pes_fk_pb` int NOT NULL,
@@ -757,20 +757,20 @@ CREATE TABLE `pembayaran` (
 --
 
 INSERT INTO `pembayaran` (`id_pembayaran`, `status_pem`, `total_bayar`, `batas_wkt_pem`, `id_pes_fk_pb`, `snap_token`, `midtrans_transaction_id`, `paid_at`, `created_at`, `updated_at`) VALUES
-(1, 'menunggu', 52000.00, '2026-06-19 16:03:27', 1, NULL, NULL, NULL, '2026-06-19 08:03:27', '2026-06-19 08:03:27'),
-(2, 'menunggu', 15000.00, '2026-06-19 17:07:27', 2, NULL, NULL, NULL, '2026-06-19 09:07:27', '2026-06-19 09:07:27'),
-(3, 'menunggu', 8000.00, '2026-06-24 16:23:01', 3, '74fa8af0-3d29-4c5f-b214-d6555fbaa06e', NULL, NULL, '2026-06-24 08:23:01', '2026-06-24 08:23:03'),
-(4, 'menunggu', 5000.00, '2026-06-26 10:49:59', 4, 'c967e02b-8e08-4acd-825f-ac6ab0e974a4', NULL, NULL, '2026-06-26 02:49:59', '2026-06-26 02:50:01'),
+(1, 'belum_bayar', 52000.00, '2026-06-19 16:03:27', 1, NULL, NULL, NULL, '2026-06-19 08:03:27', '2026-06-19 08:03:27'),
+(2, 'belum_bayar', 15000.00, '2026-06-19 17:07:27', 2, NULL, NULL, NULL, '2026-06-19 09:07:27', '2026-06-19 09:07:27'),
+(3, 'belum_bayar', 8000.00, '2026-06-24 16:23:01', 3, '74fa8af0-3d29-4c5f-b214-d6555fbaa06e', NULL, NULL, '2026-06-24 08:23:01', '2026-06-24 08:23:03'),
+(4, 'belum_bayar', 5000.00, '2026-06-26 10:49:59', 4, 'c967e02b-8e08-4acd-825f-ac6ab0e974a4', NULL, NULL, '2026-06-26 02:49:59', '2026-06-26 02:50:01'),
 (5, 'gagal', 4000.00, '2026-06-26 11:23:06', 5, 'e8081bff-dd4e-4d65-ad09-bb232bf52c67', NULL, NULL, '2026-06-26 03:23:06', '2026-06-26 03:39:10'),
 (6, 'gagal', 4000.00, '2026-06-26 11:31:45', 6, '656988ef-3caa-4645-bcbd-a4744b7fb375', NULL, NULL, '2026-06-26 03:31:45', '2026-06-26 03:47:49'),
-(7, 'menunggu', 7000.00, '2026-06-29 10:54:01', 7, 'f13ae0b4-14f1-4b9a-ac58-591394393e40', NULL, NULL, '2026-06-29 02:54:01', '2026-06-29 02:54:03');
+(7, 'belum_bayar', 7000.00, '2026-06-29 10:54:01', 7, 'f13ae0b4-14f1-4b9a-ac58-591394393e40', NULL, NULL, '2026-06-29 02:54:01', '2026-06-29 02:54:03');
 
 --
 -- Triggers `pembayaran`
 --
 DELIMITER $$
 CREATE TRIGGER `trg_cek_kadaluarsa_pembayaran` BEFORE UPDATE ON `pembayaran` FOR EACH ROW BEGIN
-    IF NEW.status_pem = 'menunggu' AND NOW() > NEW.batas_wkt_pem THEN
+    IF NEW.status_pem = 'belum_bayar' AND NOW() > NEW.batas_wkt_pem THEN
         SET NEW.status_pem = 'kadaluarsa';
     END IF;
 END
