@@ -4,6 +4,7 @@ import { useNavigate } from "react-router-dom";
 import api from "../api";
 import {
   FaShoppingCart,
+  FaPencilAlt,
   FaIdCard,
   FaPhone,
   FaEnvelope,
@@ -129,7 +130,7 @@ export default function ProfilPengguna() {
         {/* PROFILE CARD */}
         <div className="bg-white mx-4 sm:mx-6 p-6 rounded shadow flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
           <div className="flex gap-4 items-center">
-            <div className="bg-blue-500 text-white w-16 h-16 flex items-center justify-center rounded-lg text-xl font-bold uppercase overflow-hidden">
+            <div className="bg-[#3F7EA2] text-white w-16 h-16 flex items-center justify-center rounded-lg text-xl font-bold uppercase overflow-hidden">
               {user?.foto_profil ? (
                 <img src={user.foto_profil} alt="Profil" className="w-full h-full object-cover" />
               ) : (
@@ -159,10 +160,10 @@ export default function ProfilPengguna() {
           </div>
 
           <button
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm font-medium shadow hover:bg-blue-600 active:scale-95 transition"
+            className="bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-1"
             onClick={() => navigate("/edit-profil")}
           >
-            Edit Profil
+            <FaPencilAlt size={10} className="mt-0.5" /> Edit Profil
           </button>
         </div>
 
@@ -254,18 +255,16 @@ export default function ProfilPengguna() {
                 return (
                   <div
                     key={pesanan.id_pesanan}
-                    className={`bg-white rounded-xl p-4 shadow-sm border ${
-                      isUrgent ? 'border-red-300' : 'border-gray-200'
-                    }`}
+                    className={`bg-white rounded-xl p-4 shadow-sm border ${isUrgent ? 'border-red-300' : 'border-gray-200'
+                      }`}
                   >
                     <div className="flex justify-between items-start mb-2">
                       <div>
                         <p className="font-semibold text-sm">{pesanan.kode_pesanan}</p>
                         <p className="text-xs text-gray-500">{pesanan.produk_names}</p>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${
-                        isUrgent ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
-                      }`}>
+                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${isUrgent ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
+                        }`}>
                         {isUrgent ? 'Segera!' : 'Menunggu'}
                       </span>
                     </div>
@@ -390,11 +389,10 @@ export default function ProfilPengguna() {
                       <button
                         key={i}
                         onClick={() => setCurrentPage(i + 1)}
-                        className={`px-3 py-1 rounded ${
-                          currentPage === i + 1
+                        className={`px-3 py-1 rounded ${currentPage === i + 1
                             ? "bg-blue-500 text-white"
                             : "border"
-                        }`}
+                          }`}
                       >
                         {i + 1}
                       </button>

@@ -5,6 +5,7 @@ import axios from "axios";
 import {
     FaIdCard,
     FaPencilAlt,
+    FaEnvelope,
     FaPhone,
     FaBox,
     FaLayerGroup,
@@ -124,20 +125,18 @@ export default function ProfilAdmin() {
 
     return (
         <AppLayout role="admin" showFooter={false}>
-            <div className="bg-gray-100 min-h-screen">
+            <div className="bg-gray-100 min-h-screen px-2 sm:px-0 pb-10">
 
                 {/* HEADER */}
-                <div className="bg-[#3F7EA2] text-white p-6 mx-6 mt-6 rounded-t-lg relative">
-                    <div className="mt-4">
-                        <h1 className="flex items-center gap-2 text-xl font-semibold">
-                            Halo, {profil?.nama ?? 'Admin'} !
-                        </h1>
-                        <p className="text-sm">Kelola informasi akun administrator koperasi kampus</p>
-                    </div>
+                <div className="bg-[#3F7EA2] text-white p-6 mx-4 sm:mx-6 mt-6 rounded-t-lg">
+                    <h2 className="text-lg font-semibold">
+                        Halo, {profil?.nama ?? 'Admin'}! 👋
+                    </h2>
+                    <p className="text-sm">Kelola informasi akun administrator koperasi kampus</p>
                 </div>
 
                 {/* PROFILE CARD */}
-                <div className="bg-white mx-6 p-6 rounded shadow flex justify-between items-center">
+                <div className="bg-white mx-4 sm:mx-6 p-6 rounded shadow flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
                     <div className="flex gap-4 items-center">
 
                         {/* Avatar: foto atau inisial */}
@@ -145,10 +144,10 @@ export default function ProfilAdmin() {
                             <img
                                 src={profil.foto_profil}
                                 alt="Foto Profil"
-                                className="w-16 h-16 rounded object-cover"
+                                className="w-16 h-16 rounded-lg object-cover"
                             />
                         ) : (
-                            <div className="bg-[#3F7EA2] text-white w-16 h-16 flex items-center justify-center rounded text-lg font-bold">
+                            <div className="bg-[#3F7EA2] text-white w-16 h-16 flex items-center justify-center rounded-lg text-lg font-bold">
                                 {inisial}
                             </div>
                         )}
@@ -157,12 +156,16 @@ export default function ProfilAdmin() {
                             <h3 className="font-bold text-lg">{profil?.nama}</h3>
 
                             <div className="mt-2 space-y-2">
+                                <div className="flex gap-2 flex-wrap">
+                                    <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
+                                        <FaIdCard /> {profil?.nim_nik}
+                                    </span>
+                                    <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
+                                        <FaPhone /> {profil?.no_hp || "-"}
+                                    </span>
+                                </div>
                                 <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full w-fit">
-                                    <FaIdCard /> {profil?.nim_nik}
-                                </span>
-
-                                <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full w-fit">
-                                    <FaPhone /> {profil?.no_hp ?? '-'}
+                                    <FaEnvelope /> {profil?.email || "-"}
                                 </span>
                             </div>
                         </div>
@@ -177,48 +180,42 @@ export default function ProfilAdmin() {
                 </div>
 
                 {/* STATISTIK */}
-                <div className="mx-6 grid grid-cols-2 lg:grid-cols-4 gap-4 mt-6 mb-6">
-                    {stats.map((s, i) => (
-                        <div key={i} className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 h-[80px] overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
-                            <div className={`absolute inset-0 bg-gradient-to-tr ${s.gradient} to-transparent opacity-0 group-hover:opacity-100 transition duration-300`}></div>
-                            <div className={`relative z-10 ${s.bg} ${s.text} p-3 rounded-xl text-lg group-hover:scale-110 transition duration-300`}>
-                                {s.icon}
-                            </div>
-                            <div className="relative z-10 min-w-0">
-                                <h2 className={`text-xl font-bold transition ${s.hover}`}>{s.value}</h2>
-                                <p className="text-xs text-gray-500 truncate">{s.label}</p>
-                            </div>
-                        </div>
-                    ))}
-                </div>
+                <div className="mx-4 sm:mx-6 mt-6 mb-6">
 
-                {/* AKSES CEPAT */}
-                <div className="mx-6 mb-6">
-                    <h2 className="text-sm font-semibold text-gray-700 mb-3">AKSES CEPAT</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                        {quickAccess.map((item, i) => (
-                            <div
-                                key={i}
-                                onClick={() => navigate(item.path)}
-                                className="bg-white p-4 rounded-xl shadow-sm flex items-center justify-between cursor-pointer hover:shadow-md transition"
-                            >
-                                <div className="flex items-center gap-3">
-                                    <div className={`${item.bg} ${item.text} p-2.5 rounded-lg text-base`}>
-                                        {item.icon}
-                                    </div>
-                                    <div className="min-w-0">
-                                        <p className="font-semibold text-sm truncate">{item.label}</p>
-                                        <p className="text-xs text-gray-400 truncate">{item.sub}</p>
-                                    </div>
+                    {/* Desktop View */}
+                    <div className="hidden sm:grid grid-cols-2 lg:grid-cols-4 gap-4">
+                        {stats.map((s, i) => (
+                            <div key={i} className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 h-[80px] overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
+                                <div className={`absolute inset-0 bg-gradient-to-tr ${s.gradient} to-transparent opacity-0 group-hover:opacity-100 transition duration-300`}></div>
+                                <div className={`relative z-10 ${s.bg} ${s.text} p-3 rounded-xl text-lg group-hover:scale-110 transition duration-300`}>
+                                    {s.icon}
                                 </div>
-                                <FaChevronRight className="text-gray-400 text-sm" />
+                                <div className="relative z-10 min-w-0">
+                                    <h2 className={`text-xl font-bold transition ${s.hover}`}>{s.value}</h2>
+                                    <p className="text-xs text-gray-500 truncate">{s.label}</p>
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+
+                    {/* Mobile View - Card Style */}
+                    <div className="sm:hidden grid grid-cols-1 gap-3">
+                        {stats.map((s, i) => (
+                            <div key={i} className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+                                <div className={`${s.bg} ${s.text} p-3 rounded-xl`}>
+                                    <span className="text-xl">{s.icon}</span>
+                                </div>
+                                <div className="flex-1">
+                                    <p className="text-xs text-gray-500">{s.label}</p>
+                                    <h2 className="text-lg font-bold text-gray-900">{s.value}</h2>
+                                </div>
                             </div>
                         ))}
                     </div>
                 </div>
 
                 {/* INFORMASI AKUN */}
-                <div className="mx-6 mb-6">
+                <div className="mx-4 sm:mx-6 mb-6">
                     <h2 className="text-sm font-semibold text-gray-700 mb-3">INFORMASI AKUN</h2>
                     <div className="bg-white rounded-xl shadow-sm overflow-hidden">
                         {infoAkun.map((info, i) => (
