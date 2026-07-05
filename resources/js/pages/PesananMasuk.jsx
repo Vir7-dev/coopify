@@ -437,24 +437,24 @@ export default function PesananMasuk() {
 
                 <div className="bg-white rounded-xl shadow-sm">
     <div className="overflow-x-auto">
-        <table className="w-full text-sm min-w-[1100px]">
-                        <thead className="bg-gray-50">
+        <table className="w-full text-sm min-w-[700px]">
+                        <thead className="bg-gray-50 text-gray-500">
                             <tr className="text-left text-gray-600">
-                                <th className="px-6 py-4">No</th>
+                                <th className="px-4 py-3">No</th>
 
-                                <th className="px-6 py-4">Kode Pesanan</th>
+                                <th className="px-4 py-3">Kode Pesanan</th>
 
-                                <th className="px-6 py-4">Pelanggan</th>
+                                <th className="px-4 py-3">Pelanggan</th>
 
-                                <th className="px-6 py-4">Item</th>
+                                <th className="px-4 py-3">Item</th>
 
-                                <th className="px-6 py-4">Total</th>
+                                <th className="px-4 py-3">Total</th>
 
-                                <th className="px-6 py-4">Tanggal</th>
+                                <th className="px-4 py-3">Tanggal</th>
 
-                                <th className="px-6 py-4">Status</th>
+                                <th className="px-4 py-3">Status</th>
 
-                                <th className="px-6 py-4 text-center">Aksi</th>
+                                <th className="px-4 py-3 text-center">Aksi</th>
                             </tr>
                         </thead>
 
@@ -481,13 +481,13 @@ export default function PesananMasuk() {
                                 currentItems.map((item, index) => (
                                     <tr
                                         key={item.id_pesanan}
-                                        className="border-t hover:bg-blue-50 transition-all duration-300"
+                                        className="hover:bg-gray-50 transition"
                                     >
-                                        <td className="px-6 py-5">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             {indexOfFirstItem + index + 1}
                                         </td>
 
-                                        <td className="px-6 py-5">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             <div>
                                                 <p className="font-semibold text-gray-800">
                                                     {item.kode_pesanan}
@@ -501,7 +501,7 @@ export default function PesananMasuk() {
                                             </div>
                                         </td>
 
-                                        <td className="px-6 py-5">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             <div>
                                                 <p className="font-medium">
                                                     {item.pengguna?.nama || "-"}
@@ -509,7 +509,7 @@ export default function PesananMasuk() {
                                             </div>
                                         </td>
 
-                                        <td className="px-6 py-5">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             <div>
                                                 <p className="font-medium">
                                                     {getItemName(
@@ -533,7 +533,7 @@ export default function PesananMasuk() {
                                             ).toLocaleString("id-ID")}
                                         </td>
 
-                                        <td className="px-6 py-5">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             <div>
                                                 {formatTanggal(
                                                     item.tgl_pesanan,
@@ -547,7 +547,7 @@ export default function PesananMasuk() {
                                             </div>
                                         </td>
 
-                                        <td className="px-6 py-5">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             <span
                                                 className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(item.status_pesanan)}`}
                                             >
@@ -557,13 +557,13 @@ export default function PesananMasuk() {
                                             </span>
                                         </td>
 
-                                        <td className="px-6 py-5">
+                                        <td className="border-b border-gray-100 px-4 py-3">
                                             <div className="flex justify-center">
                                                 <button
                                                     onClick={() =>
                                                         setSelectedOrder(item)
                                                     }
-                                                    className="flex items-center gap-2 border border-blue-600 text-blue-600 px-4 py-2 rounded-xl hover:bg-blue-50 transition"
+                                                    className="border border-blue-500 text-blue-500 px-3 py-1 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1 transition"
                                                 >
                                                     <Eye size={18} />
                                                     Detail
