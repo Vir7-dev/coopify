@@ -3,6 +3,7 @@ import AppLayout from "../Layouts/AppLayout";
 import api from "../api";
 import Swal from "sweetalert2";
 import Pagination from "../components/Pagination";
+import DetailPesananModal from "../components/DetailPesananModal";
 import {
     Package,
     Eye,
@@ -11,7 +12,6 @@ import {
     Wallet,
     CalendarDays,
     ShoppingBag,
-    CheckCircle,
 } from "lucide-react";
 
 export default function PesananMasuk() {
@@ -48,20 +48,19 @@ export default function PesananMasuk() {
         fetchPesanan();
     }, []);
 
-    const handleSelesai = async (id) => {
+    const updateStatus = async (id, status) => {
         try {
             await api.put(`/admin/pesanan/${id}/status`, {
-                status: "selesai",
+                status,
             });
 
-            // Refresh data setelah update
             await fetchPesanan();
             setSelectedOrder(null);
 
             Swal.fire({
                 icon: "success",
                 title: "Berhasil!",
-                text: "Pesanan berhasil ditandai selesai",
+                text: `Status berhasil diubah menjadi ${getStatusLabel(status)}`,
                 timer: 2000,
                 showConfirmButton: false,
             });
@@ -73,7 +72,6 @@ export default function PesananMasuk() {
             });
         }
     };
-
     // Helper untuk extract tanggal saja (YYYY-MM-DD) dari timestamp
     // Handle both formats: "2026-06-26 12:30:00" or "2026-06-26T12:30:00.000000Z"
     const getDateOnly = (tanggal) => {
@@ -207,49 +205,56 @@ export default function PesananMasuk() {
     };
     return (
         <AppLayout role="admin" showFooter={false}>
-            <div className="bg-gray-100 min-h-screen p-6">
+            <div className="w-full">
                 {/* HEADER */}
 
-                <div className="mb-6">
-                    <h1 className="text-4xl font-bold text-gray-800">
-                        Pesanan Masuk
-                    </h1>
+                {/* HEADER */}
 
-                    <p className="text-gray-500 mt-2">
-                        Daftar pesanan pelanggan koperasi
-                    </p>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+                    <div>
+                        <h1 className="text-xl font-semibold">
+                            Pesanan Masuk
+                        </h1>
+
+                        <p className="text-sm text-gray-500">
+                            Daftar pesanan pelanggan koperasi
+                        </p>
+                    </div>
                 </div>
 
                 {/* STATISTIK */}
 
-                <div className="grid grid-cols-1 md:grid-cols-4 gap-5 mb-6">
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-6">
                     <div
                         className="
+        group
+        relative
         bg-white
-        rounded-2xl
+        p-4
+        rounded-xl
         shadow-sm
-        p-5
         flex
         items-center
-        gap-4
+        gap-3
+        w-full
+        overflow-hidden
+        hover:shadow-lg
+        hover:-translate-y-1
         transition-all
         duration-300
-        ease-in-out
-        hover:scale-105
-        hover:-translate-y-2
-        hover:shadow-2xl
-        hover:border
-        hover:border-[#1766D3]
+        cursor-default
     "
                     >
-                        <div className="bg-blue-100 p-3 rounded-xl">
-                            <ShoppingBag className="text-blue-600" />
+                        <div className="bg-blue-100 text-blue-600 p-3 rounded-lg">
+                            <ShoppingBag size={18} />
                         </div>
 
                         <div>
-                            <p className="text-gray-500">Total Pesanan</p>
+                            <p className="text-sm text-gray-500">
+                                Total Pesanan
+                            </p>
 
-                            <h2 className="text-3xl font-bold">
+                            <h2 className="text-lg font-semibold">
                                 {pesananMasuk.length}
                             </h2>
                         </div>
@@ -257,31 +262,31 @@ export default function PesananMasuk() {
 
                     <div
                         className="
+        group
+        relative
         bg-white
-        rounded-2xl
+        p-4
+        rounded-xl
         shadow-sm
-        p-5
         flex
         items-center
-        gap-4
+        gap-3
+        w-full
+        overflow-hidden
+        hover:shadow-lg
+        hover:-translate-y-1
         transition-all
         duration-300
-        ease-in-out
-        hover:scale-105
-        hover:-translate-y-2
-        hover:shadow-2xl
-        hover:border
-        hover:border-[#1766D3]
+        cursor-default
     "
                     >
-                        <div className="bg-green-100 p-3 rounded-xl">
-                            <Package className="text-green-600" />
+                        <div className="bg-green-100 text-green-600 p-3 rounded-lg">
+                            <Package size={18} />
                         </div>
-
                         <div>
-                            <p className="text-gray-500">Total Item</p>
+                            <p className="text-sm text-gray-500">Total Item</p>
 
-                            <h2 className="text-3xl font-bold">
+                            <h2 className="text-lg font-semibold">
                                 {pesananMasuk.reduce(
                                     (a, b) => a + getTotalQty(b.detail_pesanan),
                                     0,
@@ -292,31 +297,32 @@ export default function PesananMasuk() {
 
                     <div
                         className="
+        group
+        relative
         bg-white
-        rounded-2xl
+        p-4
+        rounded-xl
         shadow-sm
-        p-5
         flex
         items-center
-        gap-4
+        gap-3
+        w-full
+        overflow-hidden
+        hover:shadow-lg
+        hover:-translate-y-1
         transition-all
         duration-300
-        ease-in-out
-        hover:scale-105
-        hover:-translate-y-2
-        hover:shadow-2xl
-        hover:border
-        hover:border-[#1766D3]
+        cursor-default
     "
                     >
-                        <div className="bg-orange-100 p-3 rounded-xl">
-                            <Wallet className="text-orange-600" />
+                        <div className="bg-orange-100 text-orange-600 p-3 rounded-lg">
+                            <Wallet size={18} />
                         </div>
 
                         <div>
-                            <p className="text-gray-500">Total Nilai</p>
+                            <p className="text-sm text-gray-500">Total Nilai</p>
 
-                            <h2 className="text-2xl font-bold">
+                            <h2 className="text-lg font-semibold">
                                 Rp{" "}
                                 {pesananMasuk
                                     .reduce(
@@ -332,31 +338,32 @@ export default function PesananMasuk() {
 
                     <div
                         className="
+        group
+        relative
         bg-white
-        rounded-2xl
+        p-4
+        rounded-xl
         shadow-sm
-        p-5
         flex
         items-center
-        gap-4
+        gap-3
+        w-full
+        overflow-hidden
+        hover:shadow-lg
+        hover:-translate-y-1
         transition-all
         duration-300
-        ease-in-out
-        hover:scale-105
-        hover:-translate-y-2
-        hover:shadow-2xl
-        hover:border
-        hover:border-[#1766D3]
+        cursor-default
     "
                     >
-                        <div className="bg-yellow-100 p-3 rounded-xl">
-                            <Clock className="text-yellow-600" />
+                        <div className="bg-yellow-100 text-yellow-600 p-3 rounded-lg">
+                            <Clock size={18} />
                         </div>
 
                         <div>
-                            <p className="text-gray-500">Menunggu Konfirmasi</p>
+                            <p className="text-sm text-gray-500">Menunggu Konfirmasi</p>
 
-                            <h2 className="text-3xl font-bold">
+                            <h2 className="text-lg font-semibold">
                                 {
                                     pesananMasuk.filter(
                                         (item) =>
@@ -368,14 +375,14 @@ export default function PesananMasuk() {
                     </div>
                 </div>
 
-                {/* SEARCH */}
+                <div className="bg-white rounded-xl shadow-sm mb-6">
+                    <div className="p-4 flex flex-col lg:flex-row lg:items-center lg:justify-between gap-3">
 
-                <div className="bg-white rounded-2xl shadow-sm mb-6">
-                    <div className="p-5">
-                        <div className="relative w-full md:w-80">
+                        {/* Search */}
+                        <div className="relative w-full lg:w-72">
                             <Search
-                                size={18}
-                                className="absolute left-3 top-3.5 text-gray-400"
+                                size={16}
+                                className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400"
                             />
 
                             <input
@@ -383,55 +390,54 @@ export default function PesananMasuk() {
                                 onChange={(e) => setSearch(e.target.value)}
                                 type="text"
                                 placeholder="Cari pesanan..."
-                                className="w-full border rounded-xl pl-10 pr-4 py-3 outline-none focus:ring-2 focus:ring-blue-500"
+                                className="w-full pl-9 pr-4 py-2 rounded-lg border border-gray-300 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
                             />
                         </div>
+
+                        {/* Filter */}
+                        <div className="flex flex-wrap gap-2">
+
+                            <input
+                                type="date"
+                                value={filterTanggal}
+                                onChange={(e) => setFilterTanggal(e.target.value)}
+                                className="border rounded-lg px-3 py-2 text-sm"
+                            />
+
+                            <select
+                                value={filterStatus}
+                                onChange={(e) => setFilterStatus(e.target.value)}
+                                className="border rounded-lg px-3 py-2 text-sm"
+                            >
+                                <option value="">Semua Status</option>
+                                <option value="menunggu">Menunggu</option>
+                                <option value="diproses">Diproses</option>
+                                <option value="siap diambil">Siap Diambil</option>
+                                <option value="selesai">Selesai</option>
+                                <option value="dibatalkan">Dibatalkan</option>
+                            </select>
+
+                            <button
+                                onClick={() => {
+                                    setFilterStatus("");
+                                    setFilterTanggal("");
+                                }}
+                                className="px-4 py-2 rounded-lg bg-gray-100 hover:bg-gray-200 text-sm"
+                            >
+                                Reset
+                            </button>
+
+                        </div>
+
                     </div>
-                </div>
 
-                <div className="bg-white rounded-2xl shadow-sm mb-6 p-5">
-                    <div className="flex flex-col md:flex-row gap-4">
-                        <select
-                            value={filterStatus}
-                            onChange={(e) => setFilterStatus(e.target.value)}
-                            className="border rounded-xl px-4 py-3"
-                        >
-                            <option value="">Semua Status</option>
-
-                            <option value="menunggu">Menunggu</option>
-
-                            <option value="diproses">Diproses</option>
-
-                            <option value="siap diambil">Siap Diambil</option>
-
-                            <option value="selesai">Selesai</option>
-
-                            <option value="dibatalkan">Dibatalkan</option>
-                        </select>
-
-                        <input
-                            type="date"
-                            value={filterTanggal}
-                            onChange={(e) => setFilterTanggal(e.target.value)}
-                            className="border rounded-xl px-4 py-3"
-                        />
-
-                        <button
-                            onClick={() => {
-                                setFilterStatus("");
-                                setFilterTanggal("");
-                            }}
-                            className="px-5 py-3 bg-gray-100 hover:bg-gray-200 rounded-xl transition"
-                        >
-                            Reset Filter
-                        </button>
-                    </div>
                 </div>
 
                 {/* TABLE */}
 
-                <div className="bg-white rounded-2xl shadow-sm overflow-hidden">
-                    <table className="w-full">
+                <div className="bg-white rounded-xl shadow-sm">
+    <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[1100px]">
                         <thead className="bg-gray-50">
                             <tr className="text-left text-gray-600">
                                 <th className="px-6 py-4">No</th>
@@ -568,9 +574,9 @@ export default function PesananMasuk() {
                                 ))
                             )}
                         </tbody>
-                    </table>
-                </div>
-
+                   </table>
+</div> {/* overflow-x-auto */}
+</div> {/* bg-white */}
                 {/* PAGINATION */}
                 {filteredData.length > 0 && (
                     <Pagination
@@ -583,120 +589,15 @@ export default function PesananMasuk() {
                     />
                 )}
 
-                {/* MODAL DETAIL */}
+                <DetailPesananModal
+                    selectedOrder={selectedOrder}
+                    setSelectedOrder={setSelectedOrder}
+                    formatTanggal={formatTanggal}
+                    getStatusClass={getStatusClass}
+                    getStatusLabel={getStatusLabel}
+                    updateStatus={updateStatus}
+                />
 
-                {selectedOrder && (
-                    <div
-                        className="fixed inset-0 bg-black/40 flex items-center justify-center z-50"
-                        onClick={() => setSelectedOrder(null)}
-                    >
-                        <div
-                            className="bg-white rounded-2xl w-[400px] max-h-[85vh] flex flex-col shadow-xl overflow-hidden"
-                            onClick={(e) => e.stopPropagation()}
-                        >
-                            {/* Header */}
-                            <div className="bg-blue-600 text-white p-4 flex-shrink-0">
-                                <div className="flex justify-between items-start">
-                                    <div>
-                                        <h2 className="text-lg font-bold">
-                                            Detail Pesanan
-                                        </h2>
-                                        <p className="text-blue-100 text-sm">
-                                            {selectedOrder.kode_pesanan}
-                                        </p>
-                                    </div>
-                                    <button
-                                        onClick={() => setSelectedOrder(null)}
-                                        className="text-white/80 hover:text-white text-2xl leading-none"
-                                    >
-                                        &times;
-                                    </button>
-                                </div>
-                            </div>
-
-                            {/* Body - Scrollable */}
-                            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-                                {/* Info Grid */}
-                                <div className="grid grid-cols-2 gap-2 text-sm">
-                                    <div>
-                                        <p className="text-gray-500">Nama</p>
-                                        <p className="font-medium">
-                                            {selectedOrder.pengguna?.nama || "-"}
-                                        </p>
-                                    </div>
-                                    <div>
-                                        <p className="text-gray-500">Tanggal</p>
-                                        <p className="font-medium">
-                                            {formatTanggal(selectedOrder.tgl_pesanan)}
-                                        </p>
-                                    </div>
-                                </div>
-
-                                {/* Items List */}
-                                <div>
-                                    <p className="text-gray-500 text-sm mb-2">
-                                        ITEM ({selectedOrder.detail_pesanan?.length || 0})
-                                    </p>
-                                    <div className="bg-gray-50 rounded-xl divide-y divide-gray-200 max-h-[200px] overflow-y-auto">
-                                        {selectedOrder.detail_pesanan?.map((dp, idx) => (
-                                            <div key={idx} className="p-3 flex justify-between items-center">
-                                                <div className="flex-1">
-                                                    <p className="font-medium text-sm">
-                                                        {dp.produk?.nama_produk || "-"}
-                                                    </p>
-                                                    <p className="text-xs text-gray-500">
-                                                        Qty: {dp.jml_peritem || 0}
-                                                    </p>
-                                                </div>
-                                                <p className="font-semibold text-blue-600 text-sm">
-                                                    Rp {parseFloat(dp.subtotal_dp || 0).toLocaleString("id-ID")}
-                                                </p>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Total */}
-                                <div className="bg-blue-50 rounded-xl p-3 flex justify-between items-center">
-                                    <span className="font-semibold text-gray-700">
-                                        Total
-                                    </span>
-                                    <span className="text-lg font-bold text-blue-600">
-                                        Rp {parseFloat(selectedOrder.total_harga || 0).toLocaleString("id-ID")}
-                                    </span>
-                                </div>
-
-                                {/* Status */}
-                                <div className="flex justify-center">
-                                    <span className={`px-4 py-1.5 rounded-full text-sm font-semibold ${getStatusClass(selectedOrder.status_pesanan)}`}>
-                                        {getStatusLabel(selectedOrder.status_pesanan)}
-                                    </span>
-                                </div>
-                            </div>
-
-                            {/* Footer */}
-                            <div className="border-t p-3 flex gap-2 flex-shrink-0">
-                                {selectedOrder.status_pesanan !== "selesai" &&
-                                    selectedOrder.status_pesanan !== "dibatalkan" && (
-                                        <button
-                                            onClick={() => handleSelesai(selectedOrder.id_pesanan)}
-                                            className="flex-1 bg-green-600 hover:bg-green-700 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition text-sm font-medium"
-                                        >
-                                            <CheckCircle size={16} />
-                                            Tandai Selesai
-                                        </button>
-                                    )}
-
-                                <button
-                                    onClick={() => setSelectedOrder(null)}
-                                    className="flex-1 border border-gray-300 hover:bg-gray-100 py-2 rounded-xl transition text-sm font-medium"
-                                >
-                                    Tutup
-                                </button>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
         </AppLayout>
     );
