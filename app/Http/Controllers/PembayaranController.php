@@ -84,19 +84,19 @@ class PembayaranController extends Controller
         $this->expirePaymentIfNeeded($pembayaran);
 
         // Auto-sync status dari Midtrans jika di localhost (tanpa ngrok)
-        if (app()->isLocal() && $pembayaran->status_pem === 'menunggu' && $pembayaran->snap_token) {
+        if (app()->isLocal() && $pembayaran->status_pem === 'belum_bayar' && $pembayaran->snap_token) {
             $this->setupMidtrans();
             try {
                 $statusRes = \Midtrans\Transaction::status($pesanan->kode_pesanan);
                 $statusTransaksi = match ($statusRes->transaction_status ?? '') {
                     'capture', 'settlement' => 'berhasil',
-                    'pending' => 'menunggu',
+                    'pending' => 'belum_bayar',
                     'deny', 'cancel' => 'gagal',
                     'expire' => 'kadaluarsa',
-                    default => 'menunggu',
+                    default => 'belum_bayar',
                 };
 
-                if ($statusTransaksi !== 'menunggu') {
+                if ($statusTransaksi !== 'belum_bayar') {
                     DB::statement(
                         "CALL konfirmasi_pembayaran(?, ?, ?, ?, ?, @hasil)",
                         [
@@ -214,9 +214,9 @@ class PembayaranController extends Controller
         $expectedSignature = hash(
             'sha512',
             $orderId .
-            $statusCode .
-            $grossAmount .
-            config('midtrans.server_key')
+                $statusCode .
+                $grossAmount .
+                config('midtrans.server_key')
         );
 
         if (!hash_equals($expectedSignature, $signatureKey)) {
@@ -270,7 +270,7 @@ class PembayaranController extends Controller
 
             $statusTransaksi = match ($transactionStatus) {
                 'capture', 'settlement' => 'berhasil',
-                'pending' => 'menunggu',
+                'pending' => 'belum_bayar',
                 default => 'gagal',
             };
 
