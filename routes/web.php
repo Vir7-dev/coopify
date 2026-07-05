@@ -10,9 +10,6 @@ Route::get('/', function () {
     return view('welcome');
 });
 
-// ================= PRODUCTS =================//
-Route::get('/produk', [ProdukController::class, 'index']);
-
 // ================= SPA REACT =================
 Route::get('/{any}', function () {
     return view('welcome');

@@ -19,6 +19,8 @@ import Search from "./Pages/Search";
 import PesananMasuk from "./Pages/PesananMasuk";
 import ProtectedRoute from "./components/ProtectedRoute";
 
+import RedirectAdminRoute from "./components/RedirectAdminRoute";
+
 // Scroll to top on route change
 function ScrollToTop() {
     const location = useLocation();
@@ -70,14 +72,16 @@ function App() {
                 <ScrollToTop />
                 <Routes>
                     {/* Auth & Public */}
-                    <Route path="/" element={<Dashboard />} />
-                    <Route path="/login" element={<Login />} />
-                    
-                    {/* Produk (Public) */}
-                    <Route path="/produk" element={<Produk />} />
-                    <Route path="/produk/:kategori" element={<Produk />} />
-                    <Route path="/detail-produk/:id" element={<DetailProduk />} />
-                    <Route path="/search" element={<Search />} />
+                    <Route element={<RedirectAdminRoute />}>
+                        <Route path="/" element={<Dashboard />} />
+                        <Route path="/login" element={<Login />} />
+                        
+                        {/* Produk (Public) */}
+                        <Route path="/produk" element={<Produk />} />
+                        <Route path="/produk/:kategori" element={<Produk />} />
+                        <Route path="/detail-produk/:id" element={<DetailProduk />} />
+                        <Route path="/search" element={<Search />} />
+                    </Route>
 
                     {/* Rute Khusus Admin */}
                     <Route element={<ProtectedRoute allowedRoles={['admin']} />}>

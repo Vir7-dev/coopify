@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AdminProfilController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CheckoutController;
+use App\Http\Controllers\UbahSandiController;
 use App\Http\Controllers\KategoriController;
 use App\Http\Controllers\KeranjangController;
 use App\Http\Controllers\PembayaranController;
@@ -38,7 +39,7 @@ Route::middleware('auth:sanctum')->group(function () {
 
     // Auth
     Route::post('/logout', [AuthController::class, 'logout']);
-    Route::post('/ganti-password', [AuthController::class, 'gantiPassword']);
+    Route::post('/ganti-password', [UbahSandiController::class, 'gantiPassword']);
 
     // Profil Pengguna
     Route::get('/profil-pengguna', [App\Http\Controllers\ProfilPenggunaController::class, 'index']);
