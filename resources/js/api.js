@@ -8,8 +8,8 @@ export function getAuthHeaders() {
 
     return token
         ? {
-              Authorization: `Bearer ${token}`,
-          }
+            Authorization: `Bearer ${token}`,
+        }
         : {};
 }
 

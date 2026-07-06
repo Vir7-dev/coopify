@@ -126,6 +126,7 @@ function Navbar({ role }) {
         } finally {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
+            localStorage.removeItem("last_active");
             delete axios.defaults.headers.common.Authorization;
             navigate("/login");
         }

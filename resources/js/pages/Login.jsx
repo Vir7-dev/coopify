@@ -31,6 +31,7 @@ function Login() {
       localStorage.setItem("user", JSON.stringify(data.user));
       localStorage.setItem("token", data.token);
       localStorage.setItem("login_time", Date.now());
+      localStorage.setItem("last_active", Date.now());
 
       Toast.fire({
         icon: "success",
