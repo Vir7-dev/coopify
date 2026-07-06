@@ -36,17 +36,31 @@ function App() {
     useEffect(() => {
         const token = localStorage.getItem('token');
         const user = JSON.parse(localStorage.getItem('user'));
+        const lastActive = localStorage.getItem('last_active');
 
         if (!token || !user) return;
 
         const DURASI_IDLE = user.role === 'admin'
-            ? 30 * 60 * 1000   
-            : 60 * 60 * 1000;  
+            ? 30 * 60 * 1000
+            : 60 * 60 * 1000;
+
+        const DELAPAN_JAM = 8 * 60 * 60 * 1000;
+        if (lastActive && (Date.now() - Number(lastActive) > DELAPAN_JAM)) {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            localStorage.removeItem('login_time');
+            localStorage.removeItem('last_active');
+            window.location.replace('/login');
+            return;
+        }
+
+        localStorage.setItem('last_active', Date.now());
 
         const logout = () => {
             localStorage.removeItem('token');
             localStorage.removeItem('user');
             localStorage.removeItem('login_time');
+            localStorage.removeItem('last_active');
             window.location.replace('/login');
         };
 
@@ -55,11 +69,12 @@ function App() {
         const resetTimer = () => {
             clearTimeout(idleTimer);
             idleTimer = setTimeout(logout, DURASI_IDLE);
+            localStorage.setItem('last_active', Date.now());
         };
 
         const events = ['mousemove', 'click', 'keydown', 'scroll', 'touchstart'];
         events.forEach(event => window.addEventListener(event, resetTimer));
-        
+
         return () => {
             clearTimeout(idleTimer);
             events.forEach(event => window.removeEventListener(event, resetTimer));
@@ -75,7 +90,7 @@ function App() {
                     <Route element={<RedirectAdminRoute />}>
                         <Route path="/" element={<Dashboard />} />
                         <Route path="/login" element={<Login />} />
-                        
+
                         {/* Produk (Public) */}
                         <Route path="/produk" element={<Produk />} />
                         <Route path="/produk/:kategori" element={<Produk />} />

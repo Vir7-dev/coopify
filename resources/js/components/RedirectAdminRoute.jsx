@@ -3,7 +3,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 
 const RedirectAdminRoute = () => {
     const userString = localStorage.getItem('user');
-    
+
     if (userString) {
         try {
             const user = JSON.parse(userString);
