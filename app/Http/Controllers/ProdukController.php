@@ -135,7 +135,7 @@ class ProdukController extends Controller
     public function update(Request $request, $produk)
     {
         $request->validate([
-            'nama_produk' => 'required|unique:produk,nama_produk',
+            'nama_produk' => 'required|unique:produk,nama_produk,' . $produk . ',id_produk',
             'harga_jual' => 'required',
             'stok' => 'nullable|integer|min:0',
             'persen_diskon' => 'nullable|numeric|min:0|max:100',
