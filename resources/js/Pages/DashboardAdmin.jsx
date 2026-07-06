@@ -99,6 +99,9 @@ const DashboardAdmin = () => {
                 total_transaksi: statistik.total_transaksi || 0,
             });
 
+            const pesananRes = await api.get("/admin/pesanan");
+            setPesanan(pesananRes.data);
+
             // Fetch data chart
             await fetchChartData();
         } catch (err) {
@@ -162,6 +165,7 @@ const DashboardAdmin = () => {
     };
 
     const [profil, setProfil] = useState(null);
+    const [pesanan, setPesanan] = useState([]);
 
     useEffect(() => {
         fetchData();
@@ -225,8 +229,42 @@ const DashboardAdmin = () => {
             72,
         );
 
+        const pesananSelesai = pesanan.filter(
+            (item) => item.status_pesanan === "selesai",
+        );
+
+        const tableData = pesananSelesai.map((item, index) => [
+            index + 1,
+            item.kode_pesanan,
+            item.pengguna?.nama || "-",
+            item.detail_pesanan
+                ?.map((d) => `${d.produk?.nama_produk} (${d.jml_peritem}x)`)
+                .join("\n"),
+            `Rp ${Number(item.total_harga).toLocaleString("id-ID")}`,
+            item.status_pesanan,
+        ]);
+
+        autoTable(pdf, {
+            startY: 82,
+            head: [
+                [
+                    "No",
+                    "Kode",
+                    "Pelanggan",
+                    "Produk",
+                    "Total",
+                    "Status",
+                ],
+            ],
+            body: tableData,
+            styles: {
+                fontSize: 8,
+                cellPadding: 2,
+            },
+        });
+
         // TANDA TANGAN
-        const y = 110;
+        const y = pdf.lastAutoTable.finalY + 15;
 
         pdf.text("Mengetahui,", 150, y);
         pdf.text("Admin Koperasi", 150, y + 8);
