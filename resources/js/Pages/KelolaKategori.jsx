@@ -76,7 +76,9 @@ export default function KelolaKategori() {
   useEffect(() => { setCurrentPage(1); }, [search, filterKat]);
 
   const handleNamaChange = (e) => {
-    const val = e.target.value;
+    const raw = e.target.value;
+    // Hanya izinkan huruf (a-z, A-Z) dan spasi — angka & simbol langsung difilter
+    const val = raw.replace(/[^A-Za-z\s]/g, "");
     setForm((f) => ({ ...f, nama: val, ikon: suggestIcon(val) }));
   };
 
@@ -133,8 +135,12 @@ export default function KelolaKategori() {
       }
     });
   };
+  const NAMA_KATEGORI_REGEX = /^[A-Za-z\s]+$/;
+
   const handleSubmit = async () => {
-    if (!form.nama.trim()) {
+    const namaTrim = form.nama.trim();
+
+    if (!namaTrim) {
       Swal.fire({
         icon: "warning",
         title: "Perhatian!",
@@ -144,7 +150,20 @@ export default function KelolaKategori() {
       return;
     }
 
-    const body = { nama_kategori: form.nama, ikon: form.ikon };
+    if (!NAMA_KATEGORI_REGEX.test(namaTrim)) {
+      const hasNumber = /\d/.test(namaTrim);
+      Swal.fire({
+        icon: "warning",
+        title: "Perhatian!",
+        text: hasNumber
+          ? "Nama kategori hanya boleh berisi huruf, tidak boleh mengandung angka!"
+          : "Nama kategori hanya boleh berisi huruf!",
+        confirmButtonColor: "#1D63D3",
+      });
+      return;
+    }
+
+    const body = { nama_kategori: namaTrim, ikon: form.ikon };
 
     try {
       if (isEdit) {
@@ -391,6 +410,9 @@ export default function KelolaKategori() {
                       onChange={handleNamaChange}
                       className="w-full mt-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-200"
                     />
+                    <p className="text-xs text-gray-400 mt-1">
+                      Hanya huruf (spasi diperbolehkan untuk nama dua kata, contoh: "Alat Tulis")
+                    </p>
                     {form.nama && (
                       <p className="text-xs text-blue-500 mt-1">
                         Icon otomatis dipilih berdasarkan nama
