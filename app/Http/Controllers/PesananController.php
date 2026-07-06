@@ -27,6 +27,17 @@ class PesananController extends Controller
             $query->where('status_pesanan', 'menunggu');
         }
 
+        // Filter berdasarkan bulan dan tahun
+        if ($request->filled('bulan') && $request->filled('tahun')) {
+            $query->whereMonth('tgl_pesanan', $request->bulan)
+                  ->whereYear('tgl_pesanan', $request->tahun);
+        }
+
+        // Filter berdasarkan status selesai saja
+        if ($request->boolean('selesai')) {
+            $query->where('status_pesanan', 'selesai');
+        }
+
         $pesanan = $query->get();
 
         return response()->json($pesanan);

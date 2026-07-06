@@ -135,6 +135,7 @@ class AdminProfilController extends Controller
     /**
      * GET /api/admin/chart
      * Ambil data grafik penjualan per hari dalam sebulan
+     * Opsional: filter berdasarkan minggu (1-5)
      */
     public function chartData(Request $request)
     {
@@ -146,6 +147,7 @@ class AdminProfilController extends Controller
 
         $tahun = $request->input('tahun', date('Y'));
         $bulan = $request->input('bulan', date('m'));
+        $minggu = $request->input('minggu'); // 1-5, null = semua minggu
 
         // Format nama bulan Indonesia
         $namaBulan = [
@@ -155,12 +157,29 @@ class AdminProfilController extends Controller
             '10' => 'Oktober', '11' => 'November', '12' => 'Desember'
         ];
 
-        // Ambil data penjualan per hari dalam bulan yang dipilih
-        $penjualanPerHari = DB::table('pesanan as p')
+        // Query builder untuk pesanan selesai
+        $queryBuilder = DB::table('pesanan as p')
             ->join('pembayaran as pm', 'pm.id_pes_fk_pb', '=', 'p.id_pesanan')
             ->where('p.status_pesanan', 'selesai')
             ->whereYear('p.tgl_pesanan', $tahun)
-            ->whereMonth('p.tgl_pesanan', $bulan)
+            ->whereMonth('p.tgl_pesanan', $bulan);
+
+        // Filter berdasarkan minggu jika specified
+        if ($minggu !== null && is_numeric($minggu)) {
+            $weekNumber = (int) $minggu;
+            // Hitung tanggal mulai dan akhir minggu
+            $startDate = date("Y-m-d", strtotime("{$tahun}-{$bulan}-01 +" . (($weekNumber - 1) * 7) . " days"));
+            $endDate = date("Y-m-d", strtotime("{$tahun}-{$bulan}-01 +" . ($weekNumber * 7 - 1) . " days"));
+
+            // Pastikan tidak melebihi akhir bulan
+            $lastDayOfMonth = date("t", strtotime("{$tahun}-{$bulan}-01"));
+            $endDate = min($endDate, "{$tahun}-{$bulan}-{$lastDayOfMonth}");
+
+            $queryBuilder->whereBetween('p.tgl_pesanan', [$startDate, $endDate . ' 23:59:59']);
+        }
+
+        // Ambil data penjualan per hari dalam bulan/minggu yang dipilih
+        $penjualanPerHari = (clone $queryBuilder)
             ->select(
                 DB::raw('DAYOFWEEK(p.tgl_pesanan) as hari_ke'),
                 DB::raw('COUNT(*) as total_transaksi'),
@@ -183,6 +202,18 @@ class AdminProfilController extends Controller
             $dataPerHari[$data->hari_ke] = (int) $data->total_transaksi;
         }
 
+        // Hitung total transaksi dan pemasukan untuk periode yang dipilih
+        $statistikPeriode = (clone $queryBuilder)
+            ->select(
+                DB::raw('COUNT(*) as total_transaksi'),
+                DB::raw('COALESCE(SUM(p.total_harga), 0) as total_pemasukan')
+            )
+            ->first();
+
+        // Hitung jumlah minggu dalam bulan ini
+        $lastDayOfMonth = date("t", strtotime("{$tahun}-{$bulan}-01"));
+        $jumlahMinggu = ceil($lastDayOfMonth / 7);
+
         return response()->json([
             'labels' => $namaHari,
             'datasets' => [
@@ -194,7 +225,13 @@ class AdminProfilController extends Controller
                 ]
             ],
             'bulan' => $namaBulan[$bulan] ?? $bulan,
-            'tahun' => $tahun
+            'tahun' => $tahun,
+            'statistik' => [
+                'total_transaksi' => (int) $statistikPeriode->total_transaksi,
+                'total_pemasukan' => (float) $statistikPeriode->total_pemasukan
+            ],
+            'minggu' => $minggu ? (int) $minggu : null,
+            'jumlah_minggu' => $jumlahMinggu
         ]);
     }
 }

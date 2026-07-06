@@ -59,14 +59,17 @@ class Produk extends Model
 
     public function getHargaSetelahDiskonAttribute()
     {
-        $harga = (int) $this->harga_jual;
+        $harga = (float) $this->harga_jual;
 
-        if ($this->diskon && $this->diskon->persen_diskon !== null) {
+        // Prioritaskan harga_diskon jika ada (harga tetap setelah diskon)
+        if ($this->diskon && (float) $this->diskon->harga_diskon > 0) {
+            return (float) $this->diskon->harga_diskon;
+        }
 
+        // Hitung dari persen_diskon jika ada
+        if ($this->diskon && (int) $this->diskon->persen_diskon > 0) {
             $diskon = (int) $this->diskon->persen_diskon;
-
             $potongan = ($harga * $diskon) / 100;
-
             return (int) ($harga - $potongan);
         }
 
