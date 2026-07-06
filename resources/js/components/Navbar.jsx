@@ -40,10 +40,30 @@ function Navbar({ role }) {
     const [openNotif, setOpenNotif] = useState(false);
     const [keyword, setKeyword] = useState("");
 
-    const notifications = [
-        { code: "ORD12345", time: "5 menit lalu", pickup: "22 Apr 2026 - 09:15" },
-        { code: "ORD12346", time: "6 menit lalu", pickup: "22 Apr 2026 - 09:20" },
-    ];
+    // State untuk Notifikasi (dari database)
+    const [notifications, setNotifications] = useState([]);
+    const [loadingNotif, setLoadingNotif] = useState(false);
+
+    // Fetch notifikasi dari database
+    const fetchNotifikasi = async () => {
+        if (!user) return;
+        setLoadingNotif(true);
+        try {
+            const res = await api.get('/profil-pengguna/notifikasi');
+            setNotifications(res.data.notifikasi || []);
+        } catch (err) {
+            console.error('Error fetch notifikasi:', err);
+        } finally {
+            setLoadingNotif(false);
+        }
+    };
+
+    // Auto-fetch notifikasi saat user login (sekali saja)
+    useEffect(() => {
+        if (user) {
+            fetchNotifikasi();
+        }
+    }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
     // State untuk Pesanan Masuk (dari database)
     const [openOrders, setOpenOrders] = useState(false);
@@ -106,6 +126,7 @@ function Navbar({ role }) {
         } finally {
             localStorage.removeItem("token");
             localStorage.removeItem("user");
+            localStorage.removeItem("last_active");
             delete axios.defaults.headers.common.Authorization;
             navigate("/login");
         }
@@ -211,6 +232,7 @@ function Navbar({ role }) {
                                     size={22}
                                     onClick={() => {
                                         setOpenOrders(!openOrders);
+                                        setOpenProfile(false);
                                         if (!openOrders) fetchPesananMenunggu();
                                     }}
                                 />
@@ -319,7 +341,7 @@ function Navbar({ role }) {
                                 <div className="relative cursor-pointer" onClick={() => navigate("/keranjang")}>
                                     <FaShoppingCart className="cursor-pointer" data-cart-icon />
                                     {cartCount > 0 && (
-                                        <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold min-w-[18px] h-[18px] rounded-full flex items-center justify-center px-1">
+                                        <span className="absolute -top-1.5 -right-1.5 bg-red-500 text-white text-[10px] font-bold min-w-[16px] h-[16px] rounded-full flex items-center justify-center leading-none">
                                             {cartCount > 99 ? "99+" : cartCount}
                                         </span>
                                     )}
@@ -327,18 +349,58 @@ function Navbar({ role }) {
 
                                 {/* Notifikasi - Desktop */}
                                 <div className="relative">
-                                    <FaBell onClick={() => setOpenNotif(!openNotif)} className="cursor-pointer" />
+                                    <FaBell onClick={() => { setOpenNotif(!openNotif); setOpenProfile(false); }} className="cursor-pointer" />
+                                    {notifications.length > 0 && (
+                                        <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[14px] h-[14px] rounded-full flex items-center justify-center leading-none">
+                                            {notifications.length > 99 ? '99+' : notifications.length}
+                                        </span>
+                                    )}
                                     <div
                                         className={`absolute right-0 mt-3 w-[320px] bg-white rounded-xl shadow-xl transition
                                         ${openNotif ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                                         onMouseLeave={() => setOpenNotif(false)}
                                     >
-                                        <div className="bg-[#1766D3] text-white p-3 rounded-t-xl">Notifikasi</div>
-                                        {notifications.map((n, i) => (
-                                            <div key={i} className="p-3 border-b text-sm">
-                                                Pesanan <b>{n.code}</b> siap diambil
+                                        <div className="bg-[#1766D3] text-white p-3 rounded-t-xl flex items-center justify-between">
+                                            <span>Notifikasi</span>
+                                            {notifications.length > 0 && (
+                                                <span className="bg-white/20 px-2 py-0.5 rounded-full text-xs">
+                                                    {notifications.length} baru
+                                                </span>
+                                            )}
+                                        </div>
+                                        {loadingNotif ? (
+                                            <div className="p-6 text-center">
+                                                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-[#1766D3] mx-auto"></div>
                                             </div>
-                                        ))}
+                                        ) : notifications.length === 0 ? (
+                                            <div className="p-6 text-center text-gray-500 text-sm">
+                                                Tidak ada notifikasi
+                                            </div>
+                                        ) : (
+                                            notifications.map((n, i) => (
+                                                <div
+                                                    key={i}
+                                                    className={`p-3 border-b cursor-pointer hover:bg-gray-50 transition ${
+                                                        n.status === 'siap diambil' ? 'bg-green-50/50' : ''
+                                                    }`}
+                                                    onClick={() => navigate(`/profil-pengguna`)}
+                                                >
+                                                    <p className="text-sm font-medium">
+                                                        <span className={`font-bold ${n.status === 'siap diambil' ? 'text-green-600' : 'text-[#1766D3]'}`}>
+                                                            {n.kode_pesanan}
+                                                        </span>
+                                                        {' - '}
+                                                        {n.status === 'siap diambil' ? 'Siap diambil!' : 'Sedang diproses'}
+                                                    </p>
+                                                    <p className="text-xs text-gray-500 mt-0.5">
+                                                        Waktu ambil: {n.wkt_pengambilan}
+                                                    </p>
+                                                    <p className="text-xs text-gray-400 mt-0.5">
+                                                        {n.total_item} item • Rp {Number(n.total_harga).toLocaleString('id-ID')}
+                                                    </p>
+                                                </div>
+                                            ))
+                                        )}
                                     </div>
                                 </div>
                             </>
@@ -352,10 +414,10 @@ function Navbar({ role }) {
                                         src={user.foto_profil}
                                         alt="Profile"
                                         className="w-8 h-8 rounded-full object-cover cursor-pointer border border-gray-200"
-                                        onClick={() => setOpenProfile(!openProfile)}
+                                        onClick={() => { setOpenProfile(!openProfile); setOpenOrders(false); }}
                                     />
                                 ) : (
-                                    <FaUserCircle className="text-2xl cursor-pointer" onClick={() => setOpenProfile(!openProfile)} />
+                                    <FaUserCircle className="text-2xl cursor-pointer" onClick={() => { setOpenProfile(!openProfile); setOpenOrders(false); }} />
                                 )}
 
                                 {openProfile && (
@@ -430,18 +492,55 @@ function Navbar({ role }) {
 
                             {/* Notifikasi */}
                             <div className="relative p-1">
-                                <FaBell onClick={() => setOpenNotif(!openNotif)} className="w-5 h-5 cursor-pointer" />
+                                <FaBell onClick={() => { setOpenNotif(!openNotif); setOpenProfile(false); }} className="w-5 h-5 cursor-pointer" />
+                                {notifications.length > 0 && (
+                                    <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] font-bold min-w-[14px] h-[14px] px-1 rounded-full flex items-center justify-center">
+                                        {notifications.length > 99 ? '99+' : notifications.length}
+                                    </span>
+                                )}
                                 <div
-                                    className={`absolute right-0 mt-2 w-[280px] bg-white rounded-xl shadow-xl transition
+                                    className={`absolute right-0 mt-2 w-[280px] bg-white rounded-xl shadow-xl transition z-50
                                     ${openNotif ? "opacity-100" : "opacity-0 pointer-events-none"}`}
                                     onMouseLeave={() => setOpenNotif(false)}
                                 >
-                                    <div className="bg-[#1766D3] text-white p-3 rounded-t-xl text-sm">Notifikasi</div>
-                                    {notifications.map((n, i) => (
-                                        <div key={i} className="p-3 border-b text-sm">
-                                            Pesanan <b>{n.code}</b> siap diambil
+                                    <div className="bg-[#1766D3] text-white p-3 rounded-t-xl text-sm flex items-center justify-between">
+                                        <span>Notifikasi</span>
+                                        {notifications.length > 0 && (
+                                            <span className="bg-white/20 px-1.5 py-0.5 rounded-full text-[10px]">
+                                                {notifications.length}
+                                            </span>
+                                        )}
+                                    </div>
+                                    {loadingNotif ? (
+                                        <div className="p-4 text-center">
+                                            <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-[#1766D3] mx-auto"></div>
                                         </div>
-                                    ))}
+                                    ) : notifications.length === 0 ? (
+                                        <div className="p-4 text-center text-gray-500 text-xs">
+                                            Tidak ada notifikasi
+                                        </div>
+                                    ) : (
+                                        notifications.map((n, i) => (
+                                            <div
+                                                key={i}
+                                                className={`p-3 border-b text-sm cursor-pointer hover:bg-gray-50 ${
+                                                    n.status === 'siap diambil' ? 'bg-green-50/50' : ''
+                                                }`}
+                                                onClick={() => { navigate("/profil-pengguna"); setOpenNotif(false); }}
+                                            >
+                                                <p className="text-sm">
+                                                    <span className={`font-bold ${n.status === 'siap diambil' ? 'text-green-600' : 'text-[#1766D3]'}`}>
+                                                        {n.kode_pesanan}
+                                                    </span>
+                                                    {' - '}
+                                                    {n.status === 'siap diambil' ? 'Siap diambil!' : 'Sedang diproses'}
+                                                </p>
+                                                <p className="text-xs text-gray-500 mt-0.5">
+                                                    {n.wkt_pengambilan}
+                                                </p>
+                                            </div>
+                                        ))
+                                    )}
                                 </div>
                             </div>
                         </div>

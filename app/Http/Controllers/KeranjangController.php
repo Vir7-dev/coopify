@@ -14,7 +14,8 @@ class KeranjangController extends Controller
     {
         $items = Keranjang::with([
             'produk.gambar',
-            'produk.kategori'
+            'produk.kategori',
+            'produk.diskon'
         ])
             ->where(
                 'id_peng_fk_k',

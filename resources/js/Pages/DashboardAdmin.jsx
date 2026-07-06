@@ -29,6 +29,8 @@ const DashboardAdmin = () => {
 
     const [month, setMonth] = useState("Januari");
     const [year, setYear] = useState(new Date().getFullYear().toString());
+    const [week, setWeek] = useState(null); // null = semua minggu
+    const [totalWeeks, setTotalWeeks] = useState(5); // default 5
 
     const [openMonth, setOpenMonth] = useState(false);
     const [openYear, setOpenYear] = useState(false);
@@ -88,22 +90,43 @@ const DashboardAdmin = () => {
     const fetchData = async () => {
         setLoading(true);
         try {
-            // Fetch statistik dari profil endpoint
+            // Fetch statistik umum (produk & kategori) dari profil endpoint
             const profilRes = await api.get("/admin/profil");
-            const statistik = profilRes.data.statistik || {};
+            const statistikProfil = profilRes.data.statistik || {};
 
+            // Fetch chart yang juga mengembalikan statistik berdasarkan bulan
+            const bulanNomor = bulanKeNomor[month] || "01";
+            const weekParam = week ? `&minggu=${week}` : '';
+            const chartRes = await api.get(`/admin/chart?bulan=${bulanNomor}&tahun=${year}${weekParam}`);
+            const statistikChart = chartRes.data.statistik || {};
+
+            // Set stats dengan data yang sesuai
             setStats({
-                total_produk: statistik.total_produk || 0,
-                total_kategori: statistik.total_kategori || 0,
-                total_pemasukan: statistik.total_pemasukan || 0,
-                total_transaksi: statistik.total_transaksi || 0,
+                total_produk: statistikProfil.total_produk || 0,
+                total_kategori: statistikProfil.total_kategori || 0,
+                total_pemasukan: statistikChart.total_pemasukan || 0,
+                total_transaksi: statistikChart.total_transaksi || 0,
             });
 
-            const pesananRes = await api.get("/admin/pesanan");
-            setPesanan(pesananRes.data);
+            // Set chart data
+            setChartData({
+                labels: chartRes.data.labels || [
+                    "Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu",
+                ],
+                datasets: [{
+                    label: "Penjualan",
+                    data: chartRes.data.datasets?.[0]?.data || [0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: "#1766D3",
+                    borderRadius: 8,
+                }],
+            });
 
-            // Fetch data chart
-            await fetchChartData();
+            // Set jumlah minggu
+            setTotalWeeks(chartRes.data.jumlah_minggu || 5);
+
+            // Fetch pesanan berdasarkan bulan, tahun, dan minggu
+            const pesananRes = await api.get(`/admin/pesanan?bulan=${bulanNomor}&tahun=${year}&selesai=true${weekParam}`);
+            setPesanan(pesananRes.data);
         } catch (err) {
             console.error("Error fetching dashboard data:", err);
         } finally {
@@ -114,9 +137,8 @@ const DashboardAdmin = () => {
     const fetchChartData = async () => {
         try {
             const bulanNomor = bulanKeNomor[month] || "01";
-            const chartRes = await api.get(
-                `/admin/chart?bulan=${bulanNomor}&tahun=${year}`,
-            );
+            const weekParam = week ? `&minggu=${week}` : '';
+            const chartRes = await api.get(`/admin/chart?bulan=${bulanNomor}&tahun=${year}${weekParam}`);
             const data = chartRes.data;
 
             setChartData({
@@ -145,14 +167,115 @@ const DashboardAdmin = () => {
 
     const handleMonthChange = (newMonth) => {
         setMonth(newMonth);
+        setWeek(null); // Reset ke semua minggu
         setOpenMonth(false);
-        fetchChartData();
+        // Delay fetch agar state terupdate dulu
+        setTimeout(() => {
+            const bulanNomor = bulanKeNomor[newMonth] || "01";
+            fetchPesananFiltered(bulanNomor, year, null);
+            fetchChartDataFiltered(newMonth, year, null);
+        }, 0);
     };
 
     const handleYearChange = (newYear) => {
         setYear(newYear);
+        setWeek(null); // Reset ke semua minggu
         setOpenYear(false);
-        fetchChartData();
+        // Delay fetch agar state terupdate dulu
+        setTimeout(() => {
+            fetchPesananFiltered(bulanKeNomor[month] || "01", newYear, null);
+            fetchChartDataFiltered(month, newYear, null);
+        }, 0);
+    };
+
+    // Navigate to previous week
+    const handlePrevWeek = () => {
+        setWeek(currentWeek => {
+            let newWeek;
+            if (currentWeek === null) {
+                // Jika sedang lihat semua minggu, ke minggu terakhir
+                newWeek = totalWeeks;
+            } else if (currentWeek > 1) {
+                newWeek = currentWeek - 1;
+            } else {
+                return currentWeek;
+            }
+            // Fetch data dengan minggu baru
+            setTimeout(() => {
+                fetchPesananFiltered(bulanKeNomor[month] || "01", year, newWeek);
+                fetchChartDataFiltered(month, year, newWeek);
+            }, 0);
+            return newWeek;
+        });
+    };
+
+    // Navigate to next week
+    const handleNextWeek = () => {
+        setWeek(currentWeek => {
+            let newWeek;
+            if (currentWeek === null) {
+                // Jika sedang lihat semua minggu, tidak perlu next
+                return currentWeek;
+            } else if (currentWeek < totalWeeks) {
+                newWeek = currentWeek + 1;
+            } else {
+                return currentWeek;
+            }
+            // Fetch data dengan minggu baru
+            setTimeout(() => {
+                fetchPesananFiltered(bulanKeNomor[month] || "01", year, newWeek);
+                fetchChartDataFiltered(month, year, newWeek);
+            }, 0);
+            return newWeek;
+        });
+    };
+
+    // Fetch pesanan dengan filter
+    const fetchPesananFiltered = async (bulan, tahun, minggu) => {
+        try {
+            const weekParam = minggu ? `&minggu=${minggu}` : '';
+            const pesananRes = await api.get(`/admin/pesanan?bulan=${bulan}&tahun=${tahun}&selesai=true${weekParam}`);
+            setPesanan(pesananRes.data);
+        } catch (err) {
+            console.error("Error fetching pesanan:", err);
+        }
+    };
+
+    // Fetch chart dengan filter
+    const fetchChartDataFiltered = async (bulanNama, tahun, minggu) => {
+        try {
+            const bulanNomor = bulanKeNomor[bulanNama] || "01";
+            const weekParam = minggu ? `&minggu=${minggu}` : '';
+            const chartRes = await api.get(`/admin/chart?bulan=${bulanNomor}&tahun=${tahun}${weekParam}`);
+            const data = chartRes.data;
+
+            setChartData({
+                labels: data.labels || [
+                    "Minggu", "Senin", "Selasa", "Rabu", "Kamis", "Jumat", "Sabtu",
+                ],
+                datasets: [{
+                    label: "Penjualan",
+                    data: data.datasets?.[0]?.data || [0, 0, 0, 0, 0, 0, 0],
+                    backgroundColor: "#1766D3",
+                    borderRadius: 8,
+                }],
+            });
+
+            // Update statistik dan jumlah minggu berdasarkan bulan yang dipilih
+            if (data.statistik) {
+                setStats(prev => ({
+                    ...prev,
+                    total_pemasukan: data.statistik.total_pemasukan || 0,
+                    total_transaksi: data.statistik.total_transaksi || 0,
+                }));
+            }
+
+            if (data.jumlah_minggu) {
+                setTotalWeeks(data.jumlah_minggu);
+            }
+        } catch (err) {
+            console.error("Error fetching chart data:", err);
+        }
     };
 
     const formatRupiah = (angka) => {
@@ -475,9 +598,34 @@ const DashboardAdmin = () => {
                         ref={chartRef}
                         className="bg-white rounded-2xl p-5 shadow-sm hover:shadow-xl transition"
                     >
-                        <h3 className="text-lg font-semibold text-gray-700 mb-4">
-                            Grafik Penjualan - {month} {year}
-                        </h3>
+                        <div className="flex items-center justify-between mb-4">
+                            <h3 className="text-lg font-semibold text-gray-700">
+                                Grafik Penjualan - {month} {year}
+                                {week && ` (Minggu ke-${week})`}
+                            </h3>
+
+                            {/* Week Navigation */}
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={handlePrevWeek}
+                                    className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={week === 1}
+                                    title={week === null ? "Ke minggu terakhir" : ""}
+                                >
+                                    ← Prev
+                                </button>
+                                <span className="text-sm text-gray-500 min-w-[80px] text-center">
+                                    {week ? `Minggu ${week}/${totalWeeks}` : `Semua`}
+                                </span>
+                                <button
+                                    onClick={handleNextWeek}
+                                    className="px-3 py-1.5 text-sm border border-gray-200 rounded-lg hover:bg-gray-50 transition disabled:opacity-50 disabled:cursor-not-allowed"
+                                    disabled={week !== null && week >= totalWeeks}
+                                >
+                                    Next →
+                                </button>
+                            </div>
+                        </div>
 
                         <div className="h-56">
                             <Bar data={chartData} options={options} />

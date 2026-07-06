@@ -4,7 +4,7 @@ import { Navigate, Outlet } from 'react-router-dom';
 const ProtectedRoute = ({ allowedRoles }) => {
     const token = localStorage.getItem('token');
     const userString = localStorage.getItem('user');
-    
+
     let user = null;
     try {
         user = userString ? JSON.parse(userString) : null;

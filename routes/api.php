@@ -44,6 +44,7 @@ Route::middleware('auth:sanctum')->group(function () {
     // Profil Pengguna
     Route::get('/profil-pengguna', [App\Http\Controllers\ProfilPenggunaController::class, 'index']);
     Route::post('/profil-pengguna', [App\Http\Controllers\ProfilPenggunaController::class, 'update']);
+    Route::get('/profil-pengguna/notifikasi', [App\Http\Controllers\ProfilPenggunaController::class, 'notifikasi']);
 
     // Keranjang
     Route::get('/keranjang', [KeranjangController::class, 'index']);

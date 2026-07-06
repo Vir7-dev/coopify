@@ -98,13 +98,32 @@ export default function Keranjang() {
         0,
     );
 
+    // Fungsi helper untuk menghitung harga setelah diskon
+    const getItemPrice = (item) => {
+        const hargaJual = Number(item.produk.harga_jual) || 0;
+        const hargaDiskon = Number(item.produk.diskon?.harga_diskon) || 0;
+        const persenDiskon = Number(item.produk.diskon?.persen_diskon) || 0;
+
+        // Prioritaskan harga_diskon jika ada
+        if (hargaDiskon > 0) {
+            return hargaDiskon;
+        }
+
+        // Hitung dari persen_diskon jika ada
+        if (persenDiskon > 0) {
+            const potongan = (hargaJual * persenDiskon) / 100;
+            return hargaJual - potongan;
+        }
+
+        return hargaJual;
+    };
+
     const totalPrice = checkedItems.reduce(
-        (sum, item) => sum + Number(item.produk.harga_jual) * item.jml_dikeranjang,
+        (sum, item) => sum + getItemPrice(item) * item.jml_dikeranjang,
         0,
     );
 
-    const subtotalPerItem = (item) =>
-        Number(item.produk.harga_jual) * item.jml_dikeranjang;
+    const subtotalPerItem = (item) => getItemPrice(item) * item.jml_dikeranjang;
 
     const updateQty = async (idKeranjang, qty, maxStok) => {
         // Validasi: qty minimal 1 dan maksimal sesuai stok
@@ -395,12 +414,26 @@ export default function Keranjang() {
                                                                     .nama_produk
                                                             }
                                                         </h3>
-                                                        <p className="text-xs sm:text-sm text-gray-500 mt-0 sm:mt-1">
-                                                            {formatRupiah(
-                                                                item.produk
-                                                                    .harga_jual,
-                                                            )}
-                                                        </p>
+                                                        {/* Price Display - with discount support */}
+                                                        {item.produk.diskon && (item.produk.diskon.harga_diskon > 0 || item.produk.diskon.persen_diskon > 0) ? (
+                                                            <div className="flex items-center gap-2 mt-0 sm:mt-1 flex-wrap">
+                                                                <span className="text-xs sm:text-sm text-gray-400 line-through">
+                                                                    {formatRupiah(item.produk.harga_jual)}
+                                                                </span>
+                                                                <span className="text-xs sm:text-sm font-semibold text-[#1766D3]">
+                                                                    {formatRupiah(getItemPrice(item))}
+                                                                </span>
+                                                                {item.produk.diskon.persen_diskon > 0 && (
+                                                                    <span className="text-xs bg-red-100 text-red-600 px-1.5 py-0.5 rounded font-medium">
+                                                                        -{item.produk.diskon.persen_diskon}%
+                                                                    </span>
+                                                                )}
+                                                            </div>
+                                                        ) : (
+                                                            <p className="text-xs sm:text-sm text-gray-500 mt-0 sm:mt-1">
+                                                                {formatRupiah(item.produk.harga_jual)}
+                                                            </p>
+                                                        )}
                                                     </div>
                                                     <button
                                                         onClick={() =>
@@ -496,8 +529,7 @@ export default function Keranjang() {
                                                             1 && (
                                                             <p className="text-xs text-gray-400 hidden sm:block">
                                                                 {formatRupiah(
-                                                                    item.produk
-                                                                        .harga_jual,
+                                                                    getItemPrice(item),
                                                                 )}{" "}
                                                                 ×{" "}
                                                                 {

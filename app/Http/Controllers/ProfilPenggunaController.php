@@ -191,4 +191,66 @@ class ProfilPenggunaController extends Controller
             ]
         ]);
     }
+
+    /**
+     * Ambil notifikasi untuk pengguna yang sedang login
+     * GET /api/profil-pengguna/notifikasi
+     */
+    public function notifikasi(Request $request)
+    {
+        $user = $request->user();
+
+        // Ambil pesanan yang statusnya 'siap diambil' atau 'diproses' untuk notifikasi
+        $pesanans = Pesanan::with(['detailPesanan.produk'])
+            ->where('id_peng_fk_ps', $user->id_pengguna)
+            ->whereIn('status_pesanan', ['diproses', 'siap diambil'])
+            ->orderBy('wkt_pengambilan', 'asc')
+            ->get();
+
+        $notifikasi = [];
+
+        foreach ($pesanans as $pesanan) {
+            $statusText = match ($pesanan->status_pesanan) {
+                'diproses' => 'sedang diproses',
+                'siap diambil' => 'siap diambil',
+                default => $pesanan->status_pesanan,
+            };
+
+            // Format waktu pengambilan
+            $waktuPengambilan = $pesanan->wkt_pengambilan
+                ? $pesanan->wkt_pengambilan->format('d M Y - H:i')
+                : '-';
+
+            // Hitung total item
+            $totalItem = $pesanan->detailPesanan->sum('jml_peritem');
+
+            // Buat pesan berdasarkan status
+            $pesan = match ($pesanan->status_pesanan) {
+                'diproses' => "Pesanan {$pesanan->kode_pesanan} sedang {$statusText}",
+                'siap diambil' => "Pesanan {$pesanan->kode_pesanan} {$statusText}!",
+                default => "Pesanan {$pesanan->kode_pesanan}",
+            };
+
+            // Tentukan tipe notifikasi untuk styling
+            $tipe = $pesanan->status_pesanan === 'siap diambil' ? 'success' : 'info';
+
+            $notifikasi[] = [
+                'id_pesanan' => $pesanan->id_pesanan,
+                'kode_pesanan' => $pesanan->kode_pesanan,
+                'status' => $pesanan->status_pesanan,
+                'status_text' => $statusText,
+                'tipe' => $tipe,
+                'pesan' => $pesan,
+                'wkt_pengambilan' => $waktuPengambilan,
+                'total_item' => $totalItem,
+                'total_harga' => (float) $pesanan->total_harga,
+            ];
+        }
+
+        return response()->json([
+            'notifikasi' => $notifikasi,
+            'count' => count($notifikasi),
+            'siap_diambil_count' => collect($notifikasi)->where('status', 'siap diambil')->count(),
+        ]);
+    }
 }
