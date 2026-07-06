@@ -39,12 +39,12 @@ export default function KelolaProduk() {
     useEffect(() => {
         api.get("/produk")
             .then((res) => {
-                setProducts(res.data.data);
+                setProducts(res.data);
             })
             .catch((err) => console.log(err));
 
         api.get("/diskon").then((res) => {
-            setDiskon(res.data.data);
+            setDiskon(res.data);
         });
     }, []);
 
@@ -96,7 +96,7 @@ export default function KelolaProduk() {
             });
 
             const res = await api.get("/produk");
-            setProducts(res.data.data);
+            setProducts(res.data);
 
             setShowOpnameModal(false);
 
@@ -204,7 +204,7 @@ export default function KelolaProduk() {
             }
 
             const res = await api.get("/produk");
-            setProducts(res.data.data);
+            setProducts(res.data);
 
             setShowModal(false);
             setFileName("");
@@ -234,7 +234,7 @@ export default function KelolaProduk() {
             let message = "Terjadi kesalahan";
 
             if (error.response?.data?.errors) {
-  
+
                 message = Object.values(error.response.data.errors)
                     .flat()
                     .join("\n");
@@ -255,7 +255,7 @@ export default function KelolaProduk() {
             await api.delete(`/produk/${selectedDelete.id_produk}`);
 
             const res = await api.get("/produk");
-            setProducts(res.data.data);
+            setProducts(res.data);
 
             setShowDeleteModal(false);
             setSelectedDelete(null);
@@ -314,6 +314,7 @@ export default function KelolaProduk() {
         "bg-pink-100 text-pink-600",
         "bg-teal-100 text-teal-600",
     ];
+
 
     return (
         <AppLayout role="admin" showFooter={false}>

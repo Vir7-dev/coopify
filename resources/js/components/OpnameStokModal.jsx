@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import { FaBoxes, FaTimes } from "react-icons/fa";
 
 export default function OpnameStokModal({
@@ -12,6 +12,10 @@ export default function OpnameStokModal({
         jumlah_tambah: "",
     });
 
+    const [searchQuery, setSearchQuery] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
+    const dropdownRef = useRef(null);
+
     useEffect(() => {
         if (!showModal) {
             setForm({
@@ -20,6 +24,45 @@ export default function OpnameStokModal({
             });
         }
     }, [showModal]);
+
+    // Klik di luar dropdown akan menutup rekomendasi
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (
+                dropdownRef.current &&
+                !dropdownRef.current.contains(event.target)
+            ) {
+                setIsOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, []);
+
+    const filteredProducts = products.filter((item) =>
+        item.nama_produk.toLowerCase().includes(searchQuery.toLowerCase()),
+    );
+
+    const handleSelectProduct = (product) => {
+        setForm({
+            ...form,
+            id_produk: product.id_produk,
+        });
+        setSearchQuery(product.nama_produk);
+        setIsOpen(false);
+    };
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearchQuery(value);
+        setIsOpen(true);
+
+        if (value === "") {
+            setForm((prev) => ({ ...prev, id_produk: "" }));
+        }
+    };
 
     const selectedProduct = products.find(
         (item) => item.id_produk == form.id_produk,
@@ -35,7 +78,6 @@ export default function OpnameStokModal({
     return (
         <div className="fixed inset-0 bg-black/50 flex justify-center items-center z-50 p-2 sm:p-4">
             <div className="bg-white w-full max-w-[400px] max-h-[90vh] overflow-y-auto rounded-[10px] shadow-2xl">
-
                 <div className="bg-[#0099D5] text-white px-5 py-3 flex justify-between items-center">
                     <div className="flex items-center gap-2">
                         <FaBoxes className="text-white text-lg" />
@@ -54,33 +96,56 @@ export default function OpnameStokModal({
                 </div>
 
                 <div className="p-5 space-y-3.5">
-
-                    <div className="space-y-1">
+                     <div className="space-y-1 relative" ref={dropdownRef}>
                         <label className="text-[11px] font-semibold text-gray-500 ml-1">
                             Produk
                         </label>
-
-                        <select
-                            value={form.id_produk}
-                            onChange={(e) =>
-                                setForm({
-                                    ...form,
-                                    id_produk: e.target.value,
-                                })
-                            }
-                            className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
-                        >
-                            <option value="">Pilih Produk</option>
-
-                            {products.map((item) => (
-                                <option
-                                    key={item.id_produk}
-                                    value={item.id_produk}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Cari nama produk..."
+                                value={searchQuery}
+                                onFocus={() => setIsOpen(true)}
+                                onChange={handleSearchChange}
+                                className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none pr-8"
+                            />
+                            {searchQuery && (
+                                <button
+                                    type="button"
+                                    onClick={() => {
+                                        setSearchQuery("");
+                                        setForm((prev) => ({ ...prev, id_produk: "" }));
+                                    }}
+                                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600"
                                 >
-                                    {item.nama_produk}
-                                </option>
-                            ))}
-                        </select>
+                                    <FaTimes size={10} />
+                                </button>
+                            )}
+                        </div>
+                        {/* List Dropdown Rekomendasi */}
+                        {isOpen && (
+                            <div className="absolute z-10 w-full bg-white border border-gray-200 rounded-lg mt-1 max-h-48 overflow-y-auto shadow-lg">
+                                {filteredProducts.length > 0 ? (
+                                    filteredProducts.map((item) => (
+                                        <div
+                                            key={item.id_produk}
+                                            onClick={() => handleSelectProduct(item)}
+                                            className={`px-3 py-2 text-xs cursor-pointer hover:bg-gray-100 transition-colors ${
+                                                item.id_produk === form.id_produk
+                                                    ? "bg-blue-50 font-semibold text-[#1D63D3]"
+                                                    : "text-gray-700"
+                                            }`}
+                                        >
+                                            {item.nama_produk}
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="px-3 py-2 text-xs text-gray-400 text-center">
+                                        Produk tidak ditemukan
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="space-y-1">
@@ -141,7 +206,6 @@ export default function OpnameStokModal({
                             Batal
                         </button>
                     </div>
-
                 </div>
             </div>
         </div>
