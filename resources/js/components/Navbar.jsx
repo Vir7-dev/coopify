@@ -201,29 +201,38 @@ function Navbar({ role }) {
     };
 
     const handleChangePassword = async () => {
-        if (!oldPassword || !newPassword || !confirmPassword) {
-            alert("Semua field harus diisi");
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            alert("Konfirmasi password tidak cocok");
-            return;
-        }
-        try {
-            const response = await api.post("/ganti-password", {
-                old_password: oldPassword,
-                new_password: newPassword,
-                new_password_confirmation: confirmPassword,
-            });
-            alert(response.data.message);
-            setOldPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
-            setOpenPasswordModal(false);
-        } catch (error) {
-            alert(error.response?.data?.message || "Gagal ubah password");
-        }
-    };
+    if (!oldPassword || !newPassword || !confirmPassword) {
+        alert("Semua field harus diisi");
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        alert("Konfirmasi password tidak cocok");
+        return;
+    }
+
+    if (oldPassword === newPassword) {
+        alert("Password baru tidak boleh sama dengan password lama");
+        return;
+    }
+
+    try {
+        const response = await api.post("/ganti-password", {
+            old_password: oldPassword,
+            new_password: newPassword,
+            new_password_confirmation: confirmPassword,
+        });
+
+        alert(response.data.message);
+
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setOpenPasswordModal(false);
+    } catch (error) {
+        alert(error.response?.data?.message || "Gagal ubah password");
+    }
+};
 
     const formatTanggal = (tanggal) => {
         if (!tanggal) return '-';
