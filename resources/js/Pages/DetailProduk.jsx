@@ -13,8 +13,52 @@ export default function DetailProduk() {
     const [produk, setProduk] = useState(null);
     const [produkSerupa, setProdukSerupa] = useState([]);
     const [qty, setQty] = useState(1);
+    const [inputValue, setInputValue] = useState("1");
     const [activeImage, setActiveImage] = useState(0);
     const [loadingCart, setLoadingCart] = useState(false);
+
+    // Sync inputValue when qty changes externally
+    useEffect(() => {
+        setInputValue(String(qty));
+    }, [qty]);
+
+    // Sync qty when inputValue changes
+    const handleInputChange = (e) => {
+        const value = e.target.value;
+        setInputValue(value);
+
+        // Only update qty if it's a valid number
+        const num = parseInt(value);
+        if (!isNaN(num) && num >= 1 && num <= produk?.stok) {
+            setQty(num);
+        }
+    };
+
+    const handleInputBlur = () => {
+        // Reset to valid value if invalid
+        const num = parseInt(inputValue);
+        if (isNaN(num) || num < 1) {
+            setInputValue("1");
+            setQty(1);
+        } else if (num > produk?.stok) {
+            setInputValue(String(produk.stok));
+            setQty(produk.stok);
+        }
+    };
+
+    const decrementQty = () => {
+        if (qty > 1) {
+            setQty(qty - 1);
+        }
+    };
+
+    const incrementQty = () => {
+        if (qty < produk.stok) {
+            setQty(qty + 1);
+        }
+    };
+
+    const maxStok = produk?.stok || 0;
 
     useEffect(() => {
         fetch(`${API_BASE_URL}/api/produk/${id}`)
@@ -43,6 +87,11 @@ export default function DetailProduk() {
     const handleAddToCart = (e) => {
         if (!produk || loadingCart || produk.stok === 0) return;
 
+        // Validate qty
+        if (qty < 1 || qty > produk.stok) {
+            return;
+        }
+
         setLoadingCart(true);
 
         const rect = e.currentTarget.getBoundingClientRect();
@@ -62,6 +111,11 @@ export default function DetailProduk() {
 
     const buyNow = (e) => {
         if (!produk) return;
+
+        // Validate qty
+        if (qty < 1 || qty > produk.stok) {
+            return;
+        }
 
         const rect = e.currentTarget.getBoundingClientRect();
         const startPosition = {
@@ -181,32 +235,44 @@ export default function DetailProduk() {
 
                                 <div className="flex items-center border border-gray-300 rounded-xl overflow-hidden">
                                     <button
-                                        onClick={() =>
-                                            setQty(qty > 1 ? qty - 1 : 1)
-                                        }
-                                        className="w-12 h-12 bg-gray-100"
+                                        onClick={decrementQty}
+                                        disabled={qty <= 1}
+                                        className="w-12 h-12 bg-gray-100 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
                                     >
                                         -
                                     </button>
 
-                                    <div className="w-14 text-center font-semibold">
-                                        {qty}
-                                    </div>
+                                    <input
+                                        type="text"
+                                        inputMode="numeric"
+                                        pattern="[0-9]*"
+                                        value={inputValue}
+                                        onChange={handleInputChange}
+                                        onBlur={handleInputBlur}
+                                        className="w-16 h-12 text-center font-semibold border-x border-gray-200 focus:outline-none focus:bg-blue-50"
+                                    />
 
                                     <button
-                                        onClick={() => setQty(qty + 1)}
-                                        className="w-12 h-12 bg-gray-100"
+                                        onClick={incrementQty}
+                                        disabled={qty >= maxStok}
+                                        className="w-12 h-12 bg-gray-100 hover:bg-gray-200 disabled:opacity-40 disabled:cursor-not-allowed transition"
                                     >
                                         +
                                     </button>
                                 </div>
+
+                                {maxStok > 0 && (
+                                    <span className="text-xs text-gray-400">
+                                        Max: {maxStok}
+                                    </span>
+                                )}
                             </div>
 
                             {/* BUTTON */}
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 mt-8">
                                 <button
                                     onClick={handleAddToCart}
-                                    disabled={loadingCart || produk.stok === 0}
+                                    disabled={loadingCart || produk.stok === 0 || qty < 1 || qty > produk.stok}
                                     className="h-14 rounded-2xl border-2 text-[#1766D3] font-semibold flex items-center justify-center gap-2 hover:bg-blue-50 disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     <FaShoppingCart />
@@ -215,7 +281,7 @@ export default function DetailProduk() {
 
                                 <button
                                     onClick={buyNow}
-                                    disabled={produk.stok === 0}
+                                    disabled={produk.stok === 0 || qty < 1 || qty > produk.stok}
                                     className="h-14 rounded-2xl bg-[#1766D3] text-white font-semibold hover:bg-[#0f7ba5] disabled:opacity-50 disabled:cursor-not-allowed"
                                 >
                                     Beli Sekarang

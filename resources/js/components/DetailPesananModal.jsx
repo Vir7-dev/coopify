@@ -9,6 +9,7 @@ export default function DetailPesananModal({
     getStatusLabel,
     handleUpdateStatus,
     getNextActionLabel,
+    isSubmitting = false,
 }) {
     if (!selectedOrder) return null;
 
@@ -122,16 +123,18 @@ export default function DetailPesananModal({
                         selectedOrder.status_pesanan !== "dibatalkan" && (
                             <button
                                 onClick={() => handleUpdateStatus(selectedOrder.id_pesanan, selectedOrder.status_pesanan)}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition text-sm font-medium"
+                                disabled={isSubmitting}
+                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                             >
                                 <CheckCircle size={16} />
-                                {getNextActionLabel(selectedOrder.status_pesanan)}
+                                {isSubmitting ? "Memproses..." : getNextActionLabel(selectedOrder.status_pesanan)}
                             </button>
                         )}
 
                     <button
                         onClick={() => setSelectedOrder(null)}
-                        className="flex-1 border border-gray-300 hover:bg-gray-100 py-2 rounded-xl transition text-sm font-medium"
+                        disabled={isSubmitting}
+                        className="flex-1 border border-gray-300 hover:bg-gray-100 py-2 rounded-xl transition text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                         Tutup
                     </button>

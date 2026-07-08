@@ -3,6 +3,7 @@ export default function DeleteModal({
     setShowDeleteModal,
     confirmDelete,
     selectedDelete,
+    isSubmitting = false,
 }) {
     if (!showDeleteModal) return null;
 
@@ -25,14 +26,16 @@ export default function DeleteModal({
                         <div className="flex gap-3">
                             <button
                                 onClick={confirmDelete}
-                                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm"
+                                disabled={isSubmitting}
+                                className="flex-1 bg-red-500 hover:bg-red-600 text-white py-2 rounded-lg text-sm disabled:opacity-60 disabled:cursor-not-allowed transition"
                             >
-                                Hapus
+                                {isSubmitting ? "Menghapus..." : "Hapus"}
                             </button>
 
                             <button
                                 onClick={() => setShowDeleteModal(false)}
-                                className="flex-1 bg-gray-300 hover:bg-gray-400 text-black py-2 rounded-lg text-sm"
+                                disabled={isSubmitting}
+                                className="flex-1 bg-gray-300 hover:bg-gray-400 text-black py-2 rounded-lg text-sm disabled:opacity-60 disabled:cursor-not-allowed transition"
                             >
                                 Batal
                             </button>

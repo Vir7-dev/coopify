@@ -6,6 +6,7 @@ export default function OpnameStokModal({
     setShowModal,
     products,
     handleSubmit,
+    isSubmitting = false,
 }) {
     const [form, setForm] = useState({
         id_produk: "",
@@ -194,14 +195,16 @@ export default function OpnameStokModal({
                     <div className="flex gap-3 pt-2">
                         <button
                             onClick={() => handleSubmit(form)}
-                            className="flex-1 bg-[#1D63D3] hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-[#1D63D3] hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
-                            Simpan
+                            {isSubmitting ? "Menyimpan..." : "Simpan"}
                         </button>
 
                         <button
                             onClick={() => setShowModal(false)}
-                            className="flex-1 bg-[#0099D5] hover:bg-[#0088C0] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
+                            disabled={isSubmitting}
+                            className="flex-1 bg-[#0099D5] hover:bg-[#0088C0] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                         >
                             Batal
                         </button>

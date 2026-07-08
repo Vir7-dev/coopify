@@ -8,6 +8,7 @@ function Login() {
   const [nim, setNim] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
 
   const Toast = Swal.mixin({
     toast: true,
@@ -21,6 +22,9 @@ function Login() {
   });
 
   const handleLogin = async () => {
+    if (isLoading) return; // Prevent double submit
+
+    setIsLoading(true);
     try {
       const res = await api.post("/login", {
         nim_nik: nim,
@@ -51,6 +55,8 @@ function Login() {
         icon: "error",
         title: error.response?.data?.message || "Login gagal",
       });
+    } finally {
+      setIsLoading(false);
     }
   };
 
@@ -132,8 +138,10 @@ function Login() {
           {/* BUTTON */}
           <button
             type="submit"
-            className="w-full bg-[#2D5A74] text-white py-3 rounded-lg border-2 border-white font-semibold hover:scale-95 transition"          >
-            Masuk
+            disabled={isLoading}
+            className="w-full bg-[#2D5A74] text-white py-3 rounded-lg border-2 border-white font-semibold hover:scale-95 transition disabled:opacity-60 disabled:cursor-not-allowed"
+          >
+            {isLoading ? "Memuat..." : "Masuk"}
           </button>
 
         </form>

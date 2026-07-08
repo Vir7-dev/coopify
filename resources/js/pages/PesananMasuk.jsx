@@ -26,6 +26,7 @@ export default function PesananMasuk() {
     // State untuk data dari API
     const [pesananMasuk, setPesananMasuk] = useState([]);
     const [loading, setLoading] = useState(true);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     // State untuk pagination
     const [currentPage, setCurrentPage] = useState(1);
@@ -49,13 +50,16 @@ export default function PesananMasuk() {
     }, []);
 
     const handleUpdateStatus = async (id, currentStatus) => {
+        if (isSubmitting) return;
+
         let nextStatus = '';
         if (currentStatus === 'belum bayar') nextStatus = 'diproses';
         else if (currentStatus === 'diproses') nextStatus = 'siap diambil';
         else if (currentStatus === 'siap diambil') nextStatus = 'selesai';
-        
+
         if (!nextStatus) return;
 
+        setIsSubmitting(true);
         try {
             await api.put(`/admin/pesanan/${id}/status`, { status: nextStatus });
             await fetchPesanan();
@@ -74,6 +78,8 @@ export default function PesananMasuk() {
                 title: "Gagal!",
                 text: error.response?.data?.message || 'Gagal mengubah status',
             });
+        } finally {
+            setIsSubmitting(false);
         }
     };
     const getNextActionLabel = (status) => {
@@ -607,6 +613,7 @@ export default function PesananMasuk() {
                     getStatusLabel={getStatusLabel}
                     handleUpdateStatus={handleUpdateStatus}
                     getNextActionLabel={getNextActionLabel}
+                    isSubmitting={isSubmitting}
                 />
             </div>
         </AppLayout>

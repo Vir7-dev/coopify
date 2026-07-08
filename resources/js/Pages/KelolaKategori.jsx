@@ -28,6 +28,7 @@ export default function KelolaKategori() {
   const [showModal, setShowModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [form, setForm] = useState({ nama: "", ikon: "FaBox" });
 
@@ -50,18 +51,20 @@ export default function KelolaKategori() {
   useEffect(() => { fetchData(); }, []);
 
   const totalKategori = products.length;
-  const totalProduk = products.reduce((s, p) => s + (p.stok || 0), 0);
-  const terakhirUpdate = products.length
-    ? (() => {
-      const validDates = products.map((p) => new Date(p.tgl)).filter((d) => !isNaN(d));
-      if (!validDates.length) return "-";
-      return new Date(Math.max(...validDates))
-        .toLocaleDateString("id-ID", { day: "numeric", month: "long", year: "numeric" });
-    })()
-    : "-";
-  const terbanyak = products.length
-    ? products.reduce((a, b) => (a.stok > b.stok ? a : b)).nama
-    : "-";
+
+  // Kategori terbaru (paling baru dibuat)
+  const kategoriTerbaru = products.length
+    ? products.reduce((a, b) => (new Date(a.tgl) > new Date(b.tgl) ? a : b))
+    : null;
+
+  // Kategori yang belum memiliki produk
+  const kategoriKosong = products.filter((p) => (p.stok || 0) === 0);
+  const kategoriKosongCount = kategoriKosong.length;
+
+  // Kategori dengan jumlah produk terbanyak
+  const kategoriPopuler = products.length
+    ? products.reduce((a, b) => (a.stok > b.stok ? a : b))
+    : null;
 
   const filtered = products.filter((p) => {
     const matchSearch = p.nama.toLowerCase().includes(search.toLowerCase());
@@ -138,6 +141,8 @@ export default function KelolaKategori() {
   const NAMA_KATEGORI_REGEX = /^[A-Za-z\s]+$/;
 
   const handleSubmit = async () => {
+    if (isSubmitting) return;
+
     const namaTrim = form.nama.trim();
 
     if (!namaTrim) {
@@ -165,6 +170,7 @@ export default function KelolaKategori() {
 
     const body = { nama_kategori: namaTrim, ikon: form.ikon };
 
+    setIsSubmitting(true);
     try {
       if (isEdit) {
         const r = await api.put(`/kategori/${selectedProduct.id}`, body);
@@ -200,6 +206,8 @@ export default function KelolaKategori() {
         title: "Gagal!",
         text: error.response?.data?.message || "Terjadi kesalahan saat menyimpan kategori",
       });
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -236,39 +244,52 @@ export default function KelolaKategori() {
             </div>
           </div>
 
-          {/* Total Produk */}
+          {/* Kategori Terbaru */}
           <div className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 w-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
             <div className="absolute inset-0 bg-gradient-to-tr from-green-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
             <div className="relative z-10 bg-green-100 text-green-600 p-3 rounded-lg group-hover:scale-110 transition duration-300">
-              <FaBox />
-            </div>
-            <div className="relative z-10">
-              <p className="text-sm text-gray-500">Total Produk</p>
-              <h2 className="text-lg font-semibold group-hover:text-green-600 transition">{totalProduk}</h2>
-            </div>
-          </div>
-
-          {/* Tanggal Dibuat */}
-          <div className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 w-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
-            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
-            <div className="relative z-10 bg-orange-100 text-orange-600 p-3 rounded-lg group-hover:scale-110 transition duration-300">
               <FaCalendarAlt />
             </div>
             <div className="relative z-10">
-              <p className="text-sm text-gray-500">Tanggal Dibuat</p>
-              <h2 className="text-sm font-semibold group-hover:text-orange-600 transition">{terakhirUpdate}</h2>
+              <p className="text-sm text-gray-500">Kategori Terbaru</p>
+              <h2 className="text-sm font-semibold group-hover:text-green-600 transition">
+                {kategoriTerbaru ? kategoriTerbaru.nama : "-"}
+              </h2>
+              {kategoriTerbaru?.tgl && (
+                <p className="text-xs text-gray-400">
+                  {new Date(kategoriTerbaru.tgl).toLocaleDateString("id-ID", { day: "numeric", month: "short", year: "numeric" })}
+                </p>
+              )}
             </div>
           </div>
 
-          {/* Kategori Terbanyak */}
+          {/* Kategori Belum Terisi */}
+          <div className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 w-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
+            <div className="absolute inset-0 bg-gradient-to-tr from-orange-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
+            <div className="relative z-10 bg-orange-100 text-orange-600 p-3 rounded-lg group-hover:scale-110 transition duration-300">
+              <FaBox />
+            </div>
+            <div className="relative z-10">
+              <p className="text-sm text-gray-500">Belum Terisi</p>
+              <h2 className="text-lg font-semibold group-hover:text-orange-600 transition">{kategoriKosongCount}</h2>
+              <p className="text-xs text-gray-400">kategori</p>
+            </div>
+          </div>
+
+          {/* Kategori Populer */}
           <div className="group relative bg-white p-4 rounded-xl shadow-sm flex items-center gap-3 w-full overflow-hidden hover:shadow-lg hover:-translate-y-1 transition-all duration-300 cursor-default">
             <div className="absolute inset-0 bg-gradient-to-tr from-purple-500/10 to-transparent opacity-0 group-hover:opacity-100 transition duration-300"></div>
             <div className="relative z-10 bg-purple-100 text-purple-600 p-3 rounded-lg group-hover:scale-110 transition duration-300">
               <FaTags />
             </div>
             <div className="relative z-10">
-              <p className="text-sm text-gray-500">Kategori Terbanyak</p>
-              <h2 className="text-sm font-semibold group-hover:text-purple-600 transition">{terbanyak}</h2>
+              <p className="text-sm text-gray-500">Produk Terbanyak</p>
+              <h2 className="text-sm font-semibold group-hover:text-purple-600 transition">
+                {kategoriPopuler ? kategoriPopuler.nama : "-"}
+              </h2>
+              {kategoriPopuler && (
+                <p className="text-xs text-gray-400">{kategoriPopuler.stok} produk</p>
+              )}
             </div>
           </div>
         </div>
@@ -458,13 +479,15 @@ export default function KelolaKategori() {
                   <div className="flex gap-3 pt-2">
                     <button
                       onClick={handleSubmit}
-                      className="flex-1 bg-[#1D63D3] hover:bg-blue-700 transition text-white py-2 rounded-lg text-sm font-bold active:scale-95"
+                      disabled={isSubmitting}
+                      className="flex-1 bg-[#1D63D3] hover:bg-blue-700 transition text-white py-2 rounded-lg text-sm font-bold active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
-                      {isEdit ? "Update" : "Simpan"}
+                      {isSubmitting ? "Menyimpan..." : (isEdit ? "Update" : "Simpan")}
                     </button>
                     <button
                       onClick={() => setShowModal(false)}
-                      className="flex-1 bg-gray-200 hover:bg-gray-300 transition text-gray-700 py-2 rounded-lg text-sm font-bold active:scale-95"
+                      disabled={isSubmitting}
+                      className="flex-1 bg-gray-200 hover:bg-gray-300 transition text-gray-700 py-2 rounded-lg text-sm font-bold active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                     >
                       Batal
                     </button>

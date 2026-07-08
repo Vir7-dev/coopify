@@ -35,6 +35,7 @@ export default function KelolaProduk() {
     const [products, setProducts] = useState([]);
     const [diskon, setDiskon] = useState([]);
     const [showOpnameModal, setShowOpnameModal] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         api.get("/produk")
@@ -89,6 +90,30 @@ export default function KelolaProduk() {
 
     // Tambah STOK OPNAME
     const handleOpname = async (data) => {
+        if (isSubmitting) return;
+
+        // Validasi client-side
+        if (!data.id_produk) {
+            Swal.fire({
+                icon: "warning",
+                title: "Perhatian!",
+                text: "Silakan pilih produk terlebih dahulu",
+                confirmButtonColor: "#1D63D3",
+            });
+            return;
+        }
+
+        if (!data.jumlah_tambah || parseInt(data.jumlah_tambah) < 1) {
+            Swal.fire({
+                icon: "warning",
+                title: "Perhatian!",
+                text: "Jumlah tambah stok minimal 1",
+                confirmButtonColor: "#1D63D3",
+            });
+            return;
+        }
+
+        setIsSubmitting(true);
         try {
             await api.post("/produk/tambah-stok", {
                 id_produk: data.id_produk,
@@ -113,6 +138,8 @@ export default function KelolaProduk() {
                 title: "Gagal!",
                 text: error.response?.data?.message || "Terjadi kesalahan",
             });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -171,6 +198,50 @@ export default function KelolaProduk() {
     };
 
     const handleSubmit = async () => {
+        if (isSubmitting) return;
+
+        // Validasi client-side
+        if (!form.nama_produk.trim()) {
+            Swal.fire({
+                icon: "warning",
+                title: "Perhatian!",
+                text: "Nama produk wajib diisi",
+                confirmButtonColor: "#1D63D3",
+            });
+            return;
+        }
+
+        if (!form.harga_jual || parseFloat(form.harga_jual) <= 0) {
+            Swal.fire({
+                icon: "warning",
+                title: "Perhatian!",
+                text: "Harga produk wajib diisi dengan benar",
+                confirmButtonColor: "#1D63D3",
+            });
+            return;
+        }
+
+        if (!form.id_kat_fk_p) {
+            Swal.fire({
+                icon: "warning",
+                title: "Perhatian!",
+                text: "Kategori wajib dipilih",
+                confirmButtonColor: "#1D63D3",
+            });
+            return;
+        }
+
+        if (!form.deskripsi.trim()) {
+            Swal.fire({
+                icon: "warning",
+                title: "Perhatian!",
+                text: "Deskripsi produk wajib diisi",
+                confirmButtonColor: "#1D63D3",
+            });
+            return;
+        }
+
+        setIsSubmitting(true);
         try {
             const formData = new FormData();
             formData.append("nama_produk", form.nama_produk);
@@ -247,10 +318,15 @@ export default function KelolaProduk() {
                 title: "Validasi Gagal",
                 text: message,
             });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
     const confirmDelete = async () => {
+        if (isSubmitting) return;
+
+        setIsSubmitting(true);
         try {
             await api.delete(`/produk/${selectedDelete.id_produk}`);
 
@@ -275,6 +351,8 @@ export default function KelolaProduk() {
                 title: "Gagal!",
                 text: error.response?.data?.message || "Terjadi kesalahan",
             });
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -649,6 +727,7 @@ export default function KelolaProduk() {
                 setShowModal={setShowOpnameModal}
                 products={products}
                 handleSubmit={handleOpname}
+                isSubmitting={isSubmitting}
             />
 
             <ProdukModal
@@ -663,6 +742,7 @@ export default function KelolaProduk() {
                 handleFileChange={handleFileChange}
                 handleUploadClick={handleUploadClick}
                 fileName={fileName}
+                isSubmitting={isSubmitting}
             />
 
             <HapusProdukModal
@@ -670,6 +750,7 @@ export default function KelolaProduk() {
                 setShowDeleteModal={setShowDeleteModal}
                 confirmDelete={confirmDelete}
                 selectedDelete={selectedDelete}
+                isSubmitting={isSubmitting}
             />
         </AppLayout>
     );

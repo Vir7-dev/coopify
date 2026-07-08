@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import axios from "axios";
 import api from "../api";
+import { API_BASE_URL } from "../api";
 import { useCart } from "../context/CartContext";
 
 import {
@@ -39,6 +40,73 @@ function Navbar({ role }) {
 
     const [openNotif, setOpenNotif] = useState(false);
     const [keyword, setKeyword] = useState("");
+
+    // State untuk search suggestion
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+
+    // Debounced search suggestion
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (keyword.length >= 3) {
+                fetchSuggestions(keyword);
+            } else {
+                setSuggestions([]);
+            }
+        }, 300);
+
+        return () => clearTimeout(timeoutId);
+    }, [keyword]);
+
+    const fetchSuggestions = async (query) => {
+        setSearchLoading(true);
+        setShowSuggestions(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/produk/search?q=${encodeURIComponent(query)}`);
+            const results = (res.data?.data || []).slice(0, 5);
+            setSuggestions(results);
+        } catch (err) {
+            console.error("Gagal fetch suggestions:", err);
+            setSuggestions([]);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
+    const handleSuggestionClick = (product) => {
+        navigate(`/detail-produk/${product.id_produk}`);
+        setShowSuggestions(false);
+        setKeyword("");
+        setSuggestions([]);
+    };
+
+    const handleKeywordChange = (e) => {
+        const value = e.target.value;
+        setKeyword(value);
+        if (value.length >= 3) {
+            setShowSuggestions(true);
+        } else {
+            setShowSuggestions(false);
+            setSuggestions([]);
+        }
+    };
+
+    const handleSearchFocus = () => {
+        if (keyword.length >= 3 && suggestions.length > 0) {
+            setShowSuggestions(true);
+        }
+    };
+
+    const handleSearchBlur = () => {
+        setTimeout(() => setShowSuggestions(false), 200);
+    };
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === "Escape") {
+            setShowSuggestions(false);
+        }
+    };
 
     // State untuk Notifikasi (dari database)
     const [notifications, setNotifications] = useState([]);
@@ -206,17 +274,47 @@ function Navbar({ role }) {
 
                     {/* CENTER: Search Bar (non-admin only) */}
                     {role !== "admin" && (
-                        <div className="flex-1 max-w-2xl mx-8">
+                        <div className="flex-1 max-w-2xl mx-8 relative">
                             <div className="relative">
-                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" />
+                                <FaSearch className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
                                 <input
                                     type="text"
                                     value={keyword}
-                                    onChange={(e) => setKeyword(e.target.value)}
+                                    onChange={handleKeywordChange}
                                     onKeyDown={handleSearch}
+                                    onFocus={handleSearchFocus}
+                                    onBlur={handleSearchBlur}
                                     placeholder="Cari produk..."
                                     className="w-full pl-11 pr-4 py-2.5 border border-gray-300 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#1766D3] bg-gray-50 hover:bg-white transition-colors"
                                 />
+
+                                {/* Suggestions Dropdown */}
+                                {showSuggestions && keyword.length >= 3 && (
+                                    <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-gray-200 shadow-xl z-[100] overflow-hidden">
+                                        {searchLoading ? (
+                                            <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                                <span className="inline-block animate-spin mr-1">⟳</span>
+                                                Mencari...
+                                            </div>
+                                        ) : suggestions.length > 0 ? (
+                                            suggestions.map((item) => (
+                                                <div
+                                                    key={item.id_produk}
+                                                    onClick={() => handleSuggestionClick(item)}
+                                                    className="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                                                >
+                                                    <p className="text-sm font-medium text-gray-800">
+                                                        {item.nama_produk}
+                                                    </p>
+                                                </div>
+                                            ))
+                                        ) : (
+                                            <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                                Tidak ada hasil untuk "{keyword}"
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
                             </div>
                         </div>
                     )}
@@ -466,15 +564,44 @@ function Navbar({ role }) {
 
                     {/* Search Bar - Mobile */}
                     <div className="relative flex-1 max-w-[220px] sm:max-w-[280px]">
-                        <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs" />
+                        <FaSearch className="absolute left-2.5 top-1/2 -translate-y-1/2 text-gray-400 text-xs pointer-events-none" />
                         <input
                             type="text"
                             value={keyword}
-                            onChange={(e) => setKeyword(e.target.value)}
+                            onChange={handleKeywordChange}
                             onKeyDown={handleSearch}
+                            onFocus={handleSearchFocus}
+                            onBlur={handleSearchBlur}
                             placeholder="Cari..."
                             className="w-full pl-8 pr-2 py-1.5 text-xs border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#1766D3]"
                         />
+
+                        {/* Suggestions Dropdown - Mobile */}
+                        {showSuggestions && keyword.length >= 3 && (
+                            <div className="absolute top-full left-0 right-0 mt-1 bg-white rounded-lg border border-gray-200 shadow-xl z-[100] overflow-hidden">
+                                {searchLoading ? (
+                                    <div className="px-3 py-2 text-xs text-gray-500 text-center">
+                                        <span className="inline-block animate-spin mr-1">⟳</span>
+                                    </div>
+                                ) : suggestions.length > 0 ? (
+                                    suggestions.map((item) => (
+                                        <div
+                                            key={item.id_produk}
+                                            onClick={() => handleSuggestionClick(item)}
+                                            className="px-3 py-2 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                                        >
+                                            <p className="text-xs font-medium text-gray-800 truncate">
+                                                {item.nama_produk}
+                                            </p>
+                                        </div>
+                                    ))
+                                ) : (
+                                    <div className="px-3 py-2 text-xs text-gray-500 text-center">
+                                        Tidak ada hasil
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     {/* Icons - Mobile (Keranjang + Notifikasi) */}
