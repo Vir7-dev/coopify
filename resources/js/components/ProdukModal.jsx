@@ -12,6 +12,7 @@ export default function ProdukModal({
     handleFileChange,
     handleUploadClick,
     fileName,
+    isSubmitting = false,
 }) {
     if (!showModal) return null;
 
@@ -39,7 +40,7 @@ export default function ProdukModal({
                             <div className="grid grid-cols-2 gap-3">
                                 <div className="space-y-1">
                                     <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                        Nama Produk
+                                        Nama Produk <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="text"
@@ -47,13 +48,14 @@ export default function ProdukModal({
                                         placeholder="Nama produk"
                                         value={form.nama_produk}
                                         onChange={handleChange}
+                                        required
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
                                     />
                                 </div>
 
                                 <div className="space-y-1">
                                     <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                        Harga Produk
+                                        Harga Produk <span className="text-red-500">*</span>
                                     </label>
                                     <input
                                         type="number"
@@ -61,6 +63,7 @@ export default function ProdukModal({
                                         placeholder="Harga"
                                         value={form.harga_jual}
                                         onChange={handleChange}
+                                        required
                                         className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
                                     />
                                 </div>
@@ -118,7 +121,7 @@ export default function ProdukModal({
 
                             <div className="space-y-1">
                                 <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                    Deskripsi Produk
+                                    Deskripsi Produk <span className="text-red-500">*</span>
                                 </label>
                                 <textarea
                                     type="text"
@@ -126,22 +129,24 @@ export default function ProdukModal({
                                     placeholder="Deskripsi"
                                     value={form.deskripsi}
                                     onChange={handleChange}
+                                    required
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
                                 />
                             </div>
 
                             <div className="space-y-1">
                                 <label className="text-[11px] font-semibold text-gray-500 ml-1">
-                                    Kategori
+                                    Kategori <span className="text-red-500">*</span>
                                 </label>
 
                                 <select
                                     name="id_kat_fk_p"
                                     value={form.id_kat_fk_p}
                                     onChange={handleChange}
+                                    required
                                     className="w-full border border-gray-200 rounded-lg px-3 py-2 text-xs focus:border-[#0099D5] outline-none"
                                 >
-                                    <option value="">Pilih Kategori</option>
+                                    <option value="">-- Pilih Kategori --</option>
                                     <option value="1">Makanan</option>
                                     <option value="2">Minuman</option>
                                     <option value="3">
@@ -155,14 +160,16 @@ export default function ProdukModal({
                             <div className="flex gap-3 pt-2">
                                 <button
                                     onClick={handleSubmit}
-                                    className="flex-1 bg-[#1D63D3] hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
+                                    disabled={isSubmitting}
+                                    className="flex-1 bg-[#1D63D3] hover:bg-blue-700 text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
-                                    Simpan
+                                    {isSubmitting ? "Menyimpan..." : "Simpan"}
                                 </button>
 
                                 <button
                                     onClick={() => setShowModal(false)}
-                                    className="flex-1 bg-[#0099D5] hover:bg-[#0088C0] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95"
+                                    disabled={isSubmitting}
+                                    className="flex-1 bg-[#0099D5] hover:bg-[#0088C0] text-white py-2 rounded-lg flex items-center justify-center gap-2 text-xs font-bold transition-all active:scale-95 disabled:opacity-60 disabled:cursor-not-allowed"
                                 >
                                     Batal
                                 </button>

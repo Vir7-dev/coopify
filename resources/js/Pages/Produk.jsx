@@ -76,12 +76,83 @@ export default function Produk() {
     const [search, setSearch] = useState("");
     const [showHarga, setShowHarga] = useState(false);
 
+    // State untuk search suggestion
+    const [suggestions, setSuggestions] = useState([]);
+    const [showSuggestions, setShowSuggestions] = useState(false);
+    const [searchLoading, setSearchLoading] = useState(false);
+
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [wishlist, setWishlist] = useState([]);
     const [loadingKeranjang, setLoadingKeranjang] = useState(null);
     const { addToCart } = useCart();
+
+    // Debounced search suggestion
+    useEffect(() => {
+        const timeoutId = setTimeout(() => {
+            if (search.length >= 3) {
+                fetchSuggestions(search);
+            } else {
+                setSuggestions([]);
+            }
+        }, 300); // 300ms debounce
+
+        return () => clearTimeout(timeoutId);
+    }, [search]);
+
+    const fetchSuggestions = async (query) => {
+        setSearchLoading(true);
+        setShowSuggestions(true);
+        try {
+            const res = await axios.get(`${API_BASE_URL}/api/produk/search?q=${encodeURIComponent(query)}`);
+            console.log("Suggestions response:", res.data);
+            // Ambil hanya 5 suggestion teratas dari data paginated
+            const results = (res.data?.data || []).slice(0, 5);
+            console.log("Filtered suggestions:", results);
+            setSuggestions(results);
+        } catch (err) {
+            console.error("Gagal fetch suggestions:", err);
+            setSuggestions([]);
+        } finally {
+            setSearchLoading(false);
+        }
+    };
+
+    const handleSuggestionClick = (product) => {
+        navigate(`/detail-produk/${product.id_produk}`);
+        setShowSuggestions(false);
+        setSearch("");
+        setSuggestions([]);
+    };
+
+    const handleSearchChange = (e) => {
+        const value = e.target.value;
+        setSearch(value);
+        if (value.length >= 3) {
+            setShowSuggestions(true);
+        } else {
+            setShowSuggestions(false);
+            setSuggestions([]);
+        }
+    };
+
+    const handleSearchKeyDown = (e) => {
+        if (e.key === "Escape") {
+            setShowSuggestions(false);
+        }
+    };
+
+    const handleSearchFocus = () => {
+        if (search.length >= 3 && suggestions.length > 0) {
+            setShowSuggestions(true);
+        }
+    };
+
+    const handleSearchBlur = () => {
+        // Delay hide untuk klik pada suggestion
+        setTimeout(() => setShowSuggestions(false), 200);
+    };
 
     const resetHarga = () => {
         setMinHarga("");
@@ -181,19 +252,53 @@ export default function Produk() {
                 </div>
 
                 {/* FILTER CONTROLS */}
-                <div className="flex flex-col gap-3 w-full">
+                <div className="flex flex-col gap-3 w-full relative">
                     {/* Search + Filter Row */}
                     <div className="flex flex-wrap items-center gap-2">
                         {/* Search */}
                         <div className="relative flex-1 min-w-[180px]">
-                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm" />
+                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
                             <input
                                 type="text"
                                 placeholder="Cari produk..."
                                 value={search}
-                                onChange={(e) => setSearch(e.target.value)}
+                                onChange={handleSearchChange}
+                                onFocus={handleSearchFocus}
+                                onBlur={handleSearchBlur}
+                                onKeyDown={handleSearchKeyDown}
                                 className="pl-9 pr-4 py-2 w-full rounded-xl border border-gray-200 text-xs sm:text-sm bg-white focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3] shadow-sm"
                             />
+
+                            {/* Suggestions Dropdown */}
+                            {showSuggestions && search.length >= 3 && (
+                                <div
+                                    className="absolute top-full left-0 right-0 mt-1 bg-white rounded-xl border border-gray-200 shadow-xl z-[100] overflow-hidden"
+                                    style={{ minWidth: '200px' }}
+                                >
+                                    {searchLoading ? (
+                                        <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                            <span className="inline-block animate-spin mr-1">⟳</span>
+                                            Mencari...
+                                        </div>
+                                    ) : suggestions.length > 0 ? (
+                                        suggestions.map((item) => (
+                                            <div
+                                                key={item.id_produk}
+                                                onClick={() => handleSuggestionClick(item)}
+                                                className="px-4 py-3 hover:bg-blue-50 cursor-pointer transition-colors border-b border-gray-100 last:border-b-0"
+                                            >
+                                                <p className="text-sm font-medium text-gray-800">
+                                                    {item.nama_produk}
+                                                </p>
+                                            </div>
+                                        ))
+                                    ) : (
+                                        <div className="px-4 py-3 text-sm text-gray-500 text-center">
+                                            Tidak ada hasil untuk "{search}"
+                                        </div>
+                                    )}
+                                </div>
+                            )}
                         </div>
 
                         {/* Sort Dropdown */}

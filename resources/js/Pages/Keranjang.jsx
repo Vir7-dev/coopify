@@ -57,6 +57,7 @@ export default function Keranjang() {
     const [deletingId, setDeletingId] = useState(null);
     const [editingQtyId, setEditingQtyId] = useState(null);
     const [editingQtyValue, setEditingQtyValue] = useState("");
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     useEffect(() => {
         fetchKeranjang();
@@ -202,12 +203,14 @@ export default function Keranjang() {
     };
 
     const checkout = async () => {
+        if (isSubmitting) return;
         if (checkedItems.length === 0) return;
         if (!pickupTime) {
             toast.warning("Pilih waktu pengambilan terlebih dahulu");
             return;
         }
 
+        setIsSubmitting(true);
         try {
             const res = await axios.post(
                 "/api/checkout",
@@ -228,6 +231,8 @@ export default function Keranjang() {
             fetchCartCount();
         } catch (err) {
             toast.error(err.response?.data?.message || "Checkout gagal");
+        } finally {
+            setIsSubmitting(false);
         }
     };
 
@@ -609,16 +614,16 @@ export default function Keranjang() {
                                 <button
                                     onClick={checkout}
                                     disabled={
-                                        checkedItems.length === 0 || !pickupTime
+                                        checkedItems.length === 0 || !pickupTime || isSubmitting
                                     }
-                                    className={`w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all shadow-lg ${
+                                    className={`w-full py-4 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all shadow-lg disabled:opacity-60 disabled:cursor-not-allowed ${
                                         checkedItems.length === 0
                                             ? "bg-gray-300 cursor-not-allowed"
                                             : "bg-gradient-to-r from-[#1766D3] to-[#3D8FFF] hover:shadow-xl hover:scale-[1.02] active:scale-[0.98]"
                                     }`}
                                 >
-                                    Checkout
-                                    {checkedItems.length > 0 && (
+                                    {isSubmitting ? "Memproses..." : "Checkout"}
+                                    {checkedItems.length > 0 && !isSubmitting && (
                                         <FaChevronRight />
                                     )}
                                 </button>
@@ -668,15 +673,15 @@ export default function Keranjang() {
                                 {/* Mobile Checkout Button */}
                                 <button
                                     onClick={checkout}
-                                    disabled={checkedItems.length === 0 || !pickupTime}
-                                    className={`w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all ${
+                                    disabled={checkedItems.length === 0 || !pickupTime || isSubmitting}
+                                    className={`w-full py-3 rounded-xl font-bold text-white flex items-center justify-center gap-2 transition-all disabled:opacity-60 disabled:cursor-not-allowed ${
                                         checkedItems.length === 0
                                             ? "bg-gray-300 cursor-not-allowed"
                                             : "bg-gradient-to-r from-[#1766D3] to-[#3D8FFF]"
                                     }`}
                                 >
-                                    Checkout
-                                    {checkedItems.length > 0 && (
+                                    {isSubmitting ? "Memproses..." : "Checkout"}
+                                    {checkedItems.length > 0 && !isSubmitting && (
                                         <FaChevronRight />
                                     )}
                                 </button>

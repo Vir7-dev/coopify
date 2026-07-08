@@ -12,7 +12,9 @@ import {
   FaBoxOpen,
   FaClock,
   FaQrcode,
-  FaExclamationTriangle
+  FaExclamationTriangle,
+  FaSearch,
+  FaTimes
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 
@@ -101,9 +103,29 @@ export default function ProfilPengguna() {
   const [currentPage, setCurrentPage] = useState(1);
   const itemsPerPage = 5;
 
+  // Search state for riwayat
+  const [searchRiwayat, setSearchRiwayat] = useState("");
+
+  // Filter data based on search
+  const filteredData = data.filter((item) => {
+    if (!searchRiwayat) return true;
+    const query = searchRiwayat.toLowerCase();
+    return (
+      item.nama?.toLowerCase().includes(query) ||
+      item.kode_pesanan?.toLowerCase().includes(query) ||
+      item.kategori?.toLowerCase().includes(query) ||
+      item.status?.toLowerCase().includes(query)
+    );
+  });
+
   const indexOfLastItem = currentPage * itemsPerPage;
-  const currentItems = data.slice(indexOfLastItem - itemsPerPage, indexOfLastItem);
-  const totalPages = Math.ceil(data.length / itemsPerPage);
+  const currentItems = filteredData.slice(indexOfLastItem - itemsPerPage, indexOfLastItem);
+  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+
+  // Reset pagination when search changes
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [searchRiwayat]);
 
   if (loading) {
     return (
@@ -313,17 +335,53 @@ export default function ProfilPengguna() {
 
         {/* RIWAYAT */}
         <div className="mx-4 sm:mx-6 mt-6 bg-white rounded-xl shadow overflow-hidden">
-          <div className="p-4">
+          <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
             <h2 className="text-lg font-semibold">Riwayat Pesanan</h2>
+
+            {/* Search Bar */}
+            <div className="relative w-full sm:w-64">
+              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
+              <input
+                type="text"
+                placeholder="Cari pesanan..."
+                value={searchRiwayat}
+                onChange={(e) => setSearchRiwayat(e.target.value)}
+                className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3]"
+              />
+              {searchRiwayat && (
+                <button
+                  onClick={() => setSearchRiwayat("")}
+                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                >
+                  <FaTimes size={14} />
+                </button>
+              )}
+            </div>
           </div>
 
-          {data.length === 0 ? (
+          {filteredData.length === 0 ? (
             <div className="p-8 text-center text-gray-500">
-              Belum ada riwayat pesanan.
+              {searchRiwayat ? (
+                <>
+                  <p>Tidak ada pesanan yang cocok dengan "{searchRiwayat}"</p>
+                  <button
+                    onClick={() => setSearchRiwayat("")}
+                    className="mt-2 text-sm text-[#1766D3] hover:underline"
+                  >
+                    Reset pencarian
+                  </button>
+                </>
+              ) : (
+                "Belum ada riwayat pesanan."
+              )}
             </div>
           ) : (
             <>
-              <div className="space-y-4 p-4">
+              <div className="px-4 pb-2 text-xs text-gray-500">
+                Menampilkan {currentItems.length} dari {filteredData.length} pesanan
+              </div>
+
+              <div className="space-y-4 px-4 pb-4">
                 {currentItems.map((item) => (
                   <div key={item.id} className="border border-gray-200 rounded-xl p-4 shadow-sm">
 
