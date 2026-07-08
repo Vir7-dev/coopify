@@ -73,14 +73,14 @@ function Navbar({ role }) {
 
     useEffect(() => {
         if (role === "admin") {
-            fetchPesananMenunggu();
+            fetchPesananBelumBayar();
         }
     }, [role]);
 
-    const fetchPesananMenunggu = async () => {
+    const fetchPesananBelumBayar = async () => {
         setLoadingOrders(true);
         try {
-            const res = await api.get('/admin/pesanan?status=menunggu');
+            const res = await api.get('/admin/pesanan?status=belum bayar');
             setOrderList(res.data || []);
         } catch (err) {
             console.error('Error fetch pesanan:', err);
@@ -92,7 +92,7 @@ function Navbar({ role }) {
     const prosesPesanan = async (id) => {
         try {
             await api.put("/admin/pesanan/" + id + "/status", { status: 'diproses' });
-            fetchPesananMenunggu();
+            fetchPesananBelumBayar();
         } catch (err) {
             console.error('Error update status:', err);
             alert('Gagal memproses pesanan');
@@ -103,7 +103,7 @@ function Navbar({ role }) {
         if (!confirm('Yakin ingin membatalkan pesanan ini?')) return;
         try {
             await api.put("/admin/pesanan/" + id + "/status", { status: 'dibatalkan' });
-            fetchPesananMenunggu();
+            fetchPesananBelumBayar();
         } catch (err) {
             console.error('Error batalkan pesanan:', err);
             alert('Gagal membatalkan pesanan');
@@ -233,7 +233,7 @@ function Navbar({ role }) {
                                     onClick={() => {
                                         setOpenOrders(!openOrders);
                                         setOpenProfile(false);
-                                        if (!openOrders) fetchPesananMenunggu();
+                                        if (!openOrders) fetchPesananBelumBayar();
                                     }}
                                 />
                                 {orderList.length > 0 && (

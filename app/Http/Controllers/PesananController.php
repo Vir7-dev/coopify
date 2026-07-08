@@ -24,7 +24,7 @@ class PesananController extends Controller
 
         // Filter pesanan baru (menunggu) untuk notifikasi
         if ($request->boolean('baru')) {
-            $query->where('status_pesanan', 'menunggu');
+            $query->where('status_pesanan', 'belum bayar');
         }
 
         // Filter berdasarkan bulan dan tahun
@@ -64,7 +64,7 @@ class PesananController extends Controller
         \Log::info("updateStatus called for ID: $id", ['request' => $request->all()]);
         try {
             $request->validate([
-                'status' => 'required|in:menunggu,diproses,siap diambil,selesai,dibatalkan'
+                'status' => 'required|in:belum bayar,diproses,siap diambil,selesai,dibatalkan'
             ]);
 
             $pesanan = Pesanan::findOrFail($id);
@@ -74,7 +74,7 @@ class PesananController extends Controller
 
         // Validasi transisi status
         $validTransitions = [
-            'menunggu' => ['diproses', 'dibatalkan'],
+            'belum bayar' => ['diproses', 'dibatalkan'],
             'diproses' => ['siap diambil', 'dibatalkan'],
             'siap diambil' => ['selesai', 'dibatalkan'],
             'selesai' => [],
@@ -123,7 +123,7 @@ class PesananController extends Controller
      */
     public function countBaru()
     {
-        $count = Pesanan::where('status_pesanan', 'menunggu')->count();
+        $count = Pesanan::where('status_pesanan', 'belum bayar')->count();
 
         return response()->json(['count' => $count]);
     }

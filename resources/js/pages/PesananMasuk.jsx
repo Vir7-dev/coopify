@@ -50,7 +50,7 @@ export default function PesananMasuk() {
 
     const handleUpdateStatus = async (id, currentStatus) => {
         let nextStatus = '';
-        if (currentStatus === 'menunggu') nextStatus = 'diproses';
+        if (currentStatus === 'belum bayar') nextStatus = 'diproses';
         else if (currentStatus === 'diproses') nextStatus = 'siap diambil';
         else if (currentStatus === 'siap diambil') nextStatus = 'selesai';
         
@@ -77,7 +77,7 @@ export default function PesananMasuk() {
         }
     };
     const getNextActionLabel = (status) => {
-        if (status === 'menunggu') return 'Proses Pesanan';
+        if (status === 'belum bayar') return 'Proses Pesanan';
         if (status === 'diproses') return 'Siap Diambil';
         if (status === 'siap diambil') return 'Selesaikan';
         return '';
@@ -193,7 +193,7 @@ export default function PesananMasuk() {
     // Helper untuk label status
     const getStatusLabel = (status) => {
         const labels = {
-            menunggu: "Menunggu",
+            "belum bayar": "belum bayar",
             diproses: "Diproses",
             "siap diambil": "Siap Diambil",
             selesai: "Selesai",
@@ -205,7 +205,7 @@ export default function PesananMasuk() {
     // Helper untuk class status badge
     const getStatusClass = (status) => {
         const classes = {
-            menunggu: "bg-yellow-100 text-yellow-700",
+            "belum bayar": "bg-yellow-100 text-yellow-700",
             diproses: "bg-blue-100 text-blue-700",
             "siap diambil": "bg-purple-100 text-purple-700",
             selesai: "bg-green-100 text-green-700",
@@ -377,7 +377,7 @@ export default function PesananMasuk() {
                                 {
                                     pesananMasuk.filter(
                                         (item) =>
-                                            item.status_pesanan === "menunggu",
+                                            item.status_pesanan === "belum bayar",
                                     ).length
                                 }
                             </h2>
@@ -420,7 +420,7 @@ export default function PesananMasuk() {
                                 className="border rounded-lg px-3 py-2 text-sm"
                             >
                                 <option value="">Semua Status</option>
-                                <option value="menunggu">Menunggu</option>
+                                <option value="belum bayar">Belum Bayar</option>
                                 <option value="diproses">Diproses</option>
                                 <option value="siap diambil">Siap Diambil</option>
                                 <option value="selesai">Selesai</option>

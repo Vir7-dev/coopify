@@ -92,7 +92,7 @@ class CheckoutController extends Controller
                     'tgl_pesanan' => now(),
                     'wkt_pengambilan' => $waktuPengambilan,
                     'total_harga' => $totalHarga,
-                    'status_pesanan' => 'menunggu',
+                    'status_pesanan' => 'belum bayar',
                     'id_peng_fk_ps' => $idPengguna,
                 ]);
 
