@@ -12,8 +12,6 @@ class ProdukController extends Controller
 {
     public function index(Request $request)
     {
-        $perPage = $request->input('per_page', 12);
-        $perPage = min(max((int)$perPage, 1), 50); // 1-50 item per halaman
 
         $produk = Produk::with(['kategori', 'gambar', 'diskon'])
             ->withSum([
@@ -24,7 +22,7 @@ class ProdukController extends Controller
                 }
             ], 'jml_peritem')
             ->orderBy('created_at', 'desc')
-            ->paginate($perPage);
+            ->get();
 
         return response()->json($produk);
     }
