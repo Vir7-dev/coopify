@@ -193,6 +193,21 @@ class ProdukController extends Controller
     public function destroy($produk)
     {
         $produk = Produk::findOrFail($produk);
+
+        // Cek apakah produk masih ada di riwayat transaksi
+        if ($produk->detailPesanan()->exists()) {
+            return response()->json([
+                'message' => 'Produk tidak bisa dihapus karena sudah pernah dipesan pelanggan.'
+            ], 422);
+        }
+
+        // Cek apakah produk masih ada di keranjang pelanggan
+        if ($produk->keranjang()->exists()) {
+            return response()->json([
+                'message' => 'Produk tidak bisa dihapus karena masih ada di keranjang pelanggan.'
+            ], 422);
+        }
+        
         $produk->delete();
 
         return response()->json([
