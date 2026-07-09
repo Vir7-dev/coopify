@@ -141,14 +141,14 @@ function Navbar({ role }) {
 
     useEffect(() => {
         if (role === "admin") {
-            fetchPesananMenunggu();
+            fetchPesananBelumBayar();
         }
     }, [role]);
 
-    const fetchPesananMenunggu = async () => {
+    const fetchPesananBelumBayar = async () => {
         setLoadingOrders(true);
         try {
-            const res = await api.get('/admin/pesanan?status=menunggu');
+            const res = await api.get('/admin/pesanan?status=belum bayar');
             setOrderList(res.data || []);
         } catch (err) {
             console.error('Error fetch pesanan:', err);
@@ -160,7 +160,7 @@ function Navbar({ role }) {
     const prosesPesanan = async (id) => {
         try {
             await api.put("/admin/pesanan/" + id + "/status", { status: 'diproses' });
-            fetchPesananMenunggu();
+            fetchPesananBelumBayar();
         } catch (err) {
             console.error('Error update status:', err);
             alert('Gagal memproses pesanan');
@@ -171,7 +171,7 @@ function Navbar({ role }) {
         if (!confirm('Yakin ingin membatalkan pesanan ini?')) return;
         try {
             await api.put("/admin/pesanan/" + id + "/status", { status: 'dibatalkan' });
-            fetchPesananMenunggu();
+            fetchPesananBelumBayar();
         } catch (err) {
             console.error('Error batalkan pesanan:', err);
             alert('Gagal membatalkan pesanan');
@@ -201,29 +201,38 @@ function Navbar({ role }) {
     };
 
     const handleChangePassword = async () => {
-        if (!oldPassword || !newPassword || !confirmPassword) {
-            alert("Semua field harus diisi");
-            return;
-        }
-        if (newPassword !== confirmPassword) {
-            alert("Konfirmasi password tidak cocok");
-            return;
-        }
-        try {
-            const response = await api.post("/ganti-password", {
-                old_password: oldPassword,
-                new_password: newPassword,
-                new_password_confirmation: confirmPassword,
-            });
-            alert(response.data.message);
-            setOldPassword("");
-            setNewPassword("");
-            setConfirmPassword("");
-            setOpenPasswordModal(false);
-        } catch (error) {
-            alert(error.response?.data?.message || "Gagal ubah password");
-        }
-    };
+    if (!oldPassword || !newPassword || !confirmPassword) {
+        alert("Semua field harus diisi");
+        return;
+    }
+
+    if (newPassword !== confirmPassword) {
+        alert("Konfirmasi password tidak cocok");
+        return;
+    }
+
+    if (oldPassword === newPassword) {
+        alert("Password baru tidak boleh sama dengan password lama");
+        return;
+    }
+
+    try {
+        const response = await api.post("/ganti-password", {
+            old_password: oldPassword,
+            new_password: newPassword,
+            new_password_confirmation: confirmPassword,
+        });
+
+        alert(response.data.message);
+
+        setOldPassword("");
+        setNewPassword("");
+        setConfirmPassword("");
+        setOpenPasswordModal(false);
+    } catch (error) {
+        alert(error.response?.data?.message || "Gagal ubah password");
+    }
+};
 
     const formatTanggal = (tanggal) => {
         if (!tanggal) return '-';
@@ -331,7 +340,7 @@ function Navbar({ role }) {
                                     onClick={() => {
                                         setOpenOrders(!openOrders);
                                         setOpenProfile(false);
-                                        if (!openOrders) fetchPesananMenunggu();
+                                        if (!openOrders) fetchPesananBelumBayar();
                                     }}
                                 />
                                 {orderList.length > 0 && (

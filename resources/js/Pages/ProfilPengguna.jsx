@@ -287,7 +287,7 @@ export default function ProfilPengguna() {
                       </div>
                       <span className={`text-xs px-2 py-1 rounded-full font-medium ${isUrgent ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
                         }`}>
-                        {isUrgent ? 'Segera!' : 'Menunggu'}
+                        {isUrgent ? 'Segera!' : 'belum bayar'}
                       </span>
                     </div>
 

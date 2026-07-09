@@ -65,7 +65,7 @@ class ProfilPenggunaController extends Controller
         $pesananBelumBayar = [];
         $pesananPending = $pesanans->filter(function ($pesanan) {
             return $pesanan->pembayaran &&
-                   $pesanan->pembayaran->status_pem === 'menunggu' &&
+                   $pesanan->pembayaran->status_pem === 'belum bayar' &&
                    ($pesanan->pembayaran->batas_wkt_pem === null || now()->lessThan($pesanan->pembayaran->batas_wkt_pem));
         });
 
@@ -83,13 +83,13 @@ class ProfilPenggunaController extends Controller
                     $statusRes = \Midtrans\Transaction::status($pesanan->kode_pesanan);
                     $statusTransaksi = match ($statusRes->transaction_status ?? '') {
                         'capture', 'settlement' => 'berhasil',
-                        'pending' => 'menunggu',
+                        'pending' => 'belum bayar',
                         'deny', 'cancel' => 'gagal',
                         'expire' => 'kadaluarsa',
-                        default => 'menunggu',
+                        default => 'belum bayar',
                     };
 
-                    if ($statusTransaksi !== 'menunggu') {
+                    if ($statusTransaksi !== 'belum bayar') {
                         DB::statement(
                             "CALL konfirmasi_pembayaran(?, ?, ?, ?, ?, @hasil)",
                             [
@@ -104,7 +104,7 @@ class ProfilPenggunaController extends Controller
                         $pesanan->refresh();
                         
                         // Jika statusnya sudah tidak menunggu, lewati dari daftar belum bayar
-                        if ($pembayaran->status_pem !== 'menunggu') {
+                        if ($pembayaran->status_pem !== 'belum bayar') {
                             continue;
                         }
                     }

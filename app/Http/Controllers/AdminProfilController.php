@@ -29,7 +29,7 @@ class AdminProfilController extends Controller
         // ---- Statistik ----
         $totalProduk    = Produk::count();
         $totalKategori  = Kategori::count();
-        $pesananMasuk   = Pesanan::whereIn('status_pesanan', ['menunggu', 'diproses'])->count();
+        $pesananMasuk   = Pesanan::whereIn('status_pesanan', ['belum bayar', 'diproses'])->count();
         $pesananSelesai = Pesanan::where('status_pesanan', 'selesai')->count();
 
         // Hitung total pemasukan dari pesanan yang sudah lunas
@@ -38,7 +38,7 @@ class AdminProfilController extends Controller
             ->sum('total_bayar');
 
         // Hitung total transaksi
-        $totalTransaksi = Pesanan::whereIn('status_pesanan', ['selesai', 'menunggu', 'diproses'])->count();
+        $totalTransaksi = Pesanan::whereIn('status_pesanan', ['selesai', 'belum bayar', 'diproses'])->count();
 
         return response()->json([
             'profil' => [
