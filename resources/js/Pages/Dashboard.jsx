@@ -5,6 +5,7 @@ import { useNavigate, Link } from "react-router-dom";
 import { FaShoppingCart, FaHamburger, FaCoffee, FaPencilAlt, FaPills, FaUserGraduate } from "react-icons/fa";
 import { API_BASE_URL } from "../api";
 import { useCart } from "../context/CartContext";
+import Swal from "sweetalert2";
 
 // Icon mapping berdasarkan nama kategori
 const iconMap = {
@@ -29,6 +30,8 @@ function Dashboard() {
     const [products, setProducts] = useState([]);
     const [categories, setCategories] = useState([]);
     const [loadingCart, setLoadingCart] = useState(null);
+    const [pesananSiapDiambil, setPesananSiapDiambil] = useState([]);
+    const [dismissedWarnings, setDismissedWarnings] = useState(new Set());
 
     const navigate = useNavigate();
     const { addToCart } = useCart();
@@ -49,7 +52,91 @@ function Dashboard() {
             .catch(err => console.log(err));
 
         fetchProducts();
+
+        // Fetch pesanan siap diambil untuk warning
+        axios.get("/api/profil-pengguna/notifikasi")
+            .then(res => {
+                // Filter hanya yang status 'siap diambil'
+                const siapDiambil = res.data.notifikasi.filter(n => n.status === 'siap diambil');
+                setPesananSiapDiambil(siapDiambil);
+            })
+            .catch(err => console.log(err));
     }, []);
+
+    // Fungsi untuk menghitung sisa waktu pengambilan
+    const getRemainingPickupTime = (wktPengambilan) => {
+        if (!wktPengambilan) return null;
+        // Parse format "dd MMM YYYY - HH:mm"
+        const months = {
+            'Jan': 0, 'Feb': 1, 'Mar': 2, 'Apr': 3, 'May': 4, 'Jun': 5,
+            'Jul': 6, 'Aug': 7, 'Sep': 8, 'Oct': 9, 'Nov': 10, 'Dec': 11
+        };
+        const parts = wktPengambilan.split(' - ');
+        if (parts.length !== 2) return null;
+        const dateParts = parts[0].split(' ');
+        const timeParts = parts[1].split(':');
+        const deadline = new Date(
+            parseInt(dateParts[2]),
+            months[dateParts[1]] || 0,
+            parseInt(dateParts[0]),
+            parseInt(timeParts[0]),
+            parseInt(timeParts[1])
+        ).getTime();
+        const now = Date.now();
+        return deadline - now;
+    };
+
+    // Check warning pengambilan pesanan (25 menit untuk testing)
+    const WARNING_THRESHOLD = 25 * 60 * 1000; // 25 menit dalam milidetik
+
+    useEffect(() => {
+        if (pesananSiapDiambil.length === 0) return;
+
+        // Cari pesanan yang waktu pengambilannya tinggal <= 25 menit
+        const now = Date.now();
+        const urgentOrders = pesananSiapDiambil.filter(pesanan => {
+            const remaining = getRemainingPickupTime(pesanan.wkt_pengambilan);
+            return remaining !== null && remaining > 0 && remaining <= WARNING_THRESHOLD;
+        });
+
+        // Filter yang belum di-dismiss
+        const ordersToWarn = urgentOrders.filter(
+            pesanan => !dismissedWarnings.has(pesanan.id_pesanan)
+        );
+
+        if (ordersToWarn.length > 0) {
+            const pesanan = ordersToWarn[0];
+            const remaining = getRemainingPickupTime(pesanan.wkt_pengambilan);
+            const formattedTime = remaining > 60000
+                ? `${Math.floor(remaining / 60000)} menit`
+                : `${Math.ceil(remaining / 1000)} detik`;
+
+            Swal.fire({
+                icon: 'warning',
+                title: '⚠️ Peringatan Pengambilan!',
+                html: `
+                    <div style="text-align: left;">
+                        <p style="margin-bottom: 10px;">Pesanan <strong>${pesanan.kode_pesanan}</strong> harus diambil dalam:</p>
+                        <div style="background: #fee2e2; padding: 15px; border-radius: 8px; text-align: center; margin: 15px 0;">
+                            <span style="font-size: 28px; font-weight: bold; color: #dc2626;">${formattedTime}</span>
+                        </div>
+                        <p style="color: #666; font-size: 14px;">Segera ambil pesanan Anda sebelum waktu habis!</p>
+                    </div>
+                `,
+                confirmButtonColor: '#dc2626',
+                confirmButtonText: 'OK, Saya Mengerti',
+                allowOutsideClick: false,
+                allowEscapeKey: false,
+                showCancelButton: true,
+                cancelButtonText: 'Nanti Saja',
+                cancelButtonColor: '#6b7280',
+            }).then((result) => {
+                if (result.isDismissed) {
+                    setDismissedWarnings(prev => new Set([...prev, pesanan.id_pesanan]));
+                }
+            });
+        }
+    }, [pesananSiapDiambil, dismissedWarnings]);
 
     const handleAddToCart = (e, item) => {
         e.stopPropagation();
