@@ -1,500 +1,633 @@
 import React, { useState, useEffect } from "react";
 import AppLayout from "../Layouts/AppLayout";
 import { useNavigate } from "react-router-dom";
-import api from "../api";
+import api, { API_BASE_URL } from "../api";
 import {
-  FaShoppingCart,
-  FaPencilAlt,
-  FaIdCard,
-  FaPhone,
-  FaEnvelope,
-  FaCreditCard,
-  FaBoxOpen,
-  FaClock,
-  FaQrcode,
-  FaExclamationTriangle,
-  FaSearch,
-  FaTimes
+    FaShoppingCart,
+    FaPencilAlt,
+    FaIdCard,
+    FaPhone,
+    FaEnvelope,
+    FaCreditCard,
+    FaBoxOpen,
+    FaClock,
+    FaQrcode,
+    FaExclamationTriangle,
+    FaSearch,
+    FaTimes,
 } from "react-icons/fa";
 import Swal from "sweetalert2";
 
 export default function ProfilPengguna() {
-  const navigate = useNavigate();
+    const navigate = useNavigate();
 
-  const [user, setUser] = useState(null);
-  const [statistik, setStatistik] = useState({
-    total_pesanan: 0,
-    total_belanja: 0,
-    siap_diambil: 0
-  });
-  const [data, setData] = useState([]);
-  const [pesananBelumBayar, setPesananBelumBayar] = useState([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchProfile();
-  }, []);
-
-  const fetchProfile = async () => {
-    try {
-      const res = await api.get("/profil-pengguna");
-      setUser(res.data.user);
-      setStatistik(res.data.statistik);
-      setData(res.data.riwayat);
-      setPesananBelumBayar(res.data.pesanan_belum_bayar || []);
-    } catch (error) {
-      console.error(error);
-      Swal.fire({
-        icon: "error",
-        title: "Gagal memuat profil",
-        text: "Silakan coba lagi nanti",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Fungsi untuk menghitung sisa waktu pembayaran
-  const getRemainingTime = (batasWktPem) => {
-    if (!batasWktPem) return null;
-    const deadline = new Date(batasWktPem).getTime();
-    const now = Date.now();
-    const diff = deadline - now;
-
-    if (diff <= 0) return null;
-
-    const minutes = Math.floor(diff / 60000);
-    const seconds = Math.floor((diff % 60000) / 1000);
-
-    if (minutes >= 60) {
-      const hours = Math.floor(minutes / 60);
-      const mins = minutes % 60;
-      return `${hours}j ${mins}m`;
-    }
-
-    return `${minutes}m ${seconds}dtk`;
-  };
-
-  const handleBayarUlang = (pesanan) => {
-    navigate(`/pembayaran?pesanan=${pesanan.id_pesanan}`, {
-      state: {
-        id_pesanan: pesanan.id_pesanan,
-        kode_pesanan: pesanan.kode_pesanan,
-        total: pesanan.total_harga,
-        wkt_pengambilan: pesanan.wkt_pengambilan,
-      },
+    const [user, setUser] = useState(null);
+    const [statistik, setStatistik] = useState({
+        total_pesanan: 0,
+        total_belanja: 0,
+        siap_diambil: 0,
     });
-  };
+    const [data, setData] = useState([]);
+    const [pesananBelumBayar, setPesananBelumBayar] = useState([]);
+    const [loading, setLoading] = useState(true);
 
-  const getStatusStyle = (status) => {
-    if (status === "siap diambil") {
-      return "bg-blue-100 text-blue-600";
-    }
-    if (status === "selesai") {
-      return "bg-green-100 text-green-600";
-    }
-    if (status === "kadaluarsa") {
-      return "bg-red-100 text-red-600";
-    }
-    return "bg-gray-100 text-gray-500";
-  };
+    useEffect(() => {
+        fetchProfile();
+    }, []);
 
-  // PAGINATION
-  const [currentPage, setCurrentPage] = useState(1);
-  const itemsPerPage = 5;
+    const fetchProfile = async () => {
+        try {
+            const res = await api.get("/profil-pengguna");
+            setUser(res.data.user);
+            setStatistik(res.data.statistik);
+            setData(res.data.riwayat);
+            setPesananBelumBayar(res.data.pesanan_belum_bayar || []);
+        } catch (error) {
+            console.error(error);
+            Swal.fire({
+                icon: "error",
+                title: "Gagal memuat profil",
+                text: "Silakan coba lagi nanti",
+            });
+        } finally {
+            setLoading(false);
+        }
+    };
 
-  // Search state for riwayat
-  const [searchRiwayat, setSearchRiwayat] = useState("");
+    // Fungsi untuk menghitung sisa waktu pembayaran
+    const getRemainingTime = (batasWktPem) => {
+        if (!batasWktPem) return null;
+        const deadline = new Date(batasWktPem).getTime();
+        const now = Date.now();
+        const diff = deadline - now;
 
-  // Filter data based on search
-  const filteredData = data.filter((item) => {
-    if (!searchRiwayat) return true;
-    const query = searchRiwayat.toLowerCase();
-    return (
-      item.nama?.toLowerCase().includes(query) ||
-      item.kode_pesanan?.toLowerCase().includes(query) ||
-      item.kategori?.toLowerCase().includes(query) ||
-      item.status?.toLowerCase().includes(query)
+        if (diff <= 0) return null;
+
+        const minutes = Math.floor(diff / 60000);
+        const seconds = Math.floor((diff % 60000) / 1000);
+
+        if (minutes >= 60) {
+            const hours = Math.floor(minutes / 60);
+            const mins = minutes % 60;
+            return `${hours}j ${mins}m`;
+        }
+
+        return `${minutes}m ${seconds}dtk`;
+    };
+
+    const handleBayarUlang = (pesanan) => {
+        navigate(`/pembayaran?pesanan=${pesanan.id_pesanan}`, {
+            state: {
+                id_pesanan: pesanan.id_pesanan,
+                kode_pesanan: pesanan.kode_pesanan,
+                total: pesanan.total_harga,
+                wkt_pengambilan: pesanan.wkt_pengambilan,
+            },
+        });
+    };
+
+    const getStatusStyle = (status) => {
+        if (status === "siap diambil") {
+            return "bg-blue-100 text-blue-600";
+        }
+        if (status === "selesai") {
+            return "bg-green-100 text-green-600";
+        }
+        if (status === "kadaluarsa") {
+            return "bg-red-100 text-red-600";
+        }
+        return "bg-gray-100 text-gray-500";
+    };
+
+    // PAGINATION
+    const [currentPage, setCurrentPage] = useState(1);
+    const itemsPerPage = 5;
+
+    // Search state for riwayat
+    const [searchRiwayat, setSearchRiwayat] = useState("");
+
+    // Filter data based on search
+    const filteredData = data.filter((item) => {
+        if (!searchRiwayat) return true;
+        const query = searchRiwayat.toLowerCase();
+        return (
+            item.nama?.toLowerCase().includes(query) ||
+            item.kode_pesanan?.toLowerCase().includes(query) ||
+            item.kategori?.toLowerCase().includes(query) ||
+            item.status?.toLowerCase().includes(query)
+        );
+    });
+
+    const indexOfLastItem = currentPage * itemsPerPage;
+    const currentItems = filteredData.slice(
+        indexOfLastItem - itemsPerPage,
+        indexOfLastItem,
     );
-  });
+    const totalPages = Math.ceil(filteredData.length / itemsPerPage);
 
-  const indexOfLastItem = currentPage * itemsPerPage;
-  const currentItems = filteredData.slice(indexOfLastItem - itemsPerPage, indexOfLastItem);
-  const totalPages = Math.ceil(filteredData.length / itemsPerPage);
+    // Reset pagination when search changes
+    useEffect(() => {
+        setCurrentPage(1);
+    }, [searchRiwayat]);
 
-  // Reset pagination when search changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchRiwayat]);
+    if (loading) {
+        return (
+            <AppLayout role="pengguna">
+                <div className="bg-gray-100 min-h-screen flex items-center justify-center">
+                    <p>Loading...</p>
+                </div>
+            </AppLayout>
+        );
+    }
 
-  if (loading) {
     return (
-      <AppLayout role="pengguna">
-        <div className="bg-gray-100 min-h-screen flex items-center justify-center">
-          <p>Loading...</p>
-        </div>
-      </AppLayout>
-    );
-  }
-
-  return (
-    <AppLayout role="pengguna">
-      <div className="bg-gray-100 min-h-screen px-2 sm:px-0 pb-10">
-
-        {/* HEADER */}
-        <div className="bg-[#3F7EA2] text-white p-6 mx-4 sm:mx-6 mt-6 rounded-t-lg">
-          <h2 className="text-lg font-semibold">Halo, {user?.nama}! 👋</h2>
-          <p className="text-sm">
-            Kelola akun dan pantau riwayat belanja kamu di sini
-          </p>
-        </div>
-
-        {/* PROFILE CARD */}
-        <div className="bg-white mx-4 sm:mx-6 p-6 rounded shadow flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
-          <div className="flex gap-4 items-center">
-            <div className="bg-[#3F7EA2] text-white w-16 h-16 flex items-center justify-center rounded-lg text-xl font-bold uppercase overflow-hidden">
-              {user?.foto_profil ? (
-                <img src={user.foto_profil} alt="Profil" className="w-full h-full object-cover" />
-              ) : (
-                user?.nama ? user.nama.substring(0, 2) : "US"
-              )}
-            </div>
-
-            <div>
-              <h3 className="font-bold text-lg capitalize">{user?.nama}</h3>
-
-              <div className="mt-2 space-y-2">
-                <div className="flex gap-2 flex-wrap">
-                  <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
-                    <FaIdCard /> {user?.nim_nik}
-                  </span>
-
-                  <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
-                    <FaPhone /> {user?.no_hp || "-"}
-                  </span>
+        <AppLayout role="pengguna">
+            <div className="bg-gray-100 min-h-screen px-2 sm:px-0 pb-10">
+                {/* HEADER */}
+                <div className="bg-[#3F7EA2] text-white p-6 mx-4 sm:mx-6 mt-6 rounded-t-lg">
+                    <h2 className="text-lg font-semibold">
+                        Halo, {user?.nama}! 👋
+                    </h2>
+                    <p className="text-sm">
+                        Kelola akun dan pantau riwayat belanja kamu di sini
+                    </p>
                 </div>
 
-                <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full w-fit">
-                  <FaEnvelope /> {user?.email || "-"}
-                </span>
-              </div>
-            </div>
-          </div>
-
-          <button
-            className="bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-1"
-            onClick={() => navigate("/edit-profil")}
-          >
-            <FaPencilAlt size={10} className="mt-0.5" /> Edit Profil
-          </button>
-        </div>
-
-        {/* STATISTIK - Mobile Optimized */}
-        <div className="mx-4 sm:mx-6 mt-6">
-          {/* Desktop View */}
-          <div className="hidden sm:grid grid-cols-3 gap-4">
-            <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-              <div className="bg-blue-100 text-blue-600 p-3 rounded-xl text-lg">
-                <FaShoppingCart />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Total Pesanan</p>
-                <h2 className="text-xl font-bold">{statistik.total_pesanan}</h2>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-              <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
-                <FaCreditCard />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Total Belanja</p>
-                <h2 className="text-xl font-bold">
-                  Rp {statistik.total_belanja.toLocaleString("id-ID")}
-                </h2>
-              </div>
-            </div>
-
-            <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
-              <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
-                <FaBoxOpen />
-              </div>
-              <div>
-                <p className="text-xs text-gray-500">Siap Diambil</p>
-                <h2 className="text-xl font-bold">{statistik.siap_diambil}</h2>
-              </div>
-            </div>
-          </div>
-
-          {/* Mobile View - Card Style */}
-          <div className="sm:hidden grid grid-cols-1 gap-3">
-            <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
-              <div className="bg-blue-100 text-blue-600 p-3 rounded-xl">
-                <FaShoppingCart size={20} />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-500">Total Pesanan</p>
-                <h2 className="text-lg font-bold text-gray-900">{statistik.total_pesanan}</h2>
-              </div>
-            </div>
-
-            <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
-              <div className="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
-                <FaCreditCard size={20} />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-500">Total Belanja</p>
-                <h2 className="text-lg font-bold text-gray-900">
-                  Rp {statistik.total_belanja.toLocaleString("id-ID")}
-                </h2>
-              </div>
-            </div>
-            <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
-              <div className="bg-amber-100 text-amber-600 p-3 rounded-xl">
-                <FaBoxOpen size={20} />
-              </div>
-              <div className="flex-1">
-                <p className="text-xs text-gray-500">Proses & Siap</p>
-                <h2 className="text-lg font-bold text-gray-900">{statistik.siap_diambil}</h2>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* PESANAN BELUM BAYAR - MOBILE OPTIMIZED */}
-        {pesananBelumBayar.length > 0 && (
-          <div className="mx-4 sm:mx-6 mt-6">
-            {/* Header */}
-            <div className="flex items-center gap-2 mb-3">
-              <div className="bg-amber-100 p-2 rounded-full">
-                <FaExclamationTriangle className="text-amber-600" size={18} />
-              </div>
-              <h2 className="text-base font-semibold text-gray-800">Pesanan Menunggu Pembayaran</h2>
-              <span className="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
-                {pesananBelumBayar.length}
-              </span>
-            </div>
-
-            {/* Card List */}
-            <div className="space-y-3">
-              {pesananBelumBayar.map((pesanan) => {
-                const sisaWaktu = getRemainingTime(pesanan.batas_wkt_pem);
-                const isUrgent = sisaWaktu && sisaWaktu.includes('m ') && parseInt(sisaWaktu) < 15;
-
-                return (
-                  <div
-                    key={pesanan.id_pesanan}
-                    className={`bg-white rounded-2xl p-4 shadow-sm border-2 ${isUrgent ? 'border-red-400 animate-pulse' : 'border-amber-200'
-                      }`}
-                  >
-                    {/* Header Card */}
-                    <div className="flex justify-between items-start mb-3">
-                      <div className="flex-1 min-w-0">
-                        <p className="font-bold text-gray-900 text-sm sm:text-base">{pesanan.kode_pesanan}</p>
-                        <p className="text-xs text-gray-500 truncate">{pesanan.produk_names}</p>
-                      </div>
-                      <span className={`ml-2 text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${isUrgent ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'
-                        }`}>
-                        {isUrgent ? '⚠️ Segera!' : '⏳ Belum Bayar'}
-                      </span>
-                    </div>
-
-                    {/* Info Grid - Mobile Friendly */}
-                    <div className="grid grid-cols-2 gap-2 mb-3">
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500 mb-0.5">Total</p>
-                        <p className="font-bold text-emerald-600 text-sm sm:text-base">
-                          Rp {pesanan.total_harga.toLocaleString("id-ID")}
-                        </p>
-                      </div>
-                      <div className="bg-gray-50 rounded-xl p-3">
-                        <p className="text-xs text-gray-500 mb-0.5">Items</p>
-                        <p className="font-semibold text-gray-700 text-sm">{pesanan.total_items} unit</p>
-                      </div>
-                    </div>
-
-                    {/* Waktu Pengambilan */}
-                    <div className="bg-blue-50 rounded-xl p-3 mb-3 flex items-center gap-2">
-                      <FaClock className="text-blue-500 shrink-0" size={14} />
-                      <div className="min-w-0">
-                        <p className="text-xs text-blue-500">Pengambilan</p>
-                        <p className="text-sm font-medium text-blue-700 truncate">{pesanan.wkt_pengambilan || 'Segera'}</p>
-                      </div>
-                    </div>
-
-                    {/* Countdown Timer */}
-                    {sisaWaktu && (
-                      <div className={`rounded-xl p-3 mb-3 ${isUrgent ? 'bg-red-50' : 'bg-amber-50'}`}>
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className={`text-xs font-medium ${isUrgent ? 'text-red-600' : 'text-amber-600'}`}>Sisa Waktu Pembayaran</p>
-                            <p className={`text-lg font-bold ${isUrgent ? 'text-red-600' : 'text-amber-600'}`}>
-                              {sisaWaktu}
-                            </p>
-                          </div>
-                          <div className={`text-2xl ${isUrgent ? 'animate-bounce' : ''}`}>
-                            {isUrgent ? '🚨' : '⏱️'}
-                          </div>
+                {/* PROFILE CARD */}
+                <div className="bg-white mx-4 sm:mx-6 p-6 rounded shadow flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
+                    <div className="flex gap-4 items-center">
+                        <div className="bg-[#3F7EA2] text-white w-16 h-16 flex items-center justify-center rounded-lg text-xl font-bold uppercase overflow-hidden">
+                            {user?.foto_profil ? (
+                                <img
+                                    src={user.foto_profil}
+                                    alt="Profil"
+                                    className="w-full h-full object-cover"
+                                />
+                            ) : user?.nama ? (
+                                user.nama.substring(0, 2)
+                            ) : (
+                                "US"
+                            )}
                         </div>
-                      </div>
-                    )}
 
-                    {/* Tombol Bayar */}
+                        <div>
+                            <h3 className="font-bold text-lg capitalize">
+                                {user?.nama}
+                            </h3>
+
+                            <div className="mt-2 space-y-2">
+                                <div className="flex gap-2 flex-wrap">
+                                    <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
+                                        <FaIdCard /> {user?.nim_nik}
+                                    </span>
+
+                                    <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full">
+                                        <FaPhone /> {user?.no_hp || "-"}
+                                    </span>
+                                </div>
+
+                                <span className="flex items-center gap-1 bg-gray-200 text-xs px-3 py-1 rounded-full w-fit">
+                                    <FaEnvelope /> {user?.email || "-"}
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+
                     <button
-                      onClick={() => handleBayarUlang(pesanan)}
-                      className={`w-full font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 text-white ${isUrgent
-                          ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
-                          : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700'
-                        }`}
+                        className="bg-[#3F7EA2] hover:bg-[#54A2CF] text-white text-xs px-3 py-1.5 rounded-md flex items-center gap-1"
+                        onClick={() => navigate("/edit-profil")}
                     >
-                      <FaQrcode size={18} />
-                      Bayar Sekarang
+                        <FaPencilAlt size={10} className="mt-0.5" /> Edit Profil
                     </button>
-                  </div>
-                );
-              })}
-            </div>
-          </div>
-        )}
-
-        {/* RIWAYAT */}
-        <div className="mx-4 sm:mx-6 mt-6 bg-white rounded-xl shadow overflow-hidden">
-          <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-            <h2 className="text-lg font-semibold">Riwayat Pesanan</h2>
-
-            {/* Search Bar */}
-            <div className="relative w-full sm:w-64">
-              <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
-              <input
-                type="text"
-                placeholder="Cari pesanan..."
-                value={searchRiwayat}
-                onChange={(e) => setSearchRiwayat(e.target.value)}
-                className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3]"
-              />
-              {searchRiwayat && (
-                <button
-                  onClick={() => setSearchRiwayat("")}
-                  className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
-                >
-                  <FaTimes size={14} />
-                </button>
-              )}
-            </div>
-          </div>
-
-          {filteredData.length === 0 ? (
-            <div className="p-8 text-center text-gray-500">
-              {searchRiwayat ? (
-                <>
-                  <p>Tidak ada pesanan yang cocok dengan "{searchRiwayat}"</p>
-                  <button
-                    onClick={() => setSearchRiwayat("")}
-                    className="mt-2 text-sm text-[#1766D3] hover:underline"
-                  >
-                    Reset pencarian
-                  </button>
-                </>
-              ) : (
-                "Belum ada riwayat pesanan."
-              )}
-            </div>
-          ) : (
-            <>
-              <div className="px-4 pb-2 text-xs text-gray-500">
-                Menampilkan {currentItems.length} dari {filteredData.length} pesanan
-              </div>
-
-              <div className="space-y-4 px-4 pb-4">
-                {currentItems.map((item) => (
-                  <div key={item.id} className="border border-gray-200 rounded-xl p-4 shadow-sm">
-
-                    <div className="flex justify-between items-center mb-2">
-                      <h3 className="font-semibold text-sm">{item.kategori}</h3>
-                      <span className={`text-xs px-2 py-1 rounded-full ${getStatusStyle(item.status)}`}>
-                        {item.status}
-                      </span>
-                    </div>
-
-                    <div className="flex flex-col sm:flex-row gap-4">
-                      <div className="w-full sm:w-16 h-40 sm:h-16 bg-gray-200 rounded overflow-hidden">
-                        <img
-                          src={item.gambar}
-                          alt={item.nama}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-
-                      <div className="flex-1">
-                        <h4 className="font-medium text-sm">{item.nama}</h4>
-                        <p className="text-xs text-gray-500">
-                          {item.tgl ? new Date(item.tgl).toLocaleDateString("id-ID", {
-                            day: "numeric",
-                            month: "long",
-                            year: "numeric",
-                          }) : "-"}
-                        </p>
-
-                        <p className="text-sm font-semibold mt-1">
-                          Rp {item.harga.toLocaleString("id-ID")}
-                        </p>
-
-                        <p className="text-xs text-gray-500">
-                          Jumlah: {item.jumlah}
-                        </p>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-between items-center mt-3 pt-3 border-t">
-                      <p className="text-xs text-gray-500">Kode Pesanan: <span className="font-semibold text-gray-700">{item.kode_pesanan}</span></p>
-                      <p className="text-sm font-bold">
-                        Total: Rp {(item.harga * item.jumlah).toLocaleString("id-ID")}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-
-              {/* PAGINATION */}
-              {totalPages > 1 && (
-                <div className="flex flex-wrap justify-end items-center gap-3 p-4">
-                  <button
-                    onClick={() => setCurrentPage(currentPage - 1)}
-                    disabled={currentPage === 1}
-                    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-40"
-                  >
-                    Previous
-                  </button>
-
-                  <div className="flex gap-2 flex-wrap">
-                    {[...Array(totalPages)].map((_, i) => (
-                      <button
-                        key={i}
-                        onClick={() => setCurrentPage(i + 1)}
-                        className={`px-3 py-1 rounded ${currentPage === i + 1
-                            ? "bg-blue-500 text-white"
-                            : "border"
-                          }`}
-                      >
-                        {i + 1}
-                      </button>
-                    ))}
-                  </div>
-
-                  <button
-                    onClick={() => setCurrentPage(currentPage + 1)}
-                    disabled={currentPage === totalPages}
-                    className="px-3 py-1 bg-gray-200 rounded disabled:opacity-40"
-                  >
-                    Next
-                  </button>
                 </div>
-              )}
-            </>
-          )}
-        </div>
 
-      </div>
-    </AppLayout>
-  );
+                {/* STATISTIK - Mobile Optimized */}
+                <div className="mx-4 sm:mx-6 mt-6">
+                    {/* Desktop View */}
+                    <div className="hidden sm:grid grid-cols-3 gap-4">
+                        <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                            <div className="bg-blue-100 text-blue-600 p-3 rounded-xl text-lg">
+                                <FaShoppingCart />
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500">
+                                    Total Pesanan
+                                </p>
+                                <h2 className="text-xl font-bold">
+                                    {statistik.total_pesanan}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                            <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
+                                <FaCreditCard />
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500">
+                                    Total Belanja
+                                </p>
+                                <h2 className="text-xl font-bold">
+                                    Rp{" "}
+                                    {statistik.total_belanja.toLocaleString(
+                                        "id-ID",
+                                    )}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="bg-white p-4 rounded-xl shadow-sm flex items-center gap-4">
+                            <div className="bg-green-100 text-green-600 p-3 rounded-xl text-lg">
+                                <FaBoxOpen />
+                            </div>
+                            <div>
+                                <p className="text-xs text-gray-500">
+                                    Siap Diambil
+                                </p>
+                                <h2 className="text-xl font-bold">
+                                    {statistik.siap_diambil}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* Mobile View - Card Style */}
+                    <div className="sm:hidden grid grid-cols-1 gap-3">
+                        <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+                            <div className="bg-blue-100 text-blue-600 p-3 rounded-xl">
+                                <FaShoppingCart size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-500">
+                                    Total Pesanan
+                                </p>
+                                <h2 className="text-lg font-bold text-gray-900">
+                                    {statistik.total_pesanan}
+                                </h2>
+                            </div>
+                        </div>
+
+                        <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+                            <div className="bg-emerald-100 text-emerald-600 p-3 rounded-xl">
+                                <FaCreditCard size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-500">
+                                    Total Belanja
+                                </p>
+                                <h2 className="text-lg font-bold text-gray-900">
+                                    Rp{" "}
+                                    {statistik.total_belanja.toLocaleString(
+                                        "id-ID",
+                                    )}
+                                </h2>
+                            </div>
+                        </div>
+                        <div className="bg-white rounded-xl shadow-sm p-4 flex items-center gap-4">
+                            <div className="bg-amber-100 text-amber-600 p-3 rounded-xl">
+                                <FaBoxOpen size={20} />
+                            </div>
+                            <div className="flex-1">
+                                <p className="text-xs text-gray-500">
+                                    Proses & Siap
+                                </p>
+                                <h2 className="text-lg font-bold text-gray-900">
+                                    {statistik.siap_diambil}
+                                </h2>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {/* PESANAN BELUM BAYAR - MOBILE OPTIMIZED */}
+                {pesananBelumBayar.length > 0 && (
+                    <div className="mx-4 sm:mx-6 mt-6">
+                        {/* Header */}
+                        <div className="flex items-center gap-2 mb-3">
+                            <div className="bg-amber-100 p-2 rounded-full">
+                                <FaExclamationTriangle
+                                    className="text-amber-600"
+                                    size={18}
+                                />
+                            </div>
+                            <h2 className="text-base font-semibold text-gray-800">
+                                Pesanan Menunggu Pembayaran
+                            </h2>
+                            <span className="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                                {pesananBelumBayar.length}
+                            </span>
+                        </div>
+
+                        {/* Card List */}
+                        <div className="space-y-3">
+                            {pesananBelumBayar.map((pesanan) => {
+                                const sisaWaktu = getRemainingTime(
+                                    pesanan.batas_wkt_pem,
+                                );
+                                const isUrgent =
+                                    sisaWaktu &&
+                                    sisaWaktu.includes("m ") &&
+                                    parseInt(sisaWaktu) < 15;
+
+                                return (
+                                    <div
+                                        key={pesanan.id_pesanan}
+                                        className={`bg-white rounded-2xl p-4 shadow-sm border-2 ${
+                                            isUrgent
+                                                ? "border-red-400 animate-pulse"
+                                                : "border-amber-200"
+                                        }`}
+                                    >
+                                        {/* Header Card */}
+                                        <div className="flex justify-between items-start mb-3">
+                                            <div className="flex-1 min-w-0">
+                                                <p className="font-bold text-gray-900 text-sm sm:text-base">
+                                                    {pesanan.kode_pesanan}
+                                                </p>
+                                                <p className="text-xs text-gray-500 truncate">
+                                                    {pesanan.produk_names}
+                                                </p>
+                                            </div>
+                                            <span
+                                                className={`ml-2 text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${
+                                                    isUrgent
+                                                        ? "bg-red-100 text-red-600"
+                                                        : "bg-amber-100 text-amber-700"
+                                                }`}
+                                            >
+                                                {isUrgent
+                                                    ? "⚠️ Segera!"
+                                                    : "⏳ Belum Bayar"}
+                                            </span>
+                                        </div>
+
+                                        {/* Info Grid - Mobile Friendly */}
+                                        <div className="grid grid-cols-2 gap-2 mb-3">
+                                            <div className="bg-gray-50 rounded-xl p-3">
+                                                <p className="text-xs text-gray-500 mb-0.5">
+                                                    Total
+                                                </p>
+                                                <p className="font-bold text-emerald-600 text-sm sm:text-base">
+                                                    Rp{" "}
+                                                    {pesanan.total_harga.toLocaleString(
+                                                        "id-ID",
+                                                    )}
+                                                </p>
+                                            </div>
+                                            <div className="bg-gray-50 rounded-xl p-3">
+                                                <p className="text-xs text-gray-500 mb-0.5">
+                                                    Items
+                                                </p>
+                                                <p className="font-semibold text-gray-700 text-sm">
+                                                    {pesanan.total_items} unit
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Waktu Pengambilan */}
+                                        <div className="bg-blue-50 rounded-xl p-3 mb-3 flex items-center gap-2">
+                                            <FaClock
+                                                className="text-blue-500 shrink-0"
+                                                size={14}
+                                            />
+                                            <div className="min-w-0">
+                                                <p className="text-xs text-blue-500">
+                                                    Pengambilan
+                                                </p>
+                                                <p className="text-sm font-medium text-blue-700 truncate">
+                                                    {pesanan.wkt_pengambilan ||
+                                                        "Segera"}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        {/* Countdown Timer */}
+                                        {sisaWaktu && (
+                                            <div
+                                                className={`rounded-xl p-3 mb-3 ${isUrgent ? "bg-red-50" : "bg-amber-50"}`}
+                                            >
+                                                <div className="flex items-center justify-between">
+                                                    <div>
+                                                        <p
+                                                            className={`text-xs font-medium ${isUrgent ? "text-red-600" : "text-amber-600"}`}
+                                                        >
+                                                            Sisa Waktu
+                                                            Pembayaran
+                                                        </p>
+                                                        <p
+                                                            className={`text-lg font-bold ${isUrgent ? "text-red-600" : "text-amber-600"}`}
+                                                        >
+                                                            {sisaWaktu}
+                                                        </p>
+                                                    </div>
+                                                    <div
+                                                        className={`text-2xl ${isUrgent ? "animate-bounce" : ""}`}
+                                                    >
+                                                        {isUrgent ? "🚨" : "⏱️"}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* Tombol Bayar */}
+                                        <button
+                                            onClick={() =>
+                                                handleBayarUlang(pesanan)
+                                            }
+                                            className={`w-full font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 text-white ${
+                                                isUrgent
+                                                    ? "bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700"
+                                                    : "bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700"
+                                            }`}
+                                        >
+                                            <FaQrcode size={18} />
+                                            Bayar Sekarang
+                                        </button>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
+                )}
+
+                {/* RIWAYAT */}
+                <div className="mx-4 sm:mx-6 mt-6 bg-white rounded-xl shadow overflow-hidden">
+                    <div className="p-4 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                        <h2 className="text-lg font-semibold">
+                            Riwayat Pesanan
+                        </h2>
+
+                        {/* Search Bar */}
+                        <div className="relative w-full sm:w-64">
+                            <FaSearch className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400 text-sm pointer-events-none" />
+                            <input
+                                type="text"
+                                placeholder="Cari pesanan..."
+                                value={searchRiwayat}
+                                onChange={(e) =>
+                                    setSearchRiwayat(e.target.value)
+                                }
+                                className="w-full pl-9 pr-8 py-2 text-sm border border-gray-200 rounded-lg focus:outline-none focus:border-[#1766D3] focus:ring-1 focus:ring-[#1766D3]"
+                            />
+                            {searchRiwayat && (
+                                <button
+                                    onClick={() => setSearchRiwayat("")}
+                                    className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                                >
+                                    <FaTimes size={14} />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+
+                    {filteredData.length === 0 ? (
+                        <div className="p-8 text-center text-gray-500">
+                            {searchRiwayat ? (
+                                <>
+                                    <p>
+                                        Tidak ada pesanan yang cocok dengan "
+                                        {searchRiwayat}"
+                                    </p>
+                                    <button
+                                        onClick={() => setSearchRiwayat("")}
+                                        className="mt-2 text-sm text-[#1766D3] hover:underline"
+                                    >
+                                        Reset pencarian
+                                    </button>
+                                </>
+                            ) : (
+                                "Belum ada riwayat pesanan."
+                            )}
+                        </div>
+                    ) : (
+                        <>
+                            <div className="px-4 pb-2 text-xs text-gray-500">
+                                Menampilkan {currentItems.length} dari{" "}
+                                {filteredData.length} pesanan
+                            </div>
+
+                            <div className="space-y-4 px-4 pb-4">
+                                {currentItems.map((item) => (
+                                    <div
+                                        key={item.id}
+                                        className="border border-gray-200 rounded-xl p-4 shadow-sm"
+                                    >
+                                        <div className="flex justify-between items-center mb-2">
+                                            <h3 className="font-semibold text-sm">
+                                                {item.kategori}
+                                            </h3>
+                                            <span
+                                                className={`text-xs px-2 py-1 rounded-full ${getStatusStyle(item.status)}`}
+                                            >
+                                                {item.status}
+                                            </span>
+                                        </div>
+
+                                        <div className="flex flex-col sm:flex-row gap-4">
+                                            <div className="w-full sm:w-16 h-40 sm:h-16 bg-gray-200 rounded overflow-hidden">
+                                                <img
+                                                    src={`${API_BASE_URL}/${item.gambar}`}
+                                                    alt={item.nama}
+                                                    className="w-full h-full object-cover"
+                                                />
+                                            </div>
+
+                                            <div className="flex-1">
+                                                <h4 className="font-medium text-sm">
+                                                    {item.nama}
+                                                </h4>
+                                                <p className="text-xs text-gray-500">
+                                                    {item.tgl
+                                                        ? new Date(
+                                                              item.tgl,
+                                                          ).toLocaleDateString(
+                                                              "id-ID",
+                                                              {
+                                                                  day: "numeric",
+                                                                  month: "long",
+                                                                  year: "numeric",
+                                                              },
+                                                          )
+                                                        : "-"}
+                                                </p>
+
+                                                <p className="text-sm font-semibold mt-1">
+                                                    Rp{" "}
+                                                    {item.harga.toLocaleString(
+                                                        "id-ID",
+                                                    )}
+                                                </p>
+
+                                                <p className="text-xs text-gray-500">
+                                                    Jumlah: {item.jumlah}
+                                                </p>
+                                            </div>
+                                        </div>
+
+                                        <div className="flex justify-between items-center mt-3 pt-3 border-t">
+                                            <p className="text-xs text-gray-500">
+                                                Kode Pesanan:{" "}
+                                                <span className="font-semibold text-gray-700">
+                                                    {item.kode_pesanan}
+                                                </span>
+                                            </p>
+                                            <p className="text-sm font-bold">
+                                                Total: Rp{" "}
+                                                {(
+                                                    item.harga * item.jumlah
+                                                ).toLocaleString("id-ID")}
+                                            </p>
+                                        </div>
+                                    </div>
+                                ))}
+                            </div>
+
+                            {/* PAGINATION */}
+                            {totalPages > 1 && (
+                                <div className="flex flex-wrap justify-end items-center gap-3 p-4">
+                                    <button
+                                        onClick={() =>
+                                            setCurrentPage(currentPage - 1)
+                                        }
+                                        disabled={currentPage === 1}
+                                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-40"
+                                    >
+                                        Previous
+                                    </button>
+
+                                    <div className="flex gap-2 flex-wrap">
+                                        {[...Array(totalPages)].map((_, i) => (
+                                            <button
+                                                key={i}
+                                                onClick={() =>
+                                                    setCurrentPage(i + 1)
+                                                }
+                                                className={`px-3 py-1 rounded ${
+                                                    currentPage === i + 1
+                                                        ? "bg-blue-500 text-white"
+                                                        : "border"
+                                                }`}
+                                            >
+                                                {i + 1}
+                                            </button>
+                                        ))}
+                                    </div>
+
+                                    <button
+                                        onClick={() =>
+                                            setCurrentPage(currentPage + 1)
+                                        }
+                                        disabled={currentPage === totalPages}
+                                        className="px-3 py-1 bg-gray-200 rounded disabled:opacity-40"
+                                    >
+                                        Next
+                                    </button>
+                                </div>
+                            )}
+                        </>
+                    )}
+                </div>
+            </div>
+        </AppLayout>
+    );
 }

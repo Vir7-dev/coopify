@@ -109,16 +109,6 @@ class CheckoutController extends Controller
 
                 DB::table('detail_pesanan')->insert($detailRows);
 
-                $qtyPerProduk = $keranjangItems
-                    ->groupBy('id_produk')
-                    ->map(fn ($rows) => $rows->sum('jml_dikeranjang'));
-
-                foreach ($qtyPerProduk as $idProduk => $qty) {
-                    DB::table('produk')
-                        ->where('id_produk', (int) $idProduk)
-                        ->decrement('stok', (int) $qty);
-                }
-
                 DB::table('pembayaran')->insert([
                     'status_pem' => 'belum_bayar',
                     'total_bayar' => $totalHarga,

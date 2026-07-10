@@ -43,7 +43,7 @@ class ProfilPenggunaController extends Controller
                 // Cari gambar pertama, atau fallback ke default
                 $gambarUrl = "/img/default.png";
                 if ($detail->produk && $detail->produk->gambar->count() > 0) {
-                    $gambarUrl = asset('storage/' . $detail->produk->gambar->first()->url_gambar);
+                    $gambarUrl = 'storage/' . $detail->produk->gambar->first()->url_gambar;
                 }
 
                 $riwayat[] = [
@@ -78,7 +78,7 @@ class ProfilPenggunaController extends Controller
                 \Midtrans\Config::$isProduction = config('midtrans.is_production');
                 \Midtrans\Config::$isSanitized = true;
                 \Midtrans\Config::$is3ds = true;
-                
+
                 try {
                     $statusRes = \Midtrans\Transaction::status($pesanan->kode_pesanan);
                     $statusTransaksi = match ($statusRes->transaction_status ?? '') {
@@ -102,7 +102,7 @@ class ProfilPenggunaController extends Controller
                         );
                         $pembayaran->refresh();
                         $pesanan->refresh();
-                        
+
                         // Jika statusnya sudah tidak menunggu, lewati dari daftar belum bayar
                         if ($pembayaran->status_pem !== 'belum_bayar') {
                             continue;

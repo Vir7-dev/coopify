@@ -72,7 +72,7 @@ export default function DetailProduk() {
         fetch(`${API_BASE_URL}/api/produk`)
             .then((res) => res.json())
             .then((allData) => {
-                const allProducts = allData.data || [];
+                const allProducts = allData;
 
                 const similar = allProducts.filter(
                     (item) =>
