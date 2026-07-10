@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Jun 30, 2026 at 04:03 AM
+-- Generation Time: Jul 09, 2026 at 05:06 PM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -325,7 +325,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkout_keranjang` (IN `p_id_pengg
 
             VALUES(
 
-                'belum_bayar',
+                'menunggu',
                 v_total_harga,
                 DATE_ADD(NOW(),INTERVAL 24 HOUR),
                 v_id_pesanan
@@ -350,7 +350,6 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `checkout_keranjang` (IN `p_id_pengg
 END$$
 
 CREATE DEFINER=`root`@`localhost` PROCEDURE `konfirmasi_pembayaran` (IN `p_id_pembayaran` INT, IN `p_transaction_id` VARCHAR(100), IN `p_status_transaksi` VARCHAR(50), IN `p_jumlah_bayar` DECIMAL(15,2), IN `p_kunci_tanda_tangan` VARCHAR(255), OUT `p_pesan` VARCHAR(255))   BEGIN
-
     DECLARE v_status_pem VARCHAR(50);
     DECLARE v_id_pesanan INT;
 
@@ -362,100 +361,41 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `konfirmasi_pembayaran` (IN `p_id_pe
 
     START TRANSACTION;
 
-    SELECT
-        status_pem,
-        id_pes_fk_pb
-    INTO
-        v_status_pem,
-        v_id_pesanan
-    FROM pembayaran
-    WHERE id_pembayaran = p_id_pembayaran
-    FOR UPDATE;
+    SELECT status_pem, id_pes_fk_pb
+    INTO v_status_pem, v_id_pesanan
+    FROM pembayaran WHERE id_pembayaran = p_id_pembayaran FOR UPDATE;
 
     IF v_status_pem IS NULL THEN
-
         ROLLBACK;
         SET p_pesan = 'Gagal: pembayaran tidak ditemukan';
-
     ELSEIF v_status_pem = 'lunas' THEN
-
         ROLLBACK;
         SET p_pesan = 'Pembayaran sudah pernah dikonfirmasi';
-
     ELSE
-
-        INSERT INTO log_transaksi(
-            id_transaksi_ext,
-            status_transaksi,
-            jumlah_bayar,
-            kunci_tanda_tangan,
-            waktu_transaksi,
-            id_pem_fk_lm
-        )
-        VALUES(
-            p_transaction_id,
-            p_status_transaksi,
-            p_jumlah_bayar,
-            p_kunci_tanda_tangan,
-            NOW(),
-            p_id_pembayaran
-        );
+        INSERT INTO log_transaksi(id_transaksi_ext, status_transaksi, jumlah_bayar, kunci_tanda_tangan, waktu_transaksi, id_pem_fk_lm)
+        VALUES(p_transaction_id, p_status_transaksi, p_jumlah_bayar, p_kunci_tanda_tangan, NOW(), p_id_pembayaran);
 
         IF p_status_transaksi = 'lunas' THEN
-
-            UPDATE pembayaran
-            SET
-                status_pem = 'lunas',
-                paid_at = NOW(),
-                midtrans_transaction_id = p_transaction_id
-            WHERE id_pembayaran = p_id_pembayaran;
-
-            UPDATE pesanan
-            SET status_pesanan = 'diproses'
-            WHERE id_pesanan = v_id_pesanan;
-
+            UPDATE pembayaran SET status_pem = 'lunas', paid_at = NOW(), midtrans_transaction_id = p_transaction_id WHERE id_pembayaran = p_id_pembayaran;
+            UPDATE pesanan SET status_pesanan = 'diproses' WHERE id_pesanan = v_id_pesanan;
             SET p_pesan = 'Berhasil: pembayaran dikonfirmasi';
 
         ELSEIF p_status_transaksi = 'menunggu' THEN
-
-            UPDATE pembayaran
-            SET status_pem = 'belum_bayar'
-            WHERE id_pembayaran = p_id_pembayaran;
-
+            UPDATE pembayaran SET status_pem = 'menunggu' WHERE id_pembayaran = p_id_pembayaran;
             SET p_pesan = 'Pembayaran masih menunggu';
 
         ELSEIF p_status_transaksi = 'kadaluarsa' THEN
-
-            UPDATE pembayaran
-            SET status_pem = 'kadaluarsa'
-            WHERE id_pembayaran = p_id_pembayaran;
-
-            UPDATE pesanan
-            SET status_pesanan = 'kadaluarsa'
-            WHERE id_pesanan = v_id_pesanan;
-
-            -- Kembalikan stok produk
-            UPDATE produk p
-            INNER JOIN detail_pesanan dp ON dp.id_prod_fk_dp = p.id_produk
-            SET p.stok = p.stok + dp.jml_peritem
-            WHERE dp.id_pes_fk_dp = v_id_pesanan;
-
+            UPDATE pembayaran SET status_pem = 'kadaluarsa' WHERE id_pembayaran = p_id_pembayaran;
+            UPDATE pesanan SET status_pesanan = 'kadaluarsa' WHERE id_pesanan = v_id_pesanan;
+            UPDATE produk p INNER JOIN detail_pesanan dp ON dp.id_prod_fk_dp = p.id_produk SET p.stok = p.stok + dp.jml_peritem WHERE dp.id_pes_fk_dp = v_id_pesanan;
             SET p_pesan = 'Pembayaran kadaluarsa';
 
         ELSE
-
-            UPDATE pembayaran
-            SET status_pem = 'gagal'
-            WHERE id_pembayaran = p_id_pembayaran;
-
+            UPDATE pembayaran SET status_pem = 'gagal' WHERE id_pembayaran = p_id_pembayaran;
             SET p_pesan = 'Pembayaran gagal';
-
         END IF;
-
         COMMIT;
-
     END IF;
-
 END$$
 
 --
@@ -535,7 +475,38 @@ INSERT INTO `detail_pesanan` (`id_detail`, `jml_peritem`, `harga_saat_pesan`, `d
 (4, 1, 5000.00, 0.00, 5000.00, 4, 16),
 (5, 1, 4000.00, 0.00, 4000.00, 5, 17),
 (6, 1, 4000.00, 0.00, 4000.00, 6, 17),
-(7, 1, 7000.00, 0.00, 7000.00, 7, 24);
+(7, 1, 7000.00, 0.00, 7000.00, 7, 24),
+(30, 1, 15000.00, 0.00, 15000.00, 19, 23),
+(31, 1, 7000.00, 0.00, 7000.00, 19, 24),
+(32, 1, 5000.00, 0.00, 5000.00, 20, 16),
+(33, 1, 4000.00, 0.00, 4000.00, 20, 17),
+(34, 1, 15000.00, 0.00, 15000.00, 20, 23),
+(35, 1, 7000.00, 0.00, 7000.00, 20, 24),
+(36, 1, 7000.00, 0.00, 7000.00, 21, 24),
+(37, 1, 7000.00, 0.00, 7000.00, 22, 24),
+(38, 1, 7000.00, 0.00, 7000.00, 23, 24),
+(39, 1, 7000.00, 0.00, 7000.00, 24, 24),
+(40, 1, 7000.00, 0.00, 7000.00, 25, 24),
+(41, 1, 7000.00, 0.00, 7000.00, 26, 24),
+(42, 1, 4000.00, 0.00, 4000.00, 27, 17),
+(43, 1, 4000.00, 0.00, 4000.00, 28, 17),
+(44, 1, 5000.00, 0.00, 5000.00, 29, 16),
+(45, 1, 7000.00, 0.00, 7000.00, 29, 24),
+(46, 2, 7000.00, 0.00, 14000.00, 30, 24),
+(47, 1, 7000.00, 0.00, 7000.00, 31, 24),
+(48, 1, 7000.00, 0.00, 7000.00, 32, 24),
+(49, 1, 7000.00, 0.00, 7000.00, 33, 24),
+(50, 1, 7000.00, 0.00, 7000.00, 34, 24),
+(51, 1, 7000.00, 0.00, 7000.00, 35, 24),
+(52, 1, 7000.00, 0.00, 7000.00, 36, 24),
+(53, 1, 15000.00, 0.00, 15000.00, 37, 23),
+(54, 1, 7000.00, 0.00, 7000.00, 38, 24),
+(55, 1, 7000.00, 0.00, 7000.00, 39, 24),
+(56, 1, 7000.00, 0.00, 7000.00, 40, 24),
+(57, 1, 7000.00, 0.00, 7000.00, 41, 24),
+(58, 1, 7000.00, 0.00, 7000.00, 42, 24),
+(59, 1, 4000.00, 0.00, 4000.00, 43, 17),
+(64, 1, 15000.00, 0.00, 15000.00, 48, 23);
 
 -- --------------------------------------------------------
 
@@ -658,10 +629,10 @@ CREATE TABLE `kategori_produk` (
 INSERT INTO `kategori_produk` (`id_kategori`, `nama_kategori`, `ikon`, `tgl_dibuat`) VALUES
 (1, 'Makanan 2', 'FaUtensils', '2024-01-01 08:00:00'),
 (2, 'Minuman', 'FaMugHot', '2024-01-01 08:00:00'),
-(3, 'Obat & Kesehatan', 'FaPills', '2024-01-01 08:00:00'),
 (4, 'Alat tulis', 'FaUtensils', '2024-01-01 08:00:00'),
 (5, 'Almamater', 'FaTshirt', '2024-01-01 08:00:00'),
-(27, 'Perlengkapan', 'FaBox', '2026-06-15 00:04:29');
+(27, 'Perlengkapan', 'FaBox', '2026-06-15 00:04:29'),
+(28, 'Obat', 'FaPills', '2026-07-06 18:05:50');
 
 -- --------------------------------------------------------
 
@@ -681,8 +652,7 @@ CREATE TABLE `keranjang` (
 --
 
 INSERT INTO `keranjang` (`id_keranjang`, `jml_dikeranjang`, `id_prod_fk_k`, `id_peng_fk_k`) VALUES
-(14, 1, 16, 47),
-(15, 1, 16, 46);
+(14, 1, 16, 47);
 
 -- --------------------------------------------------------
 
@@ -694,7 +664,7 @@ CREATE TABLE `log_transaksi` (
   `id_transaksi` int NOT NULL,
   `id_transaksi_ext` varchar(100) DEFAULT NULL,
   `id_pem_fk_lm` int NOT NULL,
-  `status_transaksi` enum('berhasil','gagal','menunggu') DEFAULT NULL,
+  `status_transaksi` enum('lunas','gagal','menunggu') DEFAULT NULL,
   `jumlah_bayar` decimal(15,2) NOT NULL DEFAULT '0.00',
   `kunci_tanda_tangan` varchar(255) DEFAULT NULL,
   `waktu_transaksi` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
@@ -709,7 +679,8 @@ INSERT INTO `log_transaksi` (`id_transaksi`, `id_transaksi_ext`, `id_pem_fk_lm`,
 (1, '3b601a2a-58fd-4482-a91d-8616674f4d83', 6, 'menunggu', 4000.00, '2195fda68d1996df3106a889b2f950515b7cf431af822ac561523780ffbb6427f5304dfd9b12c03651a2eaf2a265495cdf7d55989612bb9c54d52c6735ddf398', '2026-06-26 10:31:48', NULL),
 (2, 'f5cc116b-b30b-4089-b0b2-cc5e4bf342c9', 5, 'gagal', 4000.00, '40b5c40aba1eb7fd83f4626d7dace0593f49b9d03bb8f6a2dfaad730220eefb1f35399b789cafd688155063e37fc3d56878eb0b7fe6243511785ed945a879db6', '2026-06-26 10:39:10', NULL),
 (3, '3b601a2a-58fd-4482-a91d-8616674f4d83', 6, 'gagal', 4000.00, 'a7a4a48e4c8686ef2754c7e9c1f1518315ea9910051cdb615446a80419e582e5c109035a4a9409e2feb87da627e7ee03a92f77c2ff7e502e351027f2287e6f19', '2026-06-26 10:47:49', NULL),
-(4, '91d4ae95-5c40-4980-908e-55fe4cb416c6', 7, 'menunggu', 7000.00, '8ebbb7efcc474d538b8ac839b0b024b662b92e81bc7fd7aac4d20667bd4622a9e492b523af4c962c682b3786d739846c3ec6704b3da9ab5a3ab58a8c99df2ac9', '2026-06-29 10:02:07', NULL);
+(4, '91d4ae95-5c40-4980-908e-55fe4cb416c6', 7, 'menunggu', 7000.00, '8ebbb7efcc474d538b8ac839b0b024b662b92e81bc7fd7aac4d20667bd4622a9e492b523af4c962c682b3786d739846c3ec6704b3da9ab5a3ab58a8c99df2ac9', '2026-06-29 10:02:07', NULL),
+(5, 'TEST-ORD-FVJHL1', 32, 'lunas', 4000.00, '00d33402fce7e9d6a641a6bc39ff0f20cf4051aeb5dbf02adb0b7fdb0f9ab5a8694250d215b95a4b7f63c915222d6c9353f7ac83e730528f2e0699258ffaf222', '2026-07-05 00:22:13', NULL);
 
 -- --------------------------------------------------------
 
@@ -741,7 +712,7 @@ INSERT INTO `migrations` (`id`, `migration`, `batch`) VALUES
 
 CREATE TABLE `pembayaran` (
   `id_pembayaran` int NOT NULL,
-  `status_pem` enum('belum_bayar','lunas','gagal','dikembalikan','kadaluarsa') CHARACTER SET utf8mb4 COLLATE utf8mb4_0900_ai_ci NOT NULL DEFAULT 'menunggu',
+  `status_pem` enum('belum_bayar','lunas','gagal','dikembalikan','kadaluarsa') NOT NULL DEFAULT 'belum_bayar',
   `total_bayar` decimal(12,2) DEFAULT NULL,
   `batas_wkt_pem` datetime DEFAULT NULL,
   `id_pes_fk_pb` int NOT NULL,
@@ -757,20 +728,47 @@ CREATE TABLE `pembayaran` (
 --
 
 INSERT INTO `pembayaran` (`id_pembayaran`, `status_pem`, `total_bayar`, `batas_wkt_pem`, `id_pes_fk_pb`, `snap_token`, `midtrans_transaction_id`, `paid_at`, `created_at`, `updated_at`) VALUES
-(1, 'belum_bayar', 52000.00, '2026-06-19 16:03:27', 1, NULL, NULL, NULL, '2026-06-19 08:03:27', '2026-06-19 08:03:27'),
-(2, 'belum_bayar', 15000.00, '2026-06-19 17:07:27', 2, NULL, NULL, NULL, '2026-06-19 09:07:27', '2026-06-19 09:07:27'),
-(3, 'belum_bayar', 8000.00, '2026-06-24 16:23:01', 3, '74fa8af0-3d29-4c5f-b214-d6555fbaa06e', NULL, NULL, '2026-06-24 08:23:01', '2026-06-24 08:23:03'),
-(4, 'belum_bayar', 5000.00, '2026-06-26 10:49:59', 4, 'c967e02b-8e08-4acd-825f-ac6ab0e974a4', NULL, NULL, '2026-06-26 02:49:59', '2026-06-26 02:50:01'),
+(1, 'belum_bayar', 52000.00, '2026-06-19 16:03:27', 1, NULL, NULL, NULL, '2026-06-19 08:03:27', '2026-07-09 17:03:35'),
+(2, 'gagal', 15000.00, '2026-06-19 17:07:27', 2, NULL, NULL, NULL, '2026-06-19 09:07:27', '2026-07-03 02:54:00'),
+(3, 'belum_bayar', 8000.00, '2026-06-24 16:23:01', 3, '74fa8af0-3d29-4c5f-b214-d6555fbaa06e', NULL, NULL, '2026-06-24 08:23:01', '2026-07-09 17:03:35'),
+(4, 'belum_bayar', 5000.00, '2026-06-26 10:49:59', 4, 'c967e02b-8e08-4acd-825f-ac6ab0e974a4', NULL, NULL, '2026-06-26 02:49:59', '2026-07-09 17:03:35'),
 (5, 'gagal', 4000.00, '2026-06-26 11:23:06', 5, 'e8081bff-dd4e-4d65-ad09-bb232bf52c67', NULL, NULL, '2026-06-26 03:23:06', '2026-06-26 03:39:10'),
 (6, 'gagal', 4000.00, '2026-06-26 11:31:45', 6, '656988ef-3caa-4645-bcbd-a4744b7fb375', NULL, NULL, '2026-06-26 03:31:45', '2026-06-26 03:47:49'),
-(7, 'belum_bayar', 7000.00, '2026-06-29 10:54:01', 7, 'f13ae0b4-14f1-4b9a-ac58-591394393e40', NULL, NULL, '2026-06-29 02:54:01', '2026-06-29 02:54:03');
+(7, 'belum_bayar', 7000.00, '2026-06-29 10:54:01', 7, 'f13ae0b4-14f1-4b9a-ac58-591394393e40', NULL, NULL, '2026-06-29 02:54:01', '2026-07-09 17:03:35'),
+(8, 'belum_bayar', 22000.00, '2026-06-30 12:19:04', 19, 'c84b1e61-0197-4ab4-9d8a-648b0b17c856', NULL, NULL, '2026-06-30 04:19:04', '2026-07-09 17:03:35'),
+(9, 'kadaluarsa', 31000.00, '2026-06-30 12:32:54', 20, '610132dd-5df5-4872-be5a-687481d15d9c', NULL, NULL, '2026-06-30 04:32:54', '2026-06-30 23:08:41'),
+(10, 'kadaluarsa', 7000.00, '2026-06-30 21:16:45', 21, 'cf830a63-4acb-4a45-a970-859ad43c3efb', NULL, NULL, '2026-06-30 13:16:45', '2026-06-30 23:08:10'),
+(11, 'kadaluarsa', 7000.00, '2026-06-30 21:18:18', 22, 'aafcac0f-074d-4c6c-ba9a-e19c1b0a3250', NULL, NULL, '2026-06-30 13:18:18', '2026-06-30 23:07:36'),
+(12, 'kadaluarsa', 7000.00, '2026-06-30 22:38:12', 23, '993206be-5425-4ccf-8d62-c9befbc0ef48', NULL, NULL, '2026-06-30 14:38:12', '2026-06-30 23:07:29'),
+(13, 'kadaluarsa', 7000.00, '2026-06-30 22:39:18', 24, '90b36c33-02d1-4616-ac39-96f63e697832', NULL, NULL, '2026-06-30 14:39:18', '2026-06-30 23:06:38'),
+(14, 'kadaluarsa', 7000.00, '2026-06-30 22:43:57', 25, '80971764-b002-4a48-8994-633d112ff54c', NULL, NULL, '2026-06-30 14:43:57', '2026-06-30 23:06:20'),
+(15, 'kadaluarsa', 7000.00, '2026-06-30 22:55:04', 26, 'aefcc929-0fbd-4100-8fb9-1e2d4dd5e52f', NULL, NULL, '2026-06-30 14:55:04', '2026-06-30 23:00:39'),
+(16, 'kadaluarsa', 4000.00, '2026-06-30 23:02:46', 27, 'ed9ec748-2340-406e-bc4d-93e78f5d4e45', NULL, NULL, '2026-06-30 15:02:46', '2026-06-30 23:00:18'),
+(17, 'kadaluarsa', 4000.00, '2026-06-30 23:53:52', 28, '67712d2e-d425-4795-8bba-09fcef8601a2', NULL, NULL, '2026-06-30 15:53:52', '2026-06-30 23:00:00'),
+(18, 'belum_bayar', 12000.00, '2026-07-01 00:40:31', 29, '6fca9369-e133-458a-be70-8cb163c7c605', NULL, NULL, '2026-06-30 16:40:31', '2026-07-09 17:03:35'),
+(19, 'kadaluarsa', 14000.00, '2026-07-01 01:00:47', 30, 'cca1b777-e3e9-4a87-afc1-4a062de4a953', NULL, NULL, '2026-06-30 17:00:47', '2026-06-30 22:59:23'),
+(20, 'belum_bayar', 7000.00, '2026-07-01 06:32:47', 31, '1385c74a-1988-4e8e-a574-0bc62ce1cf05', NULL, NULL, '2026-06-30 22:32:47', '2026-07-09 17:03:35'),
+(21, 'belum_bayar', 7000.00, '2026-07-01 06:36:57', 32, '0e68a919-30fe-47b3-a952-ad27b150614a', NULL, NULL, '2026-06-30 22:36:57', '2026-07-09 17:03:35'),
+(22, 'belum_bayar', 7000.00, '2026-07-01 06:39:50', 33, 'ad836d54-97bb-45b5-98b1-2e50578ded3a', NULL, NULL, '2026-06-30 22:39:50', '2026-07-09 17:03:35'),
+(23, 'belum_bayar', 7000.00, '2026-07-01 06:41:36', 34, '13b1c272-7e3b-481f-b469-57f9195cb7d2', NULL, NULL, '2026-06-30 22:41:36', '2026-07-09 17:03:35'),
+(24, 'belum_bayar', 7000.00, '2026-07-01 06:44:05', 35, 'b479187a-9ef2-4328-95ce-0abc2f06dcef', NULL, NULL, '2026-06-30 22:44:05', '2026-07-09 17:03:35'),
+(25, 'belum_bayar', 7000.00, '2026-07-02 14:31:24', 36, '4e389742-5875-4f07-b9da-ea283e4c1e7f', NULL, NULL, '2026-07-02 06:31:24', '2026-07-09 17:03:35'),
+(26, 'belum_bayar', 15000.00, '2026-07-02 15:18:03', 37, NULL, NULL, NULL, '2026-07-02 07:18:03', '2026-07-09 17:03:35'),
+(27, 'belum_bayar', 7000.00, '2026-07-02 16:26:15', 38, 'd43d237b-61d2-488f-b8fd-7fbfb05d43b5', NULL, NULL, '2026-07-02 08:26:15', '2026-07-09 17:03:35'),
+(28, 'belum_bayar', 7000.00, '2026-07-03 10:10:41', 39, '3d1aa772-9523-41ff-9483-d86386c590d7', NULL, NULL, '2026-07-03 02:10:41', '2026-07-09 17:03:35'),
+(29, 'belum_bayar', 7000.00, '2026-07-03 10:29:59', 40, '744dc25d-9be7-4c71-8f6d-40f677604d30', NULL, NULL, '2026-07-03 02:29:59', '2026-07-09 17:03:35'),
+(30, 'belum_bayar', 7000.00, '2026-07-03 10:31:18', 41, 'd6763420-e9e7-4919-bbee-717feb7f541f', NULL, NULL, '2026-07-03 02:31:18', '2026-07-09 17:03:35'),
+(31, 'belum_bayar', 7000.00, '2026-07-03 11:10:45', 42, 'dec86522-552b-4de0-9fac-f95c0539ce59', NULL, NULL, '2026-07-03 03:10:45', '2026-07-09 17:03:35'),
+(32, 'lunas', 4000.00, '2026-07-05 00:50:56', 43, 'd347814c-3dd0-420c-bbc1-f25a5a71fddc', 'TEST-ORD-FVJHL1', '2026-07-05 00:22:13', '2026-07-04 16:50:56', '2026-07-04 17:22:13'),
+(33, 'belum_bayar', 15000.00, '2026-07-10 01:04:14', 48, NULL, NULL, NULL, '2026-07-09 17:04:14', '2026-07-09 17:04:14');
 
 --
 -- Triggers `pembayaran`
 --
 DELIMITER $$
 CREATE TRIGGER `trg_cek_kadaluarsa_pembayaran` BEFORE UPDATE ON `pembayaran` FOR EACH ROW BEGIN
-    IF NEW.status_pem = 'belum_bayar' AND NOW() > NEW.batas_wkt_pem THEN
+    IF NEW.status_pem = 'menunggu'
+       AND NOW() > NEW.batas_wkt_pem THEN
         SET NEW.status_pem = 'kadaluarsa';
     END IF;
 END
@@ -809,11 +807,11 @@ INSERT INTO `pengguna` (`id_pengguna`, `nim_nik`, `nama`, `email`, `no_hp`, `fot
 (24, '2021005', 'Eko Wijaya', 'eko@email.com', '081234567894', NULL, 'pengguna', '$2y$10$abcdefghijklmnopqrstuuVwXyZ0123456789ABCDEFGHIJKLMNOPQRs', '2026-06-05 03:26:04', '2026-06-05 03:26:04'),
 (43, '1234567', 'winda', 'winda1@gmail.com', '0811696599', NULL, 'pengguna', '$2y$12$eJ1lw6Plq/BG730KDjnmFeY5c5grqdjKXMq7LvDQCKTOQ9yQ/JYiO', '2026-06-06 08:36:20', '2026-06-06 08:39:21'),
 (44, '1122334455', 'windawin', 'winda@gmail.com', '08116965991', NULL, 'admin', '$2y$12$eMQNGWvazaKM1p6RTXIC5uTttGaQQyWDa5mwdYxuPHgzKNJZ2SfMG', '2026-06-14 16:33:17', '2026-06-14 16:58:30'),
-(45, '4342501022', 'Citra kece', 'citra10@gmail.com', '08116569899', NULL, 'pengguna', '$2y$12$3q3oBLLysysha79Yxzhr4.ynNqRlfvJmj/QdL8fRoLX/vZRfusvCq', '2026-06-18 09:19:11', '2026-06-18 09:19:11'),
+(45, '4342501022', 'Citra imut', 'citra10@gmail.com', '08116569899', 'profil/mZ4U76oEpvJw1rdm4Yohy83vd835JKogH58ALhb4.jpg', 'pengguna', '$2y$12$aJeJWiTN1yWm9JZDqvF8n.RstYeUvqLrCsLNCynx/pIfr39jWgJOC', '2026-06-18 09:19:11', '2026-06-30 19:23:20'),
 (46, '4342501003', 'fathia', 'fathia@gmail.com', '081165698990', NULL, 'pengguna', '$2y$12$1fXCnyk2ttovfHbW/ldaouMkaJOdr0RB6X2uvcYvGYmh4Tw1p7BhC', '2026-06-18 12:13:18', '2026-06-19 08:36:09'),
 (47, '4342501001', 'winda', 'winda2gmail.com', NULL, NULL, 'admin', '$2y$12$iSg.OizPOtEyEN8/nuBGc.xiqEGCDw3ZOkq7psGAnFq17ONrrAAUu', '2026-06-18 12:33:40', '2026-06-18 12:34:10'),
-(48, '271001', 'MrBeast', 'mrbeast@gmail.com', '087767676767', NULL, 'pengguna', '$2y$12$OcfGpLKF975oDgYMSboocuH4YjxXohcyQf0/L71zuCgYRtVwmO9ge', '2026-06-23 07:22:15', '2026-06-23 07:22:15'),
-(49, '271110', 'Adminvir', 'adminvir@gmail.com', '081277123489', NULL, 'admin', '$2y$12$g9.SNS7xDYtiF1F0FeWbVuKV5Cz5NGp9Z.oPUKkLnHuSVL7LHNqWC', '2026-06-26 02:41:18', '2026-06-26 02:41:18');
+(48, '271001', 'MrBeast', 'mrbeast@gmail.com', '087767676767', 'profil/PghlrLv8NtVJuXRVLtp7WwTpxwJ7WlLEBWrajU0O.jpg', 'pengguna', '$2y$12$OcfGpLKF975oDgYMSboocuH4YjxXohcyQf0/L71zuCgYRtVwmO9ge', '2026-06-23 07:22:15', '2026-07-03 03:08:01'),
+(49, '271110', 'Adminvir', 'adminvir@gmail.com', '081277123489', NULL, 'admin', '$2y$12$g9.SNS7xDYtiF1F0FeWbVuKV5Cz5NGp9Z.oPUKkLnHuSVL7LHNqWC', '2026-06-26 02:41:18', '2026-07-06 09:05:39');
 
 -- --------------------------------------------------------
 
@@ -871,7 +869,32 @@ INSERT INTO `personal_access_tokens` (`id`, `tokenable_type`, `tokenable_id`, `n
 (65, 'App\\Models\\User', 48, 'auth_token', 'e5f5f40bd3d09108168f21632681574ea233bb04c67a4f40fa70aee3b93c5305', '[\"*\"]', NULL, NULL, '2026-06-29 02:53:55', '2026-06-29 02:53:55'),
 (66, 'App\\Models\\User', 48, 'auth_token', 'f7bfcc518d09aef7c75e52ffc84b5babc4abcaaf6b565357174001e02bdab138', '[\"*\"]', '2026-06-29 11:27:21', NULL, '2026-06-29 02:53:55', '2026-06-29 11:27:21'),
 (67, 'App\\Models\\User', 49, 'auth_token', '9b05eea3d8e843306037c6bff2fb38576d3953b0ac72586c24ccb0ef39627a2a', '[\"*\"]', '2026-06-29 14:38:54', NULL, '2026-06-29 11:27:37', '2026-06-29 14:38:54'),
-(68, 'App\\Models\\User', 49, 'auth_token', 'b2b312a0998f55070b32e6b9a8c1e2d2c944addea6a4ac0a659ed86c918c1d40', '[\"*\"]', '2026-06-30 03:48:18', NULL, '2026-06-30 03:31:16', '2026-06-30 03:48:18');
+(81, 'App\\Models\\User', 47, 'auth_token', '5ef8abadcc1610802e90c7aaab77151d1f5b2176be4842f6aada1ef1d1175f90', '[\"*\"]', '2026-06-30 16:27:33', NULL, '2026-06-30 16:27:13', '2026-06-30 16:27:33'),
+(84, 'App\\Models\\User', 47, 'auth_token', '1eeac7fa92880efd7804fe32ab96babc6dfe7874ed5edf32b53d4b07feee7872', '[\"*\"]', NULL, NULL, '2026-06-30 16:55:03', '2026-06-30 16:55:03'),
+(89, 'App\\Models\\User', 48, 'auth_token', 'a970685128f1a12aa1388395145931f989fadc61408e518b95c43ea6b7c80438', '[\"*\"]', NULL, NULL, '2026-06-30 17:00:14', '2026-06-30 17:00:14'),
+(90, 'App\\Models\\User', 48, 'auth_token', 'f22ced989f2151ec6f7bbb1a045bf1d26b178785279e6bf992ff4add8856d70d', '[\"*\"]', NULL, NULL, '2026-06-30 17:00:15', '2026-06-30 17:00:15'),
+(91, 'App\\Models\\User', 48, 'auth_token', '5b2b8cf53a6007f793be43ad6eb271fe5c5dee6931d846b8d780a6579e77597f', '[\"*\"]', NULL, NULL, '2026-06-30 17:00:16', '2026-06-30 17:00:16'),
+(92, 'App\\Models\\User', 48, 'auth_token', '977d32f9517fa168fcdb9c3aa9ddfaa035db01aa9a5f09866c99b948d859e617', '[\"*\"]', '2026-06-30 17:16:18', NULL, '2026-06-30 17:00:16', '2026-06-30 17:16:18'),
+(93, 'App\\Models\\User', 46, 'auth_token', 'fbbf1d8301228fc6901194e6117a940b4ac65a31b6ad079d5bc0809019f63c80', '[\"*\"]', '2026-06-30 17:02:55', NULL, '2026-06-30 17:02:28', '2026-06-30 17:02:55'),
+(95, 'App\\Models\\User', 48, 'auth_token', 'b1710cebb1467078ab771ca0160c53b1cda32b8aa778d074e1fac023475d275f', '[\"*\"]', '2026-06-30 17:14:06', NULL, '2026-06-30 17:14:03', '2026-06-30 17:14:06'),
+(96, 'App\\Models\\User', 48, 'auth_token', '2fb00754f8877fb7b0f6025d23d23f2a57f8b5c1ef06a1f4f5605abb0833d5b5', '[\"*\"]', '2026-06-30 19:09:35', NULL, '2026-06-30 19:09:32', '2026-06-30 19:09:35'),
+(100, 'App\\Models\\User', 45, 'auth_token', '513453cc9fc932ad9f9f909434e69393ea2b0d53739d0fa7932ab424050012e9', '[\"*\"]', '2026-07-01 01:19:16', NULL, '2026-06-30 19:23:41', '2026-07-01 01:19:16'),
+(101, 'App\\Models\\User', 48, 'auth_token', '49313b53eefb1b206e9b2b080dd7e5092be05dd3ce1792fcc5bf4c99f8ae2b2e', '[\"*\"]', NULL, NULL, '2026-06-30 22:44:41', '2026-06-30 22:44:41'),
+(105, 'App\\Models\\User', 49, 'auth_token', '2faedca64bd97f899c56b99605051c60432f3e25a7f5697ff8884c9d84f95ae1', '[\"*\"]', NULL, NULL, '2026-07-02 07:24:43', '2026-07-02 07:24:43'),
+(108, 'App\\Models\\User', 47, 'auth_token', '2ccda1bfb6383da795609d7f497766f136d03dbb1436c5914fb2c636932265d3', '[\"*\"]', '2026-07-02 08:31:59', NULL, '2026-07-02 08:28:03', '2026-07-02 08:31:59'),
+(109, 'App\\Models\\User', 49, 'auth_token', 'f1f8877044eb08173e075088097ad2a037669719d8e5a0f9fd0d541ca66b1079', '[\"*\"]', NULL, NULL, '2026-07-02 08:28:06', '2026-07-02 08:28:06'),
+(111, 'App\\Models\\User', 48, 'auth_token', 'cd02c7b2604e077266b2e731526a9b984e90e00848baf141376446774e85108d', '[\"*\"]', '2026-07-02 11:54:27', NULL, '2026-07-02 08:34:13', '2026-07-02 11:54:27'),
+(112, 'App\\Models\\User', 49, 'auth_token', 'b8a32997578ebf0fad7ccb64e64260c8d457746932cfd1c5f1b8d4a9575da9d9', '[\"*\"]', '2026-07-02 08:40:02', NULL, '2026-07-02 08:35:46', '2026-07-02 08:40:02'),
+(113, 'App\\Models\\User', 48, 'auth_token', '45e57631a0edb226a9603e8891c27a840f4b6b3b7bca55bf1fb3b191fa3fec79', '[\"*\"]', NULL, NULL, '2026-07-03 01:46:21', '2026-07-03 01:46:21'),
+(114, 'App\\Models\\User', 48, 'auth_token', '62bf15f5bde4c7a9ea3b00b1bd7e9bd5a9f9ca538fa808d37f381f94e1202a0f', '[\"*\"]', '2026-07-03 02:33:32', NULL, '2026-07-03 01:46:22', '2026-07-03 02:33:32'),
+(116, 'App\\Models\\User', 48, 'auth_token', 'b99f104d25c81630bc9df84ca0c0b367b31119de43c280faac5f3eb564905c80', '[\"*\"]', '2026-07-03 03:14:15', NULL, '2026-07-03 02:57:31', '2026-07-03 03:14:15'),
+(118, 'App\\Models\\User', 48, 'auth_token', '5bbf91c36f2ce10fe6b9102f00fb2e05c958f891bd044e9eda608d364c951e14', '[\"*\"]', '2026-07-03 16:42:43', NULL, '2026-07-03 15:55:32', '2026-07-03 16:42:43'),
+(119, 'App\\Models\\User', 48, 'auth_token', '8a1eeaca3b7355b01d753fbf891e95758a0d24fa5b49888d760df18d74ce1a55', '[\"*\"]', '2026-07-04 17:12:08', NULL, '2026-07-04 16:50:30', '2026-07-04 17:12:08'),
+(120, 'App\\Models\\User', 49, 'auth_token', 'e59a97b72549a822affa799cb50b9155307a48d0ab0893056f7b6750a4444218', '[\"*\"]', '2026-07-05 06:07:44', NULL, '2026-07-05 06:05:27', '2026-07-05 06:07:44'),
+(122, 'App\\Models\\User', 48, 'auth_token', '3e138df373d07d3c6765e035b9aae1bf8a4311717e06505c65352a2e0b5d4e5d', '[\"*\"]', '2026-07-05 09:21:17', NULL, '2026-07-05 09:21:15', '2026-07-05 09:21:17'),
+(124, 'App\\Models\\User', 48, 'auth_token', '9f833cfb109eb9840396e63d58d333fdf7d393a430223b58792b13da673428a8', '[\"*\"]', '2026-07-06 04:25:47', NULL, '2026-07-06 04:21:19', '2026-07-06 04:25:47'),
+(126, 'App\\Models\\User', 49, 'auth_token', '8fe1d84aa7d0894288f6d3f86bb007e1287f516015c533843d0d401606fdfa54', '[\"*\"]', '2026-07-06 08:44:22', NULL, '2026-07-06 05:42:03', '2026-07-06 08:44:22'),
+(131, 'App\\Models\\User', 48, 'auth_token', '68b62513df1f01f237975008f27e947a40e762e4b58c9407535fbab0a2624543', '[\"*\"]', '2026-07-09 17:04:29', NULL, '2026-07-09 16:58:32', '2026-07-09 17:04:29');
 
 -- --------------------------------------------------------
 
@@ -895,12 +918,38 @@ CREATE TABLE `pesanan` (
 
 INSERT INTO `pesanan` (`id_pesanan`, `kode_pesanan`, `tgl_pesanan`, `wkt_pengambilan`, `status_pesanan`, `total_harga`, `id_peng_fk_ps`) VALUES
 (1, 'ORD-WP3L0R', '2026-06-19 15:03:27', NULL, 'menunggu', 52000.00, 46),
-(2, 'ORD-CL05CL', '2026-06-19 16:07:27', NULL, 'menunggu', 15000.00, 46),
+(2, 'ORD-CL05CL', '2026-06-19 16:07:27', NULL, 'dibatalkan', 15000.00, 46),
 (3, 'ORD-EBEO5E', '2026-06-24 15:23:01', '2026-06-24 15:52:00', 'menunggu', 8000.00, 48),
 (4, 'ORD-E3IFNE', '2026-06-26 09:49:59', '2026-06-26 10:19:00', 'menunggu', 5000.00, 48),
 (5, 'ORD-SQ4U8J', '2026-06-26 10:23:06', '2026-06-26 10:53:00', 'menunggu', 4000.00, 48),
 (6, 'ORD-SWPKJ8', '2026-06-26 10:31:45', '2026-06-26 11:01:00', 'menunggu', 4000.00, 48),
-(7, 'ORD-Z7SLJX', '2026-06-29 09:54:01', '2026-06-29 10:23:00', 'menunggu', 7000.00, 48);
+(7, 'ORD-Z7SLJX', '2026-06-29 09:54:01', '2026-06-29 10:23:00', 'menunggu', 7000.00, 48),
+(19, 'ORD-6PQCAL', '2026-06-30 11:19:04', '2026-06-30 11:48:00', 'menunggu', 22000.00, 48),
+(20, 'ORD-563A1K', '2026-06-30 11:32:54', '2026-06-30 12:02:00', 'menunggu', 31000.00, 48),
+(21, 'ORD-QOD4MG', '2026-06-30 20:16:45', '2026-06-30 20:46:00', 'menunggu', 7000.00, 48),
+(22, 'ORD-WKC0DA', '2026-06-30 20:18:18', '2026-06-30 20:48:00', 'menunggu', 7000.00, 48),
+(23, 'ORD-XYLP3V', '2026-06-30 21:38:12', '2026-06-30 22:08:00', 'menunggu', 7000.00, 48),
+(24, 'ORD-LBTHR4', '2026-06-30 21:39:18', '2026-06-30 22:09:00', 'menunggu', 7000.00, 48),
+(25, 'ORD-LVI5JC', '2026-06-30 21:43:57', '2026-06-30 22:13:00', 'menunggu', 7000.00, 48),
+(26, 'ORD-LU09XL', '2026-06-30 21:55:04', '2026-06-30 22:25:00', 'menunggu', 7000.00, 48),
+(27, 'ORD-S2LQ6I', '2026-06-30 22:02:46', '2026-06-30 22:32:00', 'menunggu', 4000.00, 48),
+(28, 'ORD-7GDY8D', '2026-06-30 22:53:52', '2026-06-30 23:23:00', 'menunggu', 4000.00, 48),
+(29, 'ORD-W4WQSK', '2026-06-30 23:40:31', '2026-07-01 00:07:00', 'menunggu', 12000.00, 46),
+(30, 'ORD-Q9KAC5', '2026-07-01 00:00:47', '2026-07-01 00:30:00', 'menunggu', 14000.00, 48),
+(31, 'ORD-IU2AYJ', '2026-07-01 05:32:47', '2026-07-01 06:01:00', 'menunggu', 7000.00, 48),
+(32, 'ORD-USUO4S', '2026-07-01 05:36:57', '2026-07-01 06:06:00', 'menunggu', 7000.00, 48),
+(33, 'ORD-5IKZDC', '2026-07-01 05:39:50', '2026-07-01 06:09:00', 'selesai', 7000.00, 48),
+(34, 'ORD-9GG3KE', '2026-07-01 05:41:36', '2026-07-01 06:11:00', 'diproses', 7000.00, 48),
+(35, 'ORD-NK80VI', '2026-07-01 05:44:05', '2026-07-01 06:14:00', 'diproses', 7000.00, 48),
+(36, 'ORD-NN57BA', '2026-07-02 13:31:24', '2026-07-02 14:00:00', 'diproses', 7000.00, 48),
+(37, 'ORD-RA1LXW', '2026-07-02 14:18:03', '2026-07-02 05:47:00', 'diproses', 15000.00, 48),
+(38, 'ORD-SQ0Y4D', '2026-07-02 15:26:15', '2026-07-02 15:55:00', 'diproses', 7000.00, 48),
+(39, 'ORD-O3QOB2', '2026-07-03 09:10:41', '2026-07-03 09:40:00', 'selesai', 7000.00, 48),
+(40, 'ORD-JYEPR4', '2026-07-03 09:29:59', '2026-07-03 09:59:00', 'selesai', 7000.00, 48),
+(41, 'ORD-QTYY6Y', '2026-07-03 09:31:18', '2026-07-03 10:01:00', 'selesai', 7000.00, 48),
+(42, 'ORD-2V6IVG', '2026-07-03 10:10:45', '2026-07-03 10:40:00', 'selesai', 7000.00, 48),
+(43, 'ORD-FVJHL1', '2026-07-04 23:50:56', '2026-07-05 00:20:00', 'selesai', 4000.00, 48),
+(48, 'ORD-3OWZMK', '2026-07-10 00:04:14', '2026-07-10 00:34:00', 'menunggu', 15000.00, 48);
 
 -- --------------------------------------------------------
 
@@ -927,11 +976,12 @@ CREATE TABLE `produk` (
 --
 
 INSERT INTO `produk` (`id_produk`, `nama_produk`, `stok`, `harga_jual`, `tgl_kadaluarsa`, `id_kat_fk_p`, `deskripsi`, `status_produk`, `created_at`, `updated_at`, `id_disk_fk_p`) VALUES
-(16, 'Nabati', 9, 5000.00, NULL, 1, 'Nabati lezatt', 'aktif', '2026-06-21 13:34:17', '2026-06-26 02:49:59', 23),
-(17, 'teh pucuk', 46, 4000.00, NULL, 2, 'Teh pucuk enak tau', 'aktif', '2026-06-21 13:40:11', '2026-06-26 03:31:45', 23),
-(18, 'Potatos', 0, 9000.00, NULL, 1, 'enakk', 'habis', '2026-06-21 13:44:31', '2026-06-21 14:23:10', 21),
-(23, 'ayam geprek', 10, 15000.00, NULL, 1, 'enakk', 'aktif', '2026-06-27 05:44:20', '2026-06-27 05:44:44', 23),
-(24, 'Es Krim', 24, 7000.00, NULL, 1, 'Es Krim Segar', 'aktif', '2026-06-28 12:59:53', '2026-06-29 02:54:01', NULL);
+(16, 'Nabati', 7, 5000.00, NULL, 1, 'Nabati lezatt', 'aktif', '2026-06-21 13:34:17', '2026-06-30 16:40:31', 23),
+(17, 'teh pucuk', 42, 4000.00, NULL, 2, 'Teh pucuk enak tau', 'aktif', '2026-06-21 13:40:11', '2026-07-04 16:50:56', 23),
+(18, 'Potatos', 1, 9000.00, NULL, 1, 'enakk', 'aktif', '2026-06-21 13:44:31', '2026-07-06 05:54:48', 21),
+(23, 'ayam geprek', 6, 15000.00, NULL, 1, 'enakk', 'aktif', '2026-06-27 05:44:20', '2026-07-09 17:04:14', 23),
+(24, 'Es Krim', 22, 7000.00, NULL, 1, 'Es Krim Segar', 'aktif', '2026-06-28 12:59:53', '2026-07-03 03:10:45', NULL),
+(27, 'Air Mineral', 0, 3000.00, NULL, 2, 'u', 'aktif', '2026-06-30 16:42:04', '2026-06-30 16:42:04', NULL);
 
 --
 -- Triggers `produk`
@@ -1144,7 +1194,7 @@ ALTER TABLE `sessions`
 -- AUTO_INCREMENT for table `detail_pesanan`
 --
 ALTER TABLE `detail_pesanan`
-  MODIFY `id_detail` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_detail` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=65;
 
 --
 -- AUTO_INCREMENT for table `diskon`
@@ -1174,19 +1224,19 @@ ALTER TABLE `jobs`
 -- AUTO_INCREMENT for table `kategori_produk`
 --
 ALTER TABLE `kategori_produk`
-  MODIFY `id_kategori` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
+  MODIFY `id_kategori` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
 
 --
 -- AUTO_INCREMENT for table `keranjang`
 --
 ALTER TABLE `keranjang`
-  MODIFY `id_keranjang` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
+  MODIFY `id_keranjang` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=78;
 
 --
 -- AUTO_INCREMENT for table `log_transaksi`
 --
 ALTER TABLE `log_transaksi`
-  MODIFY `id_transaksi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=5;
+  MODIFY `id_transaksi` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
 
 --
 -- AUTO_INCREMENT for table `migrations`
@@ -1198,7 +1248,7 @@ ALTER TABLE `migrations`
 -- AUTO_INCREMENT for table `pembayaran`
 --
 ALTER TABLE `pembayaran`
-  MODIFY `id_pembayaran` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_pembayaran` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
 
 --
 -- AUTO_INCREMENT for table `pengguna`
@@ -1210,19 +1260,19 @@ ALTER TABLE `pengguna`
 -- AUTO_INCREMENT for table `personal_access_tokens`
 --
 ALTER TABLE `personal_access_tokens`
-  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=69;
+  MODIFY `id` bigint UNSIGNED NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=132;
 
 --
 -- AUTO_INCREMENT for table `pesanan`
 --
 ALTER TABLE `pesanan`
-  MODIFY `id_pesanan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id_pesanan` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=49;
 
 --
 -- AUTO_INCREMENT for table `produk`
 --
 ALTER TABLE `produk`
-  MODIFY `id_produk` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=25;
+  MODIFY `id_produk` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=31;
 
 -- --------------------------------------------------------
 

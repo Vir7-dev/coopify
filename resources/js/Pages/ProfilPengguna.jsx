@@ -261,15 +261,22 @@ export default function ProfilPengguna() {
           </div>
         </div>
 
-        {/* PESANAN BELUM BAYAR */}
+        {/* PESANAN BELUM BAYAR - MOBILE OPTIMIZED */}
         {pesananBelumBayar.length > 0 && (
-          <div className="mx-4 sm:mx-6 mt-6 bg-amber-50 border border-amber-200 rounded-xl overflow-hidden">
-            <div className="p-4 flex items-center gap-2 border-b border-amber-200">
-              <FaExclamationTriangle className="text-amber-500" />
-              <h2 className="text-lg font-semibold text-amber-800">Pesanan Menunggu Pembayaran</h2>
+          <div className="mx-4 sm:mx-6 mt-6">
+            {/* Header */}
+            <div className="flex items-center gap-2 mb-3">
+              <div className="bg-amber-100 p-2 rounded-full">
+                <FaExclamationTriangle className="text-amber-600" size={18} />
+              </div>
+              <h2 className="text-base font-semibold text-gray-800">Pesanan Menunggu Pembayaran</h2>
+              <span className="bg-amber-500 text-white text-xs px-2 py-0.5 rounded-full font-medium">
+                {pesananBelumBayar.length}
+              </span>
             </div>
 
-            <div className="p-4 space-y-3">
+            {/* Card List */}
+            <div className="space-y-3">
               {pesananBelumBayar.map((pesanan) => {
                 const sisaWaktu = getRemainingTime(pesanan.batas_wkt_pem);
                 const isUrgent = sisaWaktu && sisaWaktu.includes('m ') && parseInt(sisaWaktu) < 15;
@@ -277,53 +284,70 @@ export default function ProfilPengguna() {
                 return (
                   <div
                     key={pesanan.id_pesanan}
-                    className={`bg-white rounded-xl p-4 shadow-sm border ${isUrgent ? 'border-red-300' : 'border-gray-200'
+                    className={`bg-white rounded-2xl p-4 shadow-sm border-2 ${isUrgent ? 'border-red-400 animate-pulse' : 'border-amber-200'
                       }`}
                   >
-                    <div className="flex justify-between items-start mb-2">
-                      <div>
-                        <p className="font-semibold text-sm">{pesanan.kode_pesanan}</p>
-                        <p className="text-xs text-gray-500">{pesanan.produk_names}</p>
+                    {/* Header Card */}
+                    <div className="flex justify-between items-start mb-3">
+                      <div className="flex-1 min-w-0">
+                        <p className="font-bold text-gray-900 text-sm sm:text-base">{pesanan.kode_pesanan}</p>
+                        <p className="text-xs text-gray-500 truncate">{pesanan.produk_names}</p>
                       </div>
-                      <span className={`text-xs px-2 py-1 rounded-full font-medium ${isUrgent ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-600'
+                      <span className={`ml-2 text-xs px-2.5 py-1 rounded-full font-semibold shrink-0 ${isUrgent ? 'bg-red-100 text-red-600' : 'bg-amber-100 text-amber-700'
                         }`}>
-                        {isUrgent ? 'Segera!' : 'belum bayar'}
+                        {isUrgent ? '⚠️ Segera!' : '⏳ Belum Bayar'}
                       </span>
                     </div>
 
-                    <div className="flex flex-wrap gap-4 text-sm mb-3">
-                      <div>
-                        <p className="text-gray-500 text-xs">Total</p>
-                        <p className="font-bold text-emerald-600">
+                    {/* Info Grid - Mobile Friendly */}
+                    <div className="grid grid-cols-2 gap-2 mb-3">
+                      <div className="bg-gray-50 rounded-xl p-3">
+                        <p className="text-xs text-gray-500 mb-0.5">Total</p>
+                        <p className="font-bold text-emerald-600 text-sm sm:text-base">
                           Rp {pesanan.total_harga.toLocaleString("id-ID")}
                         </p>
                       </div>
-                      <div>
-                        <p className="text-gray-500 text-xs">Items</p>
-                        <p className="font-medium">{pesanan.total_items} unit</p>
+                      <div className="bg-gray-50 rounded-xl p-3">
+                        <p className="text-xs text-gray-500 mb-0.5">Items</p>
+                        <p className="font-semibold text-gray-700 text-sm">{pesanan.total_items} unit</p>
                       </div>
-                      <div>
-                        <p className="text-gray-500 text-xs">Pengambilan</p>
-                        <p className="font-medium flex items-center gap-1">
-                          <FaClock className="text-gray-400" size={12} />
-                          {pesanan.wkt_pengambilan || '-'}
-                        </p>
-                      </div>
-                      {sisaWaktu && (
-                        <div>
-                          <p className="text-gray-500 text-xs">Sisa Waktu</p>
-                          <p className={`font-bold ${isUrgent ? 'text-red-500' : 'text-amber-500'}`}>
-                            {sisaWaktu}
-                          </p>
-                        </div>
-                      )}
                     </div>
 
+                    {/* Waktu Pengambilan */}
+                    <div className="bg-blue-50 rounded-xl p-3 mb-3 flex items-center gap-2">
+                      <FaClock className="text-blue-500 shrink-0" size={14} />
+                      <div className="min-w-0">
+                        <p className="text-xs text-blue-500">Pengambilan</p>
+                        <p className="text-sm font-medium text-blue-700 truncate">{pesanan.wkt_pengambilan || 'Segera'}</p>
+                      </div>
+                    </div>
+
+                    {/* Countdown Timer */}
+                    {sisaWaktu && (
+                      <div className={`rounded-xl p-3 mb-3 ${isUrgent ? 'bg-red-50' : 'bg-amber-50'}`}>
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className={`text-xs font-medium ${isUrgent ? 'text-red-600' : 'text-amber-600'}`}>Sisa Waktu Pembayaran</p>
+                            <p className={`text-lg font-bold ${isUrgent ? 'text-red-600' : 'text-amber-600'}`}>
+                              {sisaWaktu}
+                            </p>
+                          </div>
+                          <div className={`text-2xl ${isUrgent ? 'animate-bounce' : ''}`}>
+                            {isUrgent ? '🚨' : '⏱️'}
+                          </div>
+                        </div>
+                      </div>
+                    )}
+
+                    {/* Tombol Bayar */}
                     <button
                       onClick={() => handleBayarUlang(pesanan)}
-                      className="w-full bg-emerald-600 hover:bg-emerald-500 text-white font-semibold py-2.5 rounded-xl transition flex items-center justify-center gap-2"
+                      className={`w-full font-bold py-3.5 rounded-xl transition flex items-center justify-center gap-2 text-white ${isUrgent
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700'
+                          : 'bg-gradient-to-r from-emerald-500 to-emerald-600 hover:from-emerald-600 hover:to-emerald-700'
+                        }`}
                     >
-                      <FaQrcode />
+                      <FaQrcode size={18} />
                       Bayar Sekarang
                     </button>
                   </div>

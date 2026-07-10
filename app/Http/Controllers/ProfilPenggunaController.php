@@ -65,7 +65,7 @@ class ProfilPenggunaController extends Controller
         $pesananBelumBayar = [];
         $pesananPending = $pesanans->filter(function ($pesanan) {
             return $pesanan->pembayaran &&
-                   $pesanan->pembayaran->status_pem === 'belum bayar' &&
+                   $pesanan->pembayaran->status_pem === 'belum_bayar' &&
                    ($pesanan->pembayaran->batas_wkt_pem === null || now()->lessThan($pesanan->pembayaran->batas_wkt_pem));
         });
 
@@ -82,14 +82,14 @@ class ProfilPenggunaController extends Controller
                 try {
                     $statusRes = \Midtrans\Transaction::status($pesanan->kode_pesanan);
                     $statusTransaksi = match ($statusRes->transaction_status ?? '') {
-                        'capture', 'settlement' => 'berhasil',
-                        'pending' => 'belum bayar',
-                        'deny', 'cancel' => 'gagal',
-                        'expire' => 'kadaluarsa',
-                        default => 'belum bayar',
+                        'capture', 'settlement' => 'lunas',
+                        'pending'              => 'belum_bayar',
+                        'expire'               => 'kadaluarsa',
+                        'deny', 'cancel'       => 'gagal',
+                        default                => 'gagal',
                     };
 
-                    if ($statusTransaksi !== 'belum bayar') {
+                    if ($statusTransaksi !== 'belum_bayar') {
                         DB::statement(
                             "CALL konfirmasi_pembayaran(?, ?, ?, ?, ?, @hasil)",
                             [
@@ -104,7 +104,7 @@ class ProfilPenggunaController extends Controller
                         $pesanan->refresh();
                         
                         // Jika statusnya sudah tidak menunggu, lewati dari daftar belum bayar
-                        if ($pembayaran->status_pem !== 'belum bayar') {
+                        if ($pembayaran->status_pem !== 'belum_bayar') {
                             continue;
                         }
                     }

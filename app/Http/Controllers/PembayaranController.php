@@ -89,11 +89,11 @@ class PembayaranController extends Controller
             try {
                 $statusRes = \Midtrans\Transaction::status($pesanan->kode_pesanan);
                 $statusTransaksi = match ($statusRes->transaction_status ?? '') {
-                    'capture', 'settlement' => 'berhasil',
-                    'pending' => 'belum_bayar',
-                    'deny', 'cancel' => 'gagal',
-                    'expire' => 'kadaluarsa',
-                    default => 'belum_bayar',
+                    'capture', 'settlement' => 'lunas',
+                    'pending'              => 'belum_bayar',
+                    'expire'               => 'kadaluarsa',
+                    'deny', 'cancel'       => 'gagal',
+                    default                => 'gagal',
                 };
 
                 if ($statusTransaksi !== 'belum_bayar') {
@@ -269,9 +269,11 @@ class PembayaranController extends Controller
             }
 
             $statusTransaksi = match ($transactionStatus) {
-                'capture', 'settlement' => 'berhasil',
-                'pending' => 'belum_bayar',
-                default => 'gagal',
+                'capture', 'settlement' => 'lunas',
+                'pending'              => 'belum_bayar',
+                'expire'               => 'kadaluarsa',
+                'deny', 'cancel'       => 'gagal',
+                default                => 'gagal',
             };
 
             Log::info('Mapped Status', [
