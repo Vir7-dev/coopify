@@ -19,12 +19,27 @@ class PesananController extends Controller
 
         // Filter berdasarkan status
         if ($request->filled('status')) {
-            $query->where('status_pesanan', $request->status);
+            if ($request->status === 'belum bayar') {
+                $query->where('status_pesanan', 'menunggu')
+                      ->whereHas('pembayaran', function ($q) {
+                          $q->where('status_pem', 'belum_bayar');
+                      });
+            } elseif ($request->status === 'menunggu') {
+                $query->where('status_pesanan', 'menunggu')
+                      ->whereHas('pembayaran', function ($q) {
+                          $q->where('status_pem', 'lunas');
+                      });
+            } else {
+                $query->where('status_pesanan', $request->status);
+            }
         }
 
-        // Filter pesanan baru (menunggu) untuk notifikasi
+        // Filter pesanan baru (menunggu konfirmasi proses) untuk notifikasi
         if ($request->boolean('baru')) {
-            $query->where('status_pesanan', 'belum bayar');
+            $query->where('status_pesanan', 'menunggu')
+                  ->whereHas('pembayaran', function ($q) {
+                      $q->where('status_pem', 'lunas');
+                  });
         }
 
         // Filter berdasarkan bulan dan tahun
@@ -64,7 +79,7 @@ class PesananController extends Controller
         \Log::info("updateStatus called for ID: $id", ['request' => $request->all()]);
         try {
             $request->validate([
-                'status' => 'required|in:belum bayar,diproses,siap diambil,selesai,dibatalkan'
+                'status' => 'required|in:belum bayar,menunggu,diproses,siap diambil,selesai,dibatalkan'
             ]);
 
             $pesanan = Pesanan::findOrFail($id);
@@ -74,7 +89,8 @@ class PesananController extends Controller
 
         // Validasi transisi status
         $validTransitions = [
-            'belum bayar' => ['diproses', 'dibatalkan'],
+            'belum bayar' => ['dibatalkan'],
+            'menunggu' => ['diproses', 'dibatalkan'],
             'diproses' => ['siap diambil', 'dibatalkan'],
             'siap diambil' => ['selesai', 'dibatalkan'],
             'selesai' => [],
@@ -123,7 +139,10 @@ class PesananController extends Controller
      */
     public function countBaru()
     {
-        $count = Pesanan::where('status_pesanan', 'belum bayar')->count();
+        $count = Pesanan::where('status_pesanan', 'menunggu')
+            ->whereHas('pembayaran', function ($q) {
+                $q->where('status_pem', 'lunas');
+            })->count();
 
         return response()->json(['count' => $count]);
     }

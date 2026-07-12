@@ -120,7 +120,9 @@ export default function DetailPesananModal({
                 {/* Footer */}
                 <div className="border-t p-3 flex gap-2 flex-shrink-0">
                     {selectedOrder.status_pesanan !== "selesai" &&
-                        selectedOrder.status_pesanan !== "dibatalkan" && (
+                        selectedOrder.status_pesanan !== "dibatalkan" &&
+                        selectedOrder.status_pesanan !== "belum bayar" &&
+                        selectedOrder.status_pesanan !== "kadaluarsa" && (
                             <button
                                 onClick={() => handleUpdateStatus(selectedOrder.id_pesanan, selectedOrder.status_pesanan)}
                                 disabled={isSubmitting}

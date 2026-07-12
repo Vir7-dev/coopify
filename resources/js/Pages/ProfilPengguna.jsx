@@ -87,6 +87,12 @@ export default function ProfilPengguna() {
     };
 
     const getStatusStyle = (status) => {
+        if (status === "belum bayar") {
+            return "bg-yellow-100 text-yellow-600";
+        }
+        if (status === "menunggu") {
+            return "bg-amber-100 text-amber-600";
+        }
         if (status === "siap diambil") {
             return "bg-blue-100 text-blue-600";
         }

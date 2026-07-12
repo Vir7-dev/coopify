@@ -377,7 +377,7 @@ CREATE DEFINER=`root`@`localhost` PROCEDURE `konfirmasi_pembayaran` (IN `p_id_pe
 
         IF p_status_transaksi = 'lunas' THEN
             UPDATE pembayaran SET status_pem = 'lunas', paid_at = NOW(), midtrans_transaction_id = p_transaction_id WHERE id_pembayaran = p_id_pembayaran;
-            UPDATE pesanan SET status_pesanan = 'diproses' WHERE id_pesanan = v_id_pesanan;
+            UPDATE pesanan SET status_pesanan = 'menunggu' WHERE id_pesanan = v_id_pesanan;
             SET p_pesan = 'Berhasil: pembayaran dikonfirmasi';
 
         ELSEIF p_status_transaksi = 'menunggu' THEN

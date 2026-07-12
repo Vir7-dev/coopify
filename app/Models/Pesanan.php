@@ -51,4 +51,15 @@ class Pesanan extends Model
             'id_pengguna'
         );
     }
+
+    public function getStatusPesananAttribute($value)
+    {
+        if ($value === 'menunggu') {
+            $pembayaran = $this->pembayaran;
+            if ($pembayaran && $pembayaran->status_pem === 'belum_bayar') {
+                return 'belum bayar';
+            }
+        }
+        return $value;
+    }
 }

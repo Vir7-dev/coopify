@@ -148,7 +148,7 @@ function Navbar({ role }) {
     const fetchPesananBelumBayar = async () => {
         setLoadingOrders(true);
         try {
-            const res = await api.get('/admin/pesanan?status=belum bayar');
+            const res = await api.get('/admin/pesanan?status=menunggu');
             setOrderList(res.data || []);
         } catch (err) {
             console.error('Error fetch pesanan:', err);
