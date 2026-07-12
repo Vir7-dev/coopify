@@ -105,12 +105,16 @@ export default function EditProfil() {
 
       if (isAdmin) {
         const token = localStorage.getItem("token");
-        await axios.post("/api/admin/profil", formData, {
+        const res = await axios.post("/api/admin/profil", formData, {
           headers: {
             Authorization: `Bearer ${token}`,
             "Content-Type": "multipart/form-data",
           },
         });
+
+        // Update localStorage supaya Navbar & halaman lain (mis. card profil) ikut update
+        const updatedUser = { ...user, ...res.data.profil };
+        localStorage.setItem("user", JSON.stringify(updatedUser));
       } else {
         const res = await api.post("/profil-pengguna", formData, {
           headers: { "Content-Type": "multipart/form-data" },
@@ -128,7 +132,14 @@ export default function EditProfil() {
       });
     } catch (error) {
       console.error(error);
-      Swal.fire("Gagal", "Terjadi kesalahan saat menyimpan data", "error");
+      const errors = error.response?.data?.errors;
+      let errorMessage = "Terjadi kesalahan saat menyimpan data";
+      if (errors) {
+        errorMessage = Object.values(errors).flat().join("\n");
+      } else if (error.response?.data?.message) {
+        errorMessage = error.response.data.message;
+      }
+      Swal.fire("Gagal", errorMessage, "error");
     } finally {
       setIsSaving(false);
     }
