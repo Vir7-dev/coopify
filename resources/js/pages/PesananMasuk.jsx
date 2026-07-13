@@ -200,7 +200,7 @@ export default function PesananMasuk() {
     const getStatusLabel = (status) => {
         const labels = {
             "belum bayar": "Belum Bayar",
-            menunggu: "Menunggu Konfirmasi",
+            menunggu: "Menunggu",
             diproses: "Diproses",
             "siap diambil": "Siap Diambil",
             selesai: "Selesai",
@@ -379,7 +379,7 @@ export default function PesananMasuk() {
                         </div>
 
                         <div>
-                            <p className="text-sm text-gray-500">Menunggu Konfirmasi</p>
+                            <p className="text-sm text-gray-500">Menunggu</p>
 
                             <h2 className="text-lg font-semibold">
                                 {
@@ -429,7 +429,7 @@ export default function PesananMasuk() {
                             >
                                 <option value="">Semua Status</option>
                                 <option value="belum bayar">Belum Bayar</option>
-                                <option value="menunggu">Menunggu Konfirmasi</option>
+                                <option value="menunggu">Menunggu</option>
                                 <option value="diproses">Diproses</option>
                                 <option value="siap diambil">Siap Diambil</option>
                                 <option value="selesai">Selesai</option>

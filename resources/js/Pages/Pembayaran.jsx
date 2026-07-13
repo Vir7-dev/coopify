@@ -372,7 +372,7 @@ export default function Pembayaran({
                                 {status === "waiting" && (
                                     <p className="text-yellow-300 text-sm text-center">
                                         {error ||
-                                            "Pembayaran sedang menunggu konfirmasi."}
+                                            "Pembayaran sedang menunggu."}
                                     </p>
                                 )}
 
