@@ -8,6 +8,7 @@ export default function DetailPesananModal({
     getStatusClass,
     getStatusLabel,
     handleUpdateStatus,
+    handleCancelOrder,
     getNextActionLabel,
     isSubmitting = false,
 }) {
@@ -118,29 +119,50 @@ export default function DetailPesananModal({
                 </div>
 
                 {/* Footer */}
-                <div className="border-t p-3 flex gap-2 flex-shrink-0">
-                    {selectedOrder.status_pesanan !== "selesai" &&
-                        selectedOrder.status_pesanan !== "dibatalkan" &&
-                        selectedOrder.status_pesanan !== "belum bayar" &&
-                        selectedOrder.status_pesanan !== "kadaluarsa" && (
-                            <button
-                                onClick={() => handleUpdateStatus(selectedOrder.id_pesanan, selectedOrder.status_pesanan)}
-                                disabled={isSubmitting}
-                                className="flex-1 bg-blue-600 hover:bg-blue-700 text-white py-2 rounded-xl flex items-center justify-center gap-2 transition text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
-                            >
-                                <CheckCircle size={16} />
-                                {isSubmitting ? "Memproses..." : getNextActionLabel(selectedOrder.status_pesanan)}
-                            </button>
-                        )}
+                <div className="border-t p-4 flex justify-end gap-2 flex-shrink-0">
+    {/* Tombol Batalkan */}
+    {selectedOrder.status_pesanan !== "selesai" &&
+        selectedOrder.status_pesanan !== "dibatalkan" && (
+            <button
+                onClick={() => handleCancelOrder(selectedOrder.id_pesanan)}
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+                Batalkan
+            </button>
+        )}
 
-                    <button
-                        onClick={() => setSelectedOrder(null)}
-                        disabled={isSubmitting}
-                        className="flex-1 border border-gray-300 hover:bg-gray-100 py-2 rounded-xl transition text-sm font-medium disabled:opacity-60 disabled:cursor-not-allowed"
-                    >
-                        Tutup
-                    </button>
-                </div>
+    {/* Tombol Update Status */}
+    {selectedOrder.status_pesanan !== "selesai" &&
+        selectedOrder.status_pesanan !== "dibatalkan" &&
+        selectedOrder.status_pesanan !== "belum bayar" &&
+        selectedOrder.status_pesanan !== "kadaluarsa" && (
+            <button
+                onClick={() =>
+                    handleUpdateStatus(
+                        selectedOrder.id_pesanan,
+                        selectedOrder.status_pesanan
+                    )
+                }
+                disabled={isSubmitting}
+                className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg flex items-center gap-2 transition disabled:opacity-60 disabled:cursor-not-allowed"
+            >
+                <CheckCircle size={16} />
+                {isSubmitting
+                    ? "Memproses..."
+                    : getNextActionLabel(selectedOrder.status_pesanan)}
+            </button>
+        )}
+
+    {/* Tombol Tutup */}
+    <button
+        onClick={() => setSelectedOrder(null)}
+        disabled={isSubmitting}
+        className="px-4 py-2 border border-gray-300 hover:bg-gray-100 rounded-lg transition disabled:opacity-60"
+    >
+        Tutup
+    </button>
+</div>
             </div>
         </div>
     );

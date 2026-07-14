@@ -82,6 +82,41 @@ export default function PesananMasuk() {
             setIsSubmitting(false);
         }
     };
+    const handleCancelOrder = async (id) => {
+        const result = await Swal.fire({
+            title: "Batalkan Pesanan?",
+            text: "Pesanan yang dibatalkan tidak dapat diproses kembali.",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Ya, Batalkan",
+            cancelButtonText: "Batal",
+            confirmButtonColor: "#dc2626",
+        });
+
+        if (!result.isConfirmed) return;
+
+        try {
+            await api.put(`/admin/pesanan/${id}/cancel`);
+
+            await fetchPesanan();
+
+            setSelectedOrder(null);
+
+            Swal.fire({
+                icon: "success",
+                title: "Berhasil",
+                text: "Pesanan berhasil dibatalkan",
+                timer: 2000,
+                showConfirmButton: false,
+            });
+        } catch (error) {
+            Swal.fire({
+                icon: "error",
+                title: "Gagal",
+                text: error.response?.data?.message || "Terjadi kesalahan",
+            });
+        }
+    };
     const getNextActionLabel = (status) => {
         if (status === 'menunggu') return 'Proses Pesanan';
         if (status === 'diproses') return 'Siap Diambil';
@@ -455,147 +490,147 @@ export default function PesananMasuk() {
                 {/* TABLE */}
 
                 <div className="bg-white rounded-xl shadow-sm">
-    <div className="overflow-x-auto">
-        <table className="w-full text-sm min-w-[700px]">
-                        <thead className="bg-gray-50 text-gray-500">
-                            <tr className="text-left text-gray-600">
-                                <th className="px-4 py-3">No</th>
+                    <div className="overflow-x-auto">
+                        <table className="w-full text-sm min-w-[700px]">
+                            <thead className="bg-gray-50 text-gray-500">
+                                <tr className="text-left text-gray-600">
+                                    <th className="px-4 py-3">No</th>
 
-                                <th className="px-4 py-3">Kode Pesanan</th>
+                                    <th className="px-4 py-3">Kode Pesanan</th>
 
-                                <th className="px-4 py-3">Pelanggan</th>
+                                    <th className="px-4 py-3">Pelanggan</th>
 
-                                <th className="px-4 py-3">Item</th>
+                                    <th className="px-4 py-3">Item</th>
 
-                                <th className="px-4 py-3">Total</th>
+                                    <th className="px-4 py-3">Total</th>
 
-                                <th className="px-4 py-3">Tanggal</th>
+                                    <th className="px-4 py-3">Tanggal</th>
 
-                                <th className="px-4 py-3">Status</th>
+                                    <th className="px-4 py-3">Status</th>
 
-                                <th className="px-4 py-3 text-center">Aksi</th>
-                            </tr>
-                        </thead>
-
-                        <tbody>
-                            {loading ? (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="py-16 text-center text-gray-500"
-                                    >
-                                        Memuat data...
-                                    </td>
+                                    <th className="px-4 py-3 text-center">Aksi</th>
                                 </tr>
-                            ) : filteredData.length === 0 ? (
-                                <tr>
-                                    <td
-                                        colSpan={8}
-                                        className="py-16 text-center text-gray-500"
-                                    >
-                                        Tidak ada pesanan.
-                                    </td>
-                                </tr>
-                            ) : (
-                                currentItems.map((item, index) => (
-                                    <tr
-                                        key={item.id_pesanan}
-                                        className="hover:bg-gray-50 transition"
-                                    >
-                                        <td className="border-b border-gray-100 px-4 py-3">
-                                            {indexOfFirstItem + index + 1}
-                                        </td>
+                            </thead>
 
-                                        <td className="border-b border-gray-100 px-4 py-3">
-                                            <div>
-                                                <p className="font-semibold text-gray-800">
-                                                    {item.kode_pesanan}
-                                                </p>
-
-                                                <p className="text-sm text-gray-500">
-                                                    {item.pembayaran
-                                                        ?.metode_pembayaran ||
-                                                        "-"}
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        <td className="border-b border-gray-100 px-4 py-3">
-                                            <div>
-                                                <p className="font-medium">
-                                                    {item.pengguna?.nama || "-"}
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        <td className="border-b border-gray-100 px-4 py-3">
-                                            <div>
-                                                <p className="font-medium">
-                                                    {getItemName(
-                                                        item.detail_pesanan,
-                                                    )}
-                                                </p>
-
-                                                <p className="text-sm text-gray-500">
-                                                    {getTotalQty(
-                                                        item.detail_pesanan,
-                                                    )}{" "}
-                                                    Item
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        <td className="px-6 py-5 font-semibold text-blue-600">
-                                            Rp{" "}
-                                            {parseFloat(
-                                                item.total_harga || 0,
-                                            ).toLocaleString("id-ID")}
-                                        </td>
-
-                                        <td className="border-b border-gray-100 px-4 py-3">
-                                            <div>
-                                                {formatTanggal(
-                                                    item.tgl_pesanan,
-                                                )}
-
-                                                <p className="text-sm text-gray-500">
-                                                    {formatJam(
-                                                        item.tgl_pesanan,
-                                                    )}
-                                                </p>
-                                            </div>
-                                        </td>
-
-                                        <td className="border-b border-gray-100 px-4 py-3">
-                                            <span
-                                                className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(item.status_pesanan)}`}
-                                            >
-                                                {getStatusLabel(
-                                                    item.status_pesanan,
-                                                )}
-                                            </span>
-                                        </td>
-
-                                        <td className="border-b border-gray-100 px-4 py-3">
-                                            <div className="flex justify-center">
-                                                <button
-                                                    onClick={() =>
-                                                        setSelectedOrder(item)
-                                                    }
-                                                    className="border border-blue-500 text-blue-500 px-3 py-1 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1 transition"
-                                                >
-                                                    <Eye size={18} />
-                                                    Detail
-                                                </button>
-                                            </div>
+                            <tbody>
+                                {loading ? (
+                                    <tr>
+                                        <td
+                                            colSpan={8}
+                                            className="py-16 text-center text-gray-500"
+                                        >
+                                            Memuat data...
                                         </td>
                                     </tr>
-                                ))
-                            )}
-                        </tbody>
-                   </table>
-</div> {/* overflow-x-auto */}
-</div> {/* bg-white */}
+                                ) : filteredData.length === 0 ? (
+                                    <tr>
+                                        <td
+                                            colSpan={8}
+                                            className="py-16 text-center text-gray-500"
+                                        >
+                                            Tidak ada pesanan.
+                                        </td>
+                                    </tr>
+                                ) : (
+                                    currentItems.map((item, index) => (
+                                        <tr
+                                            key={item.id_pesanan}
+                                            className="hover:bg-gray-50 transition"
+                                        >
+                                            <td className="border-b border-gray-100 px-4 py-3">
+                                                {indexOfFirstItem + index + 1}
+                                            </td>
+
+                                            <td className="border-b border-gray-100 px-4 py-3">
+                                                <div>
+                                                    <p className="font-semibold text-gray-800">
+                                                        {item.kode_pesanan}
+                                                    </p>
+
+                                                    <p className="text-sm text-gray-500">
+                                                        {item.pembayaran
+                                                            ?.metode_pembayaran ||
+                                                            "-"}
+                                                    </p>
+                                                </div>
+                                            </td>
+
+                                            <td className="border-b border-gray-100 px-4 py-3">
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {item.pengguna?.nama || "-"}
+                                                    </p>
+                                                </div>
+                                            </td>
+
+                                            <td className="border-b border-gray-100 px-4 py-3">
+                                                <div>
+                                                    <p className="font-medium">
+                                                        {getItemName(
+                                                            item.detail_pesanan,
+                                                        )}
+                                                    </p>
+
+                                                    <p className="text-sm text-gray-500">
+                                                        {getTotalQty(
+                                                            item.detail_pesanan,
+                                                        )}{" "}
+                                                        Item
+                                                    </p>
+                                                </div>
+                                            </td>
+
+                                            <td className="px-6 py-5 font-semibold text-blue-600">
+                                                Rp{" "}
+                                                {parseFloat(
+                                                    item.total_harga || 0,
+                                                ).toLocaleString("id-ID")}
+                                            </td>
+
+                                            <td className="border-b border-gray-100 px-4 py-3">
+                                                <div>
+                                                    {formatTanggal(
+                                                        item.tgl_pesanan,
+                                                    )}
+
+                                                    <p className="text-sm text-gray-500">
+                                                        {formatJam(
+                                                            item.tgl_pesanan,
+                                                        )}
+                                                    </p>
+                                                </div>
+                                            </td>
+
+                                            <td className="border-b border-gray-100 px-4 py-3">
+                                                <span
+                                                    className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusClass(item.status_pesanan)}`}
+                                                >
+                                                    {getStatusLabel(
+                                                        item.status_pesanan,
+                                                    )}
+                                                </span>
+                                            </td>
+
+                                            <td className="border-b border-gray-100 px-4 py-3">
+                                                <div className="flex justify-center">
+                                                    <button
+                                                        onClick={() =>
+                                                            setSelectedOrder(item)
+                                                        }
+                                                        className="border border-blue-500 text-blue-500 px-3 py-1 rounded-md text-xs hover:bg-blue-50 flex items-center gap-1 transition"
+                                                    >
+                                                        <Eye size={18} />
+                                                        Detail
+                                                    </button>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))
+                                )}
+                            </tbody>
+                        </table>
+                    </div> {/* overflow-x-auto */}
+                </div> {/* bg-white */}
                 {/* PAGINATION */}
                 {filteredData.length > 0 && (
                     <Pagination
@@ -615,6 +650,7 @@ export default function PesananMasuk() {
                     getStatusClass={getStatusClass}
                     getStatusLabel={getStatusLabel}
                     handleUpdateStatus={handleUpdateStatus}
+                    handleCancelOrder={handleCancelOrder}
                     getNextActionLabel={getNextActionLabel}
                     isSubmitting={isSubmitting}
                 />

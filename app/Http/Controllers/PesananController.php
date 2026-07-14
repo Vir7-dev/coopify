@@ -146,4 +146,27 @@ class PesananController extends Controller
 
         return response()->json(['count' => $count]);
     }
+    public function cancel($id)
+{
+    $pesanan = Pesanan::findOrFail($id);
+
+    if ($pesanan->status_pesanan === 'selesai') {
+        return response()->json([
+            'message' => 'Pesanan yang sudah selesai tidak dapat dibatalkan.'
+        ], 422);
+    }
+
+    if ($pesanan->status_pesanan === 'dibatalkan') {
+        return response()->json([
+            'message' => 'Pesanan sudah dibatalkan.'
+        ], 422);
+    }
+
+    $pesanan->status_pesanan = 'dibatalkan';
+    $pesanan->save();
+
+    return response()->json([
+        'message' => 'Pesanan berhasil dibatalkan.'
+    ]);
+}
 }

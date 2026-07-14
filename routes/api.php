@@ -85,5 +85,6 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::get('/admin/pesanan/count', [PesananController::class, 'countBaru']);
         Route::get('/admin/pesanan/{id}', [PesananController::class, 'show']);
         Route::put('/admin/pesanan/{id}/status', [PesananController::class, 'updateStatus']);
+        Route::put('/admin/pesanan/{id}/cancel', [PesananController::class, 'cancel']);
     });
 });
